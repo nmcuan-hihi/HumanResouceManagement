@@ -2,13 +2,44 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { writeUserData } from '../../services/database';
+import { writeUserData, writeEmployeeList } from '../../services/database';
 
 export default function LoginScreen() {
   const handlePress = () => {
     // Thêm dữ liệu mẫu vào Firebase
-    writeUserData("user1232",  "qể982346580347502348wrwerwer" );
-    console.log("123")
+    writeUserData("user1232", "42");
+
+    // Danh sách nhân viên mẫu
+    const employees = [
+      {
+        cccd: "123456789",
+        chucvuId: "CV001",
+        employeeId: "EMP001",
+        luongcobanId: "LCB001",
+        name: "Nguyễn Văn A",
+        ngaybatdau: "2024-01-01",
+        ngaysinh: "1990-01-01",
+        phongbanId: "PB001",
+        sdt: "0123456789",
+        trangthai: true,
+      },
+      {
+        cccd: "987654321",
+        chucvuId: "CV002",
+        employeeId: "EMP002",
+        luongcobanId: "LCB002",
+        name: "Trần Thị B",
+        ngaybatdau: "2024-02-01",
+        ngaysinh: "1992-02-02",
+        phongbanId: "PB002",
+        sdt: "0987654321",
+        trangthai: true,
+      },
+    ];
+
+    // Ghi danh sách nhân viên vào Firebase
+    writeEmployeeList(employees);
+    console.log("Employee list added");
   };
 
   return (
