@@ -7,6 +7,9 @@ import HomeScreen from './app/Screen/HomeScreen/HomeScreen';
 import { useFonts } from 'expo-font';
 const Stack = createStackNavigator();
 
+
+
+
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
     'FBold': require('./assets/fonts/JosefinSans-Bold.ttf'),
