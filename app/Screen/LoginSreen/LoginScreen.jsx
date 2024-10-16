@@ -8,6 +8,7 @@ export default function LoginScreen() {
   const handlePress = () => {
     // Thêm dữ liệu mẫu vào Firebase
     writeUserData("user1232",  "qể982346580347502348wrwerwer" );
+    console.log("123")
   };
 
   return (
