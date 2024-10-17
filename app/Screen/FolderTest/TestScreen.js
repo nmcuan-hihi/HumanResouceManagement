@@ -58,12 +58,16 @@ export default function TestScreen({ navigation }) {
         <Text style={styles.buttonText}>Edit Employee</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('EmployeeScreen')}>
+        <Text style={styles.buttonText}>EmployeeScreen</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('PhongBanScreen')}>
         <Text style={styles.buttonText}>Phong Ban</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('TeamMember')}>
-        <Text style={styles.buttonText}>Team Member</Text>
+      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('HomeScreenGD')}>
+        <Text style={styles.buttonText}>DirectorScreen</Text>
       </TouchableOpacity>
 
     </View>

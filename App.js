@@ -19,6 +19,9 @@ import TabNavigation from './app/Navigation/TabNavigation';
 const Stack = createStackNavigator();
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import DashboardGD from './app/Compoment/DashboardGD';
+import HomeScreenGD from './app/Screen/HomeScreen/HomeScreenGD';
+import NotificeScreen from './app/Screen/NotificeScreen/NotificeScreen';
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -38,6 +41,7 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="UserTabNav" component={TabNavigation} options={{ headerShown: false }} />
+        <Stack.Screen name="HomeScreenGD" component={HomeScreenGD} options={{ headerShown: false }} />
 
 
 
@@ -46,11 +50,12 @@ export default function App() {
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
         <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />
         <Stack.Screen name="EmployeeScreen" component={EmployeeScreen} options={{ headerShown: false }} />
+       
         <Stack.Screen name="ListEmployee" component={ListEmployee} options={{ headerShown: false }} />
         <Stack.Screen name="EmployeeDetail" component={EmployeeDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EditEmployee" component={EmployeeEditScreen} options={{ headerShown: false }} />
         <Stack.Screen name="PhongBanScreen" component={PhongBanScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="TeamMember" component={TeamMembersScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="NotificeScreen" component={NotificeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AddMember" component={AddMember} options={{ headerShown: false }} />
       </Stack.Navigator>  
     </NavigationContainer>
