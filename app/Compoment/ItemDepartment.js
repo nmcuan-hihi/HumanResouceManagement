@@ -1,37 +1,39 @@
 import React from "react";
 import { View, Image, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const ItemDepartment = () => {
+const ItemDepartment = ({ item, onPress }) => {
   return (
-    <TouchableOpacity style={styles.container}>
-    <Text style={styles.maPB}>IT01</Text>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
+      <Text style={styles.maPB}>{item.maPB}</Text>
 
-    <Text style={styles.namePB}>Phòng IT</Text>
-
+      <Text style={styles.namePB}>{item.tenPB}</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    alignSelf: "center",
+    width: "90%",
     height: 60,
-    borderWidth: 1,
     borderRadius: 20,
-    backgroundColor:'#E5E5E5',
-    flexDirection:'row',
-    alignItems: 'center'
+    backgroundColor: "#E5E5E5",
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+    elevation: 5,
+    backgroundColor: "#FFFFFF",
   },
-  maPB:{
-    fontSize:25,
-    fontWeight:'bold',
-    marginStart:20
+  maPB: {
+    fontSize: 25,
+    fontWeight: "bold",
+    marginStart: 20,
   },
 
-  namePB:{
-    fontSize:18,
-    marginStart:60
-  }
+  namePB: {
+    fontSize: 18,
+    marginStart: 60,
+  },
 });
 
 export default ItemDepartment;
