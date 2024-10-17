@@ -4,6 +4,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './app/Screen/LoginSreen/LoginScreen';
 import HomeScreen from './app/Screen/HomeScreen/HomeScreen';
+import HomeScreenGD from './app/Screen/HomeScreen/HomeScreenGD';
+import ListDepartementScreen from './app/Screen/DepartmentScreen/ListDepartmentScreen';
+
 import { useFonts } from 'expo-font';
 const Stack = createStackNavigator();
 
@@ -19,9 +22,11 @@ export default function App() {
   return (
     <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="ListPhongBan">
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="HomeGD" component={HomeScreenGD} options={{ headerShown: false }} />
+        <Stack.Screen name="ListPhongBan" component={ListDepartementScreen} options={{ headerShown: false }} />
        
 
       </Stack.Navigator>  
