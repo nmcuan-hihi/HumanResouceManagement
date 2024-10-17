@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
   },
   textName: {
     textAlign: "center",
+    fontSize: 13,
   },
 });
 export default BtnFunction;
