@@ -14,7 +14,7 @@ import PhongBanScreen from './app/Screen/DepartmentsScreen/DepartmentsScreen';
 import TeamMembersScreen from './app/Screen/DepartmentsScreen/TeamMember';
 import AddMember from './app/Screen/DepartmentsScreen/AddMemberCode';
 import { useFonts } from 'expo-font';
-import TestScreen from './app/FolderTest/TestScreen';
+import TestScreen from './app/Screen/FolderTest/TestScreen';
 import TabNavigation from './app/Navigation/TabNavigation';
 const Stack = createStackNavigator();
 

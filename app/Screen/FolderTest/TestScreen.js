@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
-import { writeUserData } from '../services/database';
+import { writeUserData } from '../../services/database';
 
 export default function TestScreen({ navigation }) {
   // Hàm để thêm nhân viên vào Firebase
@@ -39,7 +39,11 @@ export default function TestScreen({ navigation }) {
 
       {/* Các nút điều hướng đến các màn hình khác */}
       <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('ChamCong')}>
-        <Text style={styles.buttonText}>Cham Cong</Text>
+        <Text style={styles.buttonText}>Kế Toán</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('ChamCongNV')}>
+        <Text style={styles.buttonText}>Chấm công</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('ListEmployee')}>
