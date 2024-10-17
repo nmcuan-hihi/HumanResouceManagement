@@ -2,8 +2,12 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import React from 'react';
 import BackNav from '../../Compoment/BackNav';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
+import { TouchableOpacity } from 'react-native';
 
 export default function PhongBanScreen({navigation}) {
+  const handlePress = () => {
+    navigation.navigate('TeamMember');
+  }; 
  
     const employeeData = [
         { manv: "IT01", name: "Phòng IT01" },
@@ -28,7 +32,8 @@ export default function PhongBanScreen({navigation}) {
                 style={{ marginTop: 20 }} // Adjust margin as needed
                 data={employeeData}
                 renderItem={({ item }) => (
-                    <ItemListEmployee manv={item.manv} name={item.name} />
+                  <TouchableOpacity onPress={handlePress} ><ItemListEmployee manv={item.manv} name={item.name} /></TouchableOpacity>
+                    
                 )}
                 keyExtractor={(item, index) => index.toString()} // Use index as a key
             />
