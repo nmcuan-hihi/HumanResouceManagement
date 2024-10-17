@@ -4,9 +4,9 @@ import { FontAwesome } from '@expo/vector-icons'; // Import FontAwesome
 
 
 
-const DashboardEmployee = ({name, icon}) => {
+const DashboardEmployee = ({name, icon, onPress}) => {
   return (
-    <TouchableOpacity style={styles.gridItem}>
+    <TouchableOpacity style={styles.gridItem} onPress={onPress}>
     <FontAwesome name={icon} size={20} color="#2E2E2E" />
     <Text style={styles.gridLabel}>{name}</Text>
   </TouchableOpacity>

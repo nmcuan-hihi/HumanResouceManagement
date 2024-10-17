@@ -2,20 +2,25 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-export default function BackNav({ navigation, name, btn }) {
+export default function BackNav({ navigation, name, btn, onEditPress }) {
   return (
    
     <SafeAreaView style={styles.container}>
     <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{name}</Text>
-        <TouchableOpacity>
-          <Text style={styles.saveButton}>{btn}</Text>
-        </TouchableOpacity>
-      </View>
-      </SafeAreaView>
+      {/* Nút quay lại */}
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Icon name="arrow-back" size={24} color="black" />
+      </TouchableOpacity>
+
+      {/* Tiêu đề màn hình */}
+      <Text style={styles.headerTitle}>{name}</Text>
+
+      {/* Nút chỉnh sửa */}
+      <TouchableOpacity onPress={onEditPress}>
+        <Text style={styles.saveButton}>{btn}</Text>
+      </TouchableOpacity>
+    </View>
+  </SafeAreaView>
 
   );
 }

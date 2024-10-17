@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, Text } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
 import BackNav from '../../Compoment/BackNav';
 
@@ -21,13 +21,17 @@ const employeeData = [
   { manv: "NV003", name: "Trần Thị C" },
   // Thêm nhiều nhân viên khác vào đây
 ];
+const itemCount = employeeData.length;
 
 export default function EmployeeList({ navigation }) {
+  const handlePress = (item) => {
+    navigation.navigate('EmployeeDetail', { manv: item.manv, name: item.name });
+  };
   return (
     <View style={styles.container}>
       {/* Header Section */}
       <View style={styles.headerSection}>
-        <BackNav navigation={navigation} name={"Danh sách nhân viên"}  />
+        <BackNav navigation={navigation} name={"Danh sách nhân viên"} btn={itemCount} />
         {/* <Text style={styles.headerText}>{"120"}</Text> */}
       </View>
 
@@ -36,7 +40,9 @@ export default function EmployeeList({ navigation }) {
         style={{ marginTop: 20 }} // Adjust margin as needed
         data={employeeData}
         renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handlePress(item)}>
           <ItemListEmployee manv={item.manv} name={item.name} />
+        </TouchableOpacity>
         )}
         keyExtractor={(item, index) => index.toString()} // Use index as a key
       />

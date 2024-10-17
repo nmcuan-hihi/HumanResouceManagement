@@ -3,7 +3,8 @@ import React from 'react';
 import BackNav from '../../Compoment/BackNav';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
 
-export default function PhongBanScreen(navigation) {
+export default function PhongBanScreen({navigation}) {
+ 
     const employeeData = [
         { manv: "IT01", name: "Phòng IT01" },
         { manv: "IT02", name: "Phòng IT02" },
@@ -17,8 +18,9 @@ export default function PhongBanScreen(navigation) {
       
         // Thêm nhiều nhân viên khác vào đây
       ];
+      const itemCount = employeeData.length;
     return (
-        <><BackNav navigation={navigation} name={"Phòng ban"} btn={"10"} />
+        <><BackNav navigation={navigation} name={"Phòng ban"} btn={itemCount} />
         <View style={styles.container}>
 
 

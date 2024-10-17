@@ -4,7 +4,13 @@ import { FontAwesome } from '@expo/vector-icons'; // Import FontAwesome
 import Dashboard from '../../Compoment/Dashboard';
 import DashboardEmployee from '../../Compoment/FunctionEmployee';
 
-export default function EmployeeScreen() {
+export default function EmployeeScreen({navigation}) {
+  const handlePress1 = () => {
+    navigation.navigate('ListEmployee');
+  };
+  const handlePress = () => {
+    navigation.navigate('PhongBanScreen');
+  };
   return (
     <View style={styles.wrapper}>
       {/* Render the Dashboard at the top */}
@@ -15,11 +21,11 @@ export default function EmployeeScreen() {
         <Text style={styles.contentText}>Chức năng</Text>
         <View style={styles.gridContainer}>
 
-        <DashboardEmployee name="Nhân viên" icon="user" />
+        <DashboardEmployee name="Nhân viên" icon="user" onPress={handlePress1}/>
         <DashboardEmployee name="Tìm kiếm" icon="search" />
-        <DashboardEmployee name="Phòng ban" icon="home"/>
+        <DashboardEmployee name="Phòng ban" icon="home" onPress={handlePress}/>
         <DashboardEmployee name="Nhiệm vụ" icon="th-large"/>
-        <DashboardEmployee name="Nghỉ phép" icon="0"/>
+        <DashboardEmployee name="Nghỉ phép" icon="th-large"/>
 
 
           {/* <TouchableOpacity style={styles.gridItem}>

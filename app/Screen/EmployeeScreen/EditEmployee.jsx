@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image } from 'react-native';
 
-export default function EmployeeEditScreen() {
+export default function EmployeeEditScreen({navigation}) {
   const [employeeData, setEmployeeData] = useState({
     room: 'E006',
     position: 'Nhân viên',
@@ -40,7 +40,7 @@ export default function EmployeeEditScreen() {
         <InputField label="Lương cơ bản" value={employeeData.salary} onChangeText={(value) => updateField('salary', value)} keyboardType="numeric" />
         <InputField label="Ngày vào" value={employeeData.joinDate} onChangeText={(value) => updateField('joinDate', value)} />
 
-        <TouchableOpacity style={styles.updateButton}>
+        <TouchableOpacity style={styles.updateButton} onPress={() => navigation.goBack()}>
           <Text style={styles.updateButtonText}>Cập Nhật</Text>
         </TouchableOpacity>
 
