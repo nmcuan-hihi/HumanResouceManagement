@@ -2,44 +2,28 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { writeUserData, writeEmployeeList } from '../../services/database';
+import { writeUserData } from '../../services/database';
 
 export default function LoginScreen() {
   const handlePress = () => {
-    // Thêm dữ liệu mẫu vào Firebase
-    writeUserData("user1232", "42");
 
-    // Danh sách nhân viên mẫu
-    const employees = [
-      {
-        cccd: "123456789",
-        chucvuId: "CV001",
-        employeeId: "EMP001",
-        luongcobanId: "LCB001",
-        name: "Nguyễn Văn A",
-        ngaybatdau: "2024-01-01",
-        ngaysinh: "1990-01-01",
-        phongbanId: "PB001",
-        sdt: "0123456789",
-        trangthai: true,
-      },
-      {
-        cccd: "987654321",
-        chucvuId: "CV002",
-        employeeId: "EMP002",
-        luongcobanId: "LCB002",
-        name: "Trần Thị B",
-        ngaybatdau: "2024-02-01",
-        ngaysinh: "1992-02-02",
-        phongbanId: "PB002",
-        sdt: "0987654321",
-        trangthai: true,
-      },
-    ];
+    const employee = {
+      cccd: "123456789",
+      chucvuId: "CV001",
+      employeeId: "EMP01",
+      luongcobanId: "LCB001",
+      name: "Nguyễn Văn A",
+      ngaybatdau: "2024-01-01",
+      ngaysinh: "1990-01-01",
+      phongbanId: "PB001",
+      sdt: "0123456789",
+      trangthai: true,
+      imageURL: "https://firebasestorage.googleapis.com/v0/b/hrm-pj-team3.appspot.com/o/employee%2Fstar.jpg?alt=media&token=cb1f939b-ecab-4066-b7fd-6f75a7934126" // Thêm imageURL
+    };
 
-    // Ghi danh sách nhân viên vào Firebase
-    writeEmployeeList(employees);
-    console.log("Employee list added");
+    // Ghi nhân viên vào Firebase
+    writeUserData(employee);
+    console.log("Employee added");
   };
 
   return (

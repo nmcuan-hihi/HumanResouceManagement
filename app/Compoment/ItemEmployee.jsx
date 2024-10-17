@@ -19,7 +19,7 @@ export default function ItemListEmployee({manv, name}) {
       alignItems: 'center',
       backgroundColor: '#F0F8FF', // Light background color
       padding: 15,
-      borderRadius: 10, // Rounded corners
+      borderRadius: 5, // Rounded corners
       marginBottom: 20,
       marginLeft: 20,
       marginRight: 20,
@@ -27,7 +27,7 @@ export default function ItemListEmployee({manv, name}) {
       shadowOpacity: 0.2,
       shadowRadius: 5,
       shadowOffset: { width: 0, height: 2 },
-      elevation: 3, // For Android shadow
+      elevation: 3, 
       height: 80,
     },
     employeeImage: {

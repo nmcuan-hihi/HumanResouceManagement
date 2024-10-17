@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   contentText: {
+    marginTop: 15,
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',

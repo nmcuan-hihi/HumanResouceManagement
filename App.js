@@ -14,6 +14,7 @@ import PhongBanScreen from './app/Screen/DepartmentsScreen/DepartmentsScreen';
 import TeamMembersScreen from './app/Screen/DepartmentsScreen/TeamMember';
 import AddMember from './app/Screen/DepartmentsScreen/AddMemberCode';
 import { useFonts } from 'expo-font';
+import TestAddEmployee from './app/FolderTest/TestAddEmployee';
 const Stack = createStackNavigator();
 
 
@@ -31,7 +32,8 @@ export default function App() {
   return (
     <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="EmployeeScreen">
+      <Stack.Navigator initialRouteName="Test">
+      <Stack.Screen name="Test" component={TestAddEmployee} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
