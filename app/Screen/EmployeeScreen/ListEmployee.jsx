@@ -27,7 +27,7 @@ export default function EmployeeList({ navigation }) {
     <View style={styles.container}>
       {/* Header Section */}
       <View style={styles.headerSection}>
-        <BackNav navigation={navigation} name={"Danh sách nhân viên"} />
+        <BackNav navigation={navigation} name={"Danh sách nhân viên"}  />
         {/* <Text style={styles.headerText}>{"120"}</Text> */}
       </View>
 

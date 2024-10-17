@@ -1,253 +1,224 @@
-import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import DateTimePicker from '@react-native-community/datetimepicker'; // Assuming you're using this library for the picker
-import { FontAwesome } from '@expo/vector-icons'; // If using Expo, import FontAwesome
-import Dashboard from '../../Compoment/Dashboard';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function ChamCongNV() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [startTime, setStartTime] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  const [timeIn, setTimeIn] = useState('9:30');
+  const [timeOut, setTimeOut] = useState('17:00');
+  const [selectedMonth, setSelectedMonth] = useState('December 2022');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const toggleCheck = () => {
-    setIsChecked(!isChecked);
-  };
-
-  // Dữ liệu nhân viên
   const employees = [
-    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'Đi làm' },
-    { id: 'NV002', name: 'Nguyễn Văn A', department: 'Phòng HR', status: 'Nghỉ có lương' },
-    { id: 'NV003', name: 'Nguyễn Văn B', department: 'Phòng IT', status: 'Đi làm' },
-    { id: 'NV004', name: 'Nguyễn Thị C', department: 'Phòng Kinh Doanh', status: 'Nghỉ có lương' },
-    { id: 'NV005', name: 'Nguyễn Văn D', department: 'Phòng Marketing', status: 'Đi làm' },
-    // Add more employees here
+    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'checked' },
+    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'checked' },
+    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'checked' },
+    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'checked' },
+    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'unchecked' },
   ];
 
-  // Xử lý thời gian vào
-  const onChangeStart = (event, selectedDate) => {
-    const currentDate = selectedDate || startTime;
-    setShowStartPicker(false);
-    setStartTime(currentDate);
-  };
-
-  // Xử lý thời gian ra
-  const onChangeEnd = (event, selectedDate) => {
-    const currentDate = selectedDate || endTime;
-    setShowEndPicker(false);
-    setEndTime(currentDate);
-  };
-
-  // Lọc danh sách nhân viên theo tên
-  const filteredEmployees = employees.filter(employee =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <>
-      
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity>
+          <Icon name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Chấm công</Text>
+        <TouchableOpacity>
+          <Text style={styles.saveButton}>Lưu</Text>
+        </TouchableOpacity>
+      </View>
 
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Chấm công</Text>
-          <TouchableOpacity style={styles.saveButton}>
-            <Text style={styles.saveButtonText}>Lưu</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.timeContainer}>
+      <View style={styles.timeSection}>
         <Text style={styles.timeLabel}>Thời gian</Text>
         <View style={styles.timeInputs}>
-          <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.timeInput}>
-            <Text>{`Vào: ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.timeInput}>
-            <Text>{`Ra: ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {showStartPicker && (
-          <DateTimePicker
-            value={startTime}
-            mode="time"
-            is24Hour={true}
-            display="default"
-            onChange={onChangeStart}
-          />
-        )}
-        {showEndPicker && (
-          <DateTimePicker
-            value={endTime}
-            mode="time"
-            is24Hour={true}
-            display="default"
-            onChange={onChangeEnd}
-          />
-        )}
-      </View>
-
-      {/* Date Section */}
-      <View style={styles.dateContainer}>
-        <Text style={styles.dateText}>December 2022</Text>
-        <FontAwesome name="calendar" size={24} color="black" />
-        <View style={styles.dateNavigation}>
-          <FontAwesome name="chevron-left" size={20} color="purple" />
-          <FontAwesome name="chevron-right" size={20} color="purple" />
+          <View style={styles.timeInputContainer}>
+            <Text>Vào</Text>
+            <TextInput style={styles.timeInput} value={timeIn} onChangeText={setTimeIn} />
+          </View>
+          <View style={styles.timeInputContainer}>
+            <Text>Ra</Text>
+            <TextInput style={styles.timeInput} value={timeOut} onChangeText={setTimeOut} />
+          </View>
         </View>
       </View>
 
-        {/* Tùy chọn lọc */}
-        <View style={styles.filterContainer}>
-          <TouchableOpacity style={styles.filterButton}>
-            <Text style={styles.filterButtonText}>Đi làm</Text>
+      <View style={styles.calendarSection}>
+        <TouchableOpacity style={styles.monthSelector}>
+          <Text>{selectedMonth}</Text>
+          <Icon name="arrow-drop-down" size={24} color="black" />
+        </TouchableOpacity>
+        <View style={styles.calendarNavigation}>
+          <TouchableOpacity>
+            <Icon name="chevron-left" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton}>
-            <Text style={styles.filterButtonText}>Nghỉ có lương</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton}>
-            <Text style={styles.filterButtonText}>Phòng ban</Text>
+          <Icon name="calendar-today" size={24} color="black" />
+          <TouchableOpacity>
+            <Icon name="chevron-right" size={24} color="black" />
           </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Tìm kiếm theo tên */}
+      <View style={styles.filterSection}>
+        <TouchableOpacity style={[styles.filterButton, styles.activeFilterButton]}>
+          <Text style={styles.filterButtonText}>Đi làm</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filterButton}>
+          <Text style={styles.filterButtonText}>Nghỉ có lương</Text>
+          <Icon name="arrow-drop-down" size={24} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filterButton}>
+          <Text style={styles.filterButtonText}>Phòng ban</Text>
+          <Icon name="arrow-drop-down" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.searchSection}>
+        <Icon name="search" size={24} color="gray" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Tìm kiếm theo tên"
-          value={searchTerm}
-          onChangeText={setSearchTerm}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
-
-        {/* Danh sách nhân viên */}
-        <ScrollView>
-          {filteredEmployees.map(employee => (
-            <View key={employee.id} style={styles.employeeItem}>
-              <Text style={styles.employeeId}>{employee.id}</Text>
-              <Text style={styles.employeeName}>{employee.name}</Text>
-              <Text style={styles.employeeDepartment}>{employee.department}</Text>
-              <TouchableOpacity onPress={toggleCheck} style={styles.checkbox}>
-        {isChecked ? (
-          <View style={styles.checkedSquare}>
-            <FontAwesome name="check" size={18} color="white" />
-          </View>
-        ) : (
-          <View style={styles.uncheckedSquare} />
-        )}
-      </TouchableOpacity>
-            </View>
-          ))}
-        </ScrollView>
       </View>
-    </>
+
+      <ScrollView style={styles.employeeList}>
+        {employees.map((employee, index) => (
+          <View key={index} style={[
+            styles.employeeItem,
+            index % 2 === 0 ? styles.evenItem : styles.oddItem,
+            employee.status === 'unchecked' && styles.uncheckedItem
+          ]}>
+            <View>
+              <Text style={styles.employeeName}>{employee.id} {employee.name}</Text>
+              <Text style={styles.employeeDepartment}>{employee.department}</Text>
+            </View>
+            <Icon name="check-circle" size={24} color={employee.status === 'checked' ? 'green' : 'gray'} />
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  checkbox: {
-    padding: 5,
-  },
-  checkedSquare: {
-    width: 24,
-    height: 24,
-    backgroundColor: 'green',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  uncheckedSquare: {
-    width: 24,
-    height: 24,
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
-    padding: 16,
+    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    padding: 16,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   saveButton: {
-    backgroundColor: '#4C8FFF',
-    padding: 10,
-    borderRadius: 5,
+    color: 'blue',
+    fontWeight: 'bold',
   },
-  saveButtonText: {
-    color: '#fff',
-  },
-  timeContainer: {
-    marginBottom: 20,
-    backgroundColor: '#FFEAD1',
-    padding: 10,
-    borderRadius: 5,
+  timeSection: {
+    backgroundColor: '#FFD700',
+    padding: 16,
+    marginHorizontal: 16,
+    borderRadius: 8,
   },
   timeLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8,
+  },
+  timeInputs: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timeInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   timeInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 5,
-    backgroundColor: '#fff',
-    marginBottom: 10,
-    justifyContent: 'center',
+    backgroundColor: 'white',
+    padding: 4,
+    marginLeft: 8,
+    width: 60,
+    textAlign: 'center',
   },
-  monthText: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  filterContainer: {
+  calendarSection: {
     flexDirection: 'row',
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFD700',
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 8,
+  },
+  monthSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  calendarNavigation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  filterSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
   },
   filterButton: {
-    backgroundColor: '#FEDD71',
-    padding: 10,
-    borderRadius: 5,
-    marginRight: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 16,
+  },
+  activeFilterButton: {
+    backgroundColor: '#4CAF50',
   },
   filterButtonText: {
-    color: '#333',
+    marginRight: 4,
+  },
+  searchSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    margin: 16,
+    borderRadius: 8,
+    padding: 8,
+  },
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
+    flex: 1,
+  },
+  employeeList: {
+    marginHorizontal: 16,
   },
   employeeItem: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 15,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
-    marginBottom: 10,
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 8,
   },
-  employeeId: {
-    fontWeight: 'bold',
+  evenItem: {
+    backgroundColor: '#E0FFFF',
+  },
+  oddItem: {
+    backgroundColor: '#FFFACD',
+  },
+  uncheckedItem: {
+    backgroundColor: '#D3D3D3',
   },
   employeeName: {
-    flex: 1,
-    marginLeft: 10,
+    fontWeight: 'bold',
   },
   employeeDepartment: {
-    color: '#666',
+    color: 'gray',
   },
 });
+
