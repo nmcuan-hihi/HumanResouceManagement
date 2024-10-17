@@ -4,26 +4,10 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { writeUserData } from '../../services/database';
 
-export default function LoginScreen() {
-  const handlePress = () => {
-
-    const employee = {
-      cccd: "123456789",
-      chucvuId: "CV001",
-      employeeId: "EMP01",
-      luongcobanId: "LCB001",
-      name: "Nguyễn Văn A",
-      ngaybatdau: "2024-01-01",
-      ngaysinh: "1990-01-01",
-      phongbanId: "PB001",
-      sdt: "0123456789",
-      trangthai: true,
-      imageURL: "https://firebasestorage.googleapis.com/v0/b/hrm-pj-team3.appspot.com/o/employee%2Fstar.jpg?alt=media&token=cb1f939b-ecab-4066-b7fd-6f75a7934126" // Thêm imageURL
-    };
-
-    // Ghi nhân viên vào Firebase
-    writeUserData(employee);
-    console.log("Employee added");
+export default function LoginScreen({ navigation }) { // Nhận prop navigation
+  const handlePress = () => {  
+    // Điều hướng đến màn hình Test - màn hình chính 
+    navigation.navigate('UserTabNav');
   };
 
   return (
