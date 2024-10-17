@@ -107,11 +107,11 @@ styles = StyleSheet.create({
   TextInput: {
     width: "90%",
     height: 50,
-    borderWidth: 1,
+    borderBottomWidth: 1,
     borderRadius: 10,
     padding: 10,
     marginVertical: 10,
-    fontSize: 22,
+    fontSize: 20,
   },
   bodyBtn: {
     width: "100%",
