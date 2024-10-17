@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#CCFFFF",
     padding: 20,
     margin: 20,
+    borderRadius: 20,
   },
   rowFunc: { flexDirection: "row", justifyContent: "flex-start" },
 });

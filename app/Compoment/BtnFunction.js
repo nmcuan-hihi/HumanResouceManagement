@@ -17,7 +17,6 @@ const styles = StyleSheet.create({
     height: 70,
     alignItems: "center",
     margin: 5,
-    backgroundColor: "#99CCFF",
     borderRadius: 5,
   },
   textName: {
