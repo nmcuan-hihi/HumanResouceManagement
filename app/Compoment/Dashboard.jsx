@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 5,
+    margin: 10,
   },
   statLabel: {
     fontSize: 14,
