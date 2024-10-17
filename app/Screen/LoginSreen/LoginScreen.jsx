@@ -4,7 +4,10 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { writeUserData } from '../../services/database';
 
-export default function LoginScreen() {
+export default function LoginScreen({navigation}) {
+  const handlePress1 = () => {
+    navigation.navigate('EmployeeScreen');
+  };
   const handlePress = () => {
 
     const employee = {
@@ -40,7 +43,7 @@ export default function LoginScreen() {
       <TextInput style={styles.input} placeholder="XXX-XXXX-XXX" keyboardType="numeric" />
       <TextInput style={styles.input} placeholder="XXX" secureTextEntry />
 
-      <TouchableOpacity style={styles.button} onPress={handlePress}>
+      <TouchableOpacity style={styles.button} onPress={handlePress1}>
         <Text style={styles.buttonText}>Continue →</Text>
       </TouchableOpacity>
     </View>

@@ -8,6 +8,12 @@ export default function EmployeeScreen({navigation}) {
   const handlePress1 = () => {
     navigation.navigate('ListEmployee');
   };
+  const handleFind = () => {
+    navigation.navigate('FindEmployee');
+  };
+  const handTaskList = () => {
+    navigation.navigate('TaskList');
+  };
   const handlePress = () => {
     navigation.navigate('PhongBanScreen');
   };
@@ -22,9 +28,9 @@ export default function EmployeeScreen({navigation}) {
         <View style={styles.gridContainer}>
 
         <DashboardEmployee name="Nhân viên" icon="user" onPress={handlePress1}/>
-        <DashboardEmployee name="Tìm kiếm" icon="search" />
+        <DashboardEmployee name="Tìm kiếm" icon="search" onPress={handleFind}/>
         <DashboardEmployee name="Phòng ban" icon="home" onPress={handlePress}/>
-        <DashboardEmployee name="Nhiệm vụ" icon="th-large"/>
+        <DashboardEmployee name="Nhiệm vụ" icon="th-large" onPress={handTaskList}/>
         <DashboardEmployee name="Nghỉ phép" icon="th-large"/>
 
 

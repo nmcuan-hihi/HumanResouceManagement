@@ -8,8 +8,12 @@ import ChamCong from './app/Screen/MarkAttendaceScreen/MarkAttendace';
 import ChamCongNV from './app/Screen/MarkAttendaceScreen/MarkAttendaceNV';
 import EmployeeScreen from './app/Screen/HomeScreen/MangageEmployeeScreen';
 import ListEmployee from './app/Screen/EmployeeScreen/ListEmployee';
+import FindEmployee from './app/Screen/EmployeeScreen/FindEmployee';
 import EmployeeDetailScreen from './app/Screen/EmployeeScreen/EmployeeDetail';
 import EmployeeEditScreen from './app/Screen/EmployeeScreen/EditEmployee';
+import TaskList from './app/Screen/TaskScreen/TaskListScreen';
+import AddTask from './app/Screen/TaskScreen/AddTaskScreen';
+import TaskDetail from './app/Screen/TaskScreen/TaskDetail';
 import PhongBanScreen from './app/Screen/DepartmentsScreen/DepartmentsScreen';
 import TeamMembersScreen from './app/Screen/DepartmentsScreen/TeamMember';
 import AddMember from './app/Screen/DepartmentsScreen/AddMemberCode';
@@ -32,7 +36,7 @@ export default function App() {
   return (
     <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Test">
+      <Stack.Navigator initialRouteName="Login">
       <Stack.Screen name="Test" component={TestAddEmployee} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
@@ -40,11 +44,15 @@ export default function App() {
         <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />
         <Stack.Screen name="EmployeeScreen" component={EmployeeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ListEmployee" component={ListEmployee} options={{ headerShown: false }} />
+        <Stack.Screen name="FindEmployee" component={FindEmployee} options={{ headerShown: false }} />
         <Stack.Screen name="EmployeeDetail" component={EmployeeDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EditEmployee" component={EmployeeEditScreen} options={{ headerShown: false }} />
         <Stack.Screen name="PhongBanScreen" component={PhongBanScreen} options={{ headerShown: false }} />
         <Stack.Screen name="TeamMember" component={TeamMembersScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AddMember" component={AddMember} options={{ headerShown: false }} />
+        <Stack.Screen name="TaskList" component={TaskList} options={{ headerShown: false }} />
+        <Stack.Screen name="TaskDetail" component={TaskDetail} options={{ headerShown: false }} />
+        <Stack.Screen name="AddTask" component={AddTask} options={{ headerShown: false }} />
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />
