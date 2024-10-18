@@ -1,12 +1,13 @@
 class BangCap {
     constructor(id, tenBang) {
-        this.id = id;
+        this.bangcap_id = id;
         this.tenBang = tenBang;
+        
     }
 
     getBangCapDetails() {
         return {
-            id: this.id,
+            bangcap_id: this.bangcap_id,
             tenBang: this.tenBang
         };
     }

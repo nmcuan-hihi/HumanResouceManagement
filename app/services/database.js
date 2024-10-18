@@ -63,3 +63,36 @@ export async function readPhongBan() {
     console.error("Error reading phong ban:", error);
   }
 }
+
+// bằng cấp
+// Hàm ghi dữ liệu bằng cấp
+export function writeBangCap(bangCap) {
+  const bangCapId = bangCap.bangcap_id; // Lấy ID bằng cấp
+
+  set(ref(database, `bangcap/${bangCapId}`), bangCap) // Lưu vào node 'bangcap'
+    .then(() => {
+      console.log(`Bằng cấp ${bangCapId} written successfully!`);
+    })
+    .catch((error) => {
+      console.error(`Error writing bằng cấp ${bangCapId}:`, error);
+    });
+}
+
+// Hàm đọc danh sách bằng cấp
+export async function readBangCap() {
+  try {
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, 'bangcap')); // Lấy dữ liệu từ node 'bangcap'
+
+    if (snapshot.exists()) {
+      const bangCaps = snapshot.val(); // Chuyển dữ liệu thành đối tượng
+      console.log("Bang cap data:", bangCaps);
+      return bangCaps; // Trả về danh sách bằng cấp
+    } else {
+      console.log("No data available");
+      return null; // Không có dữ liệu
+    }
+  } catch (error) {
+    console.error("Error reading bang cap:", error);
+  }
+}

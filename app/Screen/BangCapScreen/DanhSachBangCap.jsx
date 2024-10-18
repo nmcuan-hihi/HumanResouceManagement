@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   FlatList,
@@ -7,51 +7,72 @@ import {
   Modal,
   TextInput,
   Text,
+  Alert,
 } from "react-native";
 import ItemListEmployee from "../../Compoment/ItemEmployee";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
-
-const data = [
-  { maBC: "BC001", tenBC: "Tiếng Anh AI EO" },
-  { maBC: "BC002", tenBC: "Chứng Chỉ Tin Học" },
-  { maBC: "BC003", tenBC: "Chứng chỉ quân sự" },
-
-  // Thêm nhiều nhân viên khác vào đây
-];
-const itemCount = data.length;
+import { readBangCap, writeBangCap } from "../../services/database";
 
 export default function DanhSachBangCap({ navigation }) {
+  const [data, setData] = useState([]); // Lưu danh sách bằng cấp
   const [visibleModal, setVisibleModal] = useState(false);
+  const [maBC, setMaBC] = useState(""); // Mã bằng cấp
+  const [tenBC, setTenBC] = useState(""); // Tên bằng cấp
+
+  // Đọc dữ liệu bằng cấp khi màn hình được load
+  useEffect(() => {
+    const fetchData = async () => {
+      const bangCapData = await readBangCap();
+      setData(Object.values(bangCapData || {})); // Cập nhật dữ liệu nếu có
+    };
+    fetchData();
+  }, []);
 
   const handlePress = (item) => {
     navigation.navigate("DetailBangCap", { item });
   };
+
+  // Thêm bằng cấp và cập nhật danh sách
+  const handleAddBangCap = async () => {
+    if (!maBC || !tenBC) {
+      Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
+      return;
+    }
+
+    const newBangCap = { bangcap_id: maBC, tenBang: tenBC };
+    await writeBangCap(newBangCap); // Ghi dữ liệu vào Firebase
+
+    // Cập nhật danh sách bằng cấp sau khi thêm
+    setData((prevData) => [...prevData, newBangCap]);
+
+    // Reset form và đóng modal
+    setMaBC("");
+    setTenBC("");
+    setVisibleModal(false);
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header Section */}
       <View style={styles.headerSection}>
         <BackNav
           navigation={navigation}
           name={"Danh sách bằng cấp"}
           btn={"Thêm"}
-          onEditPress={() => {
-            setVisibleModal(true);
-          }}
+          soLuong={data.length}
+          onEditPress={() => setVisibleModal(true)}
         />
-        {/* <Text style={styles.headerText}>{"120"}</Text> */}
       </View>
 
-      {/* Employee List */}
       <FlatList
-        style={{ marginTop: 20 }} // Adjust margin as needed
+        style={{ marginTop: 20 }}
         data={data}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => handlePress(item)}>
-            <ItemListEmployee manv={item.maBC} name={item.tenBC} />
+            <ItemListEmployee manv={item.bangcap_id} name={item.tenBang} />
           </TouchableOpacity>
         )}
-        keyExtractor={(item, index) => index.toString()} // Use index as a key
+        keyExtractor={(item, index) => index.toString()}
       />
 
       <Modal visible={visibleModal} transparent={true} animationType="slide">
@@ -61,23 +82,30 @@ export default function DanhSachBangCap({ navigation }) {
               <HeaderNav
                 name={"Thêm bằng cấp"}
                 nameIconRight={"close"}
-                onEditPress={() => {
-                  setVisibleModal(false);
-                }}
+                onEditPress={() => setVisibleModal(false)}
               />
             </View>
 
             <View style={styles.body}>
-              <TextInput style={styles.TextInput} placeholder="Mã bằng cấp" />
-              <Text></Text>
-              <TextInput style={styles.TextInput} placeholder="Tên bằng cấp" />
+              <TextInput
+                style={styles.TextInput}
+                placeholder="Mã bằng cấp"
+                value={maBC}
+                onChangeText={setMaBC}
+              />
+              <TextInput
+                style={styles.TextInput}
+                placeholder="Tên bằng cấp"
+                value={tenBC}
+                onChangeText={setTenBC}
+              />
             </View>
 
             <View style={styles.bodyBtn}>
-                  <TouchableOpacity style={styles.btnThem}>
-                    <Text style={styles.nameBtn}>Thêm</Text>
-                  </TouchableOpacity>
-                </View>
+              <TouchableOpacity style={styles.btnThem} onPress={handleAddBangCap}>
+                <Text style={styles.nameBtn}>Thêm</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -92,18 +120,10 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   headerSection: {
-    flexDirection: "row", // Align items in a row
-    justifyContent: "space-between", // Add space between BackNav and number text
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 15,
   },
-  headerText: {
-    fontSize: 24, // Font size for "120"
-    fontWeight: "bold",
-    color: "#000000", // Black color
-    marginRight: 100, // Optional: Add margin to space from BackNav
-  },
-
-  // modal styles
   modalCtn: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     flex: 1,
@@ -140,10 +160,13 @@ const styles = StyleSheet.create({
   btnThem: {
     width: "90%",
     height: 50,
-    borderRadius: 20,
+    borderRadius: 10,
     backgroundColor: "#FFA500",
     justifyContent: "center",
     alignItems: "center",
   },
-  nameBtn: { fontSize: 22, color: "#FFFFFF" },
+  nameBtn: {
+    fontSize: 22,
+    color: "#FFFFFF",
+  },
 });
