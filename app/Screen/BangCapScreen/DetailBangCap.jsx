@@ -38,7 +38,6 @@ export default function DetailBangCap({ navigation, route }) {
                 style={styles.textInput}
                 value={nameBC}
                 onChangeText={setNameBC}
-
                 editable={visibleEdit}
               ></TextInput>
               <TouchableOpacity
@@ -107,6 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderBottomWidth: 1,
     width: "90%",
+    color: "#000",
   },
 
   bodyBtn: {
