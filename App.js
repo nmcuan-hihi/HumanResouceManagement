@@ -24,6 +24,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardGD from './app/Compoment/DashboardGD';
 import HomeScreenGD from './app/Screen/HomeScreen/HomeScreenGD';
 import NotificeScreen from './app/Screen/NotificeScreen/NotificeScreen';
+import QuanLyMucLuong from './app/Screen/QuanLyLuong/QuanLyMucLuong';
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -48,7 +49,8 @@ export default function App() {
         <Stack.Screen name="DanhSachBangCap" component={DanhSachBangCap} options={{ headerShown: false }} />
         <Stack.Screen name="DetailBangCap" component={DetailBangCap} options={{ headerShown: false }} />
 
-
+        <Stack.Screen name="QuanLyMucLuong" component={QuanLyMucLuong} options={{ headerShown: false }} />
+ 
 
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
         <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />

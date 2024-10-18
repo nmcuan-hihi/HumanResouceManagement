@@ -12,9 +12,10 @@ import {
 } from "react-native";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
-export default function DetailBangCap({ navigation, route }) {
-  const { maBC, tenBC } = route.params.item;
+export default function QuanLyMucLuong({ navigation }) {
+  const data = 4750000;
 
   const [visibleModal, setVisibleModal] = useState(false);
 
@@ -24,29 +25,26 @@ export default function DetailBangCap({ navigation, route }) {
     <>
       <View style={styles.header}>
         {/* Sử dụng BackNav với onEditPress */}
-        <BackNav
-          navigation={navigation}
-          name={"Chi tiết bằng cấp"}
-          btn={"Chỉnh sửa"}
-          onEditPress={() => {
-            setVisibleModal(true);
-          }}
-        />
+        <BackNav navigation={navigation} name={"Quản lý mức lương"} />
       </View>
 
       <SafeAreaView style={styles.container}>
         <ScrollView>
-        
-
-          {/* Thông tin nhân viên */}
           <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Mã bằng cấp</Text>
-            <Text style={styles.sectionTitle1}>{maBC}</Text>
-          </View>
-
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Tên bằng cấp</Text>
-            <Text style={styles.sectionTitle1}>{tenBC}</Text>
+            <Text>Mức lương cơ bản </Text>
+            <Text></Text>
+            <View style={styles.viewText}>
+              <Text style={styles.sectionTitle}>
+                {(data + "").replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " vnđ"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisibleModal(true);
+                }}
+              >
+                <Icon name="edit" size={24} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
 
@@ -67,18 +65,15 @@ export default function DetailBangCap({ navigation, route }) {
                 <Text></Text>
                 <TextInput
                   style={styles.TextInput}
-                  placeholder="Tên bằng cấp"
-                  value={tenBC}
-                />
+                  placeholder="Lương cơ bản"
+                  keyboardType="numeric"                />
               </View>
 
               <View style={styles.bodyBtn}>
                 <TouchableOpacity style={styles.btnThem}>
                   <Text style={styles.nameBtn}>Cập nhật</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.btnXoa}>
-                  <Text style={styles.nameBtn}>Xóa</Text>
-                </TouchableOpacity>
+              
               </View>
             </View>
           </View>
@@ -100,29 +95,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
   },
-  image: {
-    width: "70%",
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 16,
-    margin: 20,
-    marginLeft: 60,
-  },
+
   infoSection: {
-    backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 12,
+
+  viewText: {
+    borderWidth: 1,
+    alignItems: "center",
+    height: 50,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    elevation: 5,
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  sectionTitle1: {
+
+  sectionTitle: {
     fontSize: 20,
-    marginBottom: 20,
+    fontWeight: "bold",
   },
 
   // modal styles
