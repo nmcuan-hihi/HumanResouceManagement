@@ -5,7 +5,7 @@ export default function BangCapDetailScreen({ route, navigation }) {
   const { certificate } = route.params; // Nhận dữ liệu bằng cấp từ EmployeeDetailScreen
 
   const handleEditPress = () => {
-    navigation.navigate('EditCertificate', { certificateId: certificate.id });
+    navigation.navigate('EditBangCap', { certificateId: certificate.id });
   };
 
   return (

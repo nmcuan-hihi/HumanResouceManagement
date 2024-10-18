@@ -7,7 +7,8 @@ import HomeScreen from './app/Screen/HomeScreen/HomeScreen';
 import ChamCong from './app/Screen/MarkAttendaceScreen/MarkAttendace';
 import ChamCongNV from './app/Screen/MarkAttendaceScreen/MarkAttendaceNV';
 import EmployeeScreen from './app/Screen/HomeScreen/MangageEmployeeScreen';
-import BangcapDetail from './app/Screen/BangCapScreens/BangCapDetailScreen'
+import BangcapDetail from './app/Screen/BangCapScreens/BangCapDetailScreen';
+import EditBangCap from './app/Screen/BangCapScreens/EditCertificateScreen'
 import ListEmployee from './app/Screen/EmployeeScreen/ListEmployee';
 import EmployeeDetailScreen from './app/Screen/EmployeeScreen/EmployeeDetail';
 import EmployeeEditScreen from './app/Screen/EmployeeScreen/EditEmployee';
@@ -61,6 +62,9 @@ export default function App() {
 
 
         <Stack.Screen name="BangCapDetail" component={BangcapDetail} options={{ headerShown: false }} />
+        <Stack.Screen name="EditBangCap" component={EditBangCap} options={{ headerShown: false }} />
+
+
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />
