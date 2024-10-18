@@ -36,7 +36,7 @@ export default function BangCapDetailScreen({ route, navigation }) {
 
       <View style={styles.infoBox}>
         <Text style={styles.label}>Ngày cấp:</Text>
-        <Text style={styles.value}>{certificate.ngay_cap}</Text>
+        <Text style={styles.value}>{certificate.issueDate}</Text>
       </View>
 
       <View style={styles.infoBox}>

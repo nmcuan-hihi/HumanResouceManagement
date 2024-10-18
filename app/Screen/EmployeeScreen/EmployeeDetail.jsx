@@ -60,7 +60,10 @@ export default function EmployeeDetailScreen({ navigation }) {
             <Text style={styles.sectionTitle}>Danh sách bằng cấp</Text>
             {certificates.map((certificate) => (
               <TouchableOpacity key={certificate.id} onPress={() => BangCapDetail(certificate)}>
-                <InfoItem label="Tên bằng" value={certificate.name} />
+                <View style={styles.certificateItem}>
+                  <Text style={styles.certificateName}>{certificate.name}</Text>
+                  <Text style={styles.certificateIssueDate}>{certificate.issueDate}</Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -70,6 +73,7 @@ export default function EmployeeDetailScreen({ navigation }) {
   );
 }
 
+// Thành phần cho từng dòng thông tin
 const InfoItem = ({ label, value }) => (
   <View style={styles.infoItem}>
     <Text style={styles.infoLabel}>{label}</Text>
@@ -119,5 +123,18 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontWeight: '500',
+  },
+  // Tên bằng cấp lớn hơn và không có nhãn
+  certificateItem: {
+    flexDirection: 'column',
+    marginBottom: 10,
+  },
+  certificateName: {
+    fontSize: 18,  // Tên bằng cấp to hơn
+    fontWeight: 'bold',
+  },
+  certificateIssueDate: {
+    fontSize: 16,
+    color: '#666',
   },
 });
