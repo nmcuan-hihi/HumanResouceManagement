@@ -58,11 +58,7 @@ export default function TestScreen({ navigation }) {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('EmployeeScreen')}>
-        <Text style={styles.buttonText}>EmployeeScreen</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('PhongBanScreen')}>
-        <Text style={styles.buttonText}>Phong Ban</Text>
+        <Text style={styles.buttonText}>Quản Lý Nhân Sự</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('HomeScreenGD')}>
