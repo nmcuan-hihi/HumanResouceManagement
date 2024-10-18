@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -16,12 +16,18 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function DetailBangCap({ navigation, route }) {
   const { maBC, tenBC } = route.params.item;
-
+  const textInputRef = useRef(null);
   const [visibleEdit, setVisibleEdit] = useState(false);
   const [nameBC, setNameBC] = useState(tenBC);
 
   // Thêm nhiều nhân viên khác vào đây
 
+  const editNameBC = () => {
+    setVisibleEdit(true);
+    setTimeout(() => {
+      textInputRef.current.focus();
+    }, 100);
+  };
   return (
     <>
       <View style={styles.header}>
@@ -35,16 +41,13 @@ export default function DetailBangCap({ navigation, route }) {
             <Text style={styles.sectionTitle}>Tên bằng cấp</Text>
             <View style={styles.bodyInput}>
               <TextInput
+                ref={textInputRef}
                 style={styles.textInput}
                 value={nameBC}
                 onChangeText={setNameBC}
                 editable={visibleEdit}
               ></TextInput>
-              <TouchableOpacity
-                onPress={() => {
-                  setVisibleEdit(true);
-                }}
-              >
+              <TouchableOpacity onPress={editNameBC}>
                 <Icon name="edit" size={24} color="#2196F3" />
               </TouchableOpacity>
             </View>
