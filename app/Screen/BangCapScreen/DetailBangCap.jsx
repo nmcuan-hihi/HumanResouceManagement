@@ -12,11 +12,13 @@ import {
 } from "react-native";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function DetailBangCap({ navigation, route }) {
   const { maBC, tenBC } = route.params.item;
 
-  const [visibleModal, setVisibleModal] = useState(false);
+  const [visibleEdit, setVisibleEdit] = useState(false);
+  const [nameBC, setNameBC] = useState(tenBC);
 
   // Thêm nhiều nhân viên khác vào đây
 
@@ -24,65 +26,39 @@ export default function DetailBangCap({ navigation, route }) {
     <>
       <View style={styles.header}>
         {/* Sử dụng BackNav với onEditPress */}
-        <BackNav
-          navigation={navigation}
-          name={"Chi tiết bằng cấp"}
-          btn={"Chỉnh sửa"}
-          onEditPress={() => {
-            setVisibleModal(true);
-          }}
-        />
+        <BackNav navigation={navigation} name={"Chi tiết bằng cấp"} />
       </View>
 
       <SafeAreaView style={styles.container}>
         <ScrollView>
-        
-
-          {/* Thông tin nhân viên */}
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Mã bằng cấp</Text>
-            <Text style={styles.sectionTitle1}>{maBC}</Text>
-          </View>
-
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Tên bằng cấp</Text>
-            <Text style={styles.sectionTitle1}>{tenBC}</Text>
+            <View style={styles.bodyInput}>
+              <TextInput
+                style={styles.textInput}
+                value={nameBC}
+                onChangeText={setNameBC}
+
+                editable={visibleEdit}
+              ></TextInput>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisibleEdit(true);
+                }}
+              >
+                <Icon name="edit" size={24} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
 
-        <Modal visible={visibleModal} transparent={true} animationType="slide">
-          <View style={styles.modalCtn}>
-            <View style={styles.bodyModal}>
-              <View style={{ width: "95%", alignSelf: "center" }}>
-                <HeaderNav
-                  name={"Chỉnh sửa"}
-                  nameIconRight={"close"}
-                  onEditPress={() => {
-                    setVisibleModal(false);
-                  }}
-                />
-              </View>
-
-              <View style={styles.body}>
-                <Text></Text>
-                <TextInput
-                  style={styles.TextInput}
-                  placeholder="Tên bằng cấp"
-                  value={tenBC}
-                />
-              </View>
-
-              <View style={styles.bodyBtn}>
-                <TouchableOpacity style={styles.btnThem}>
-                  <Text style={styles.nameBtn}>Cập nhật</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.btnXoa}>
-                  <Text style={styles.nameBtn}>Xóa</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+        {visibleEdit ? (
+          <View style={styles.bodyBtn}>
+            <TouchableOpacity style={styles.btnThem}>
+              <Text style={styles.nameBtn}>Cập nhật</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
+        ) : null}
       </SafeAreaView>
     </>
   );
@@ -93,6 +69,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F2F2F7",
     margin: 10,
+    alignContent: "center",
   },
   header: {
     flexDirection: "row",
@@ -109,7 +86,6 @@ const styles = StyleSheet.create({
     marginLeft: 60,
   },
   infoSection: {
-    backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
     marginHorizontal: 16,
@@ -120,45 +96,26 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 12,
   },
-  sectionTitle1: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-
-  // modal styles
-  modalCtn: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  bodyModal: {
-    width: "85%",
-    height: 500,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-  },
-  body: {
-    flex: 1,
-    marginTop: 30,
+  bodyInput: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
   },
-  TextInput: {
-    width: "90%",
+  textInput: {
     height: 50,
+    fontSize: 18,
     borderBottomWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    marginVertical: 10,
-    fontSize: 20,
+    width: "90%",
   },
+
   bodyBtn: {
     width: "100%",
     alignItems: "center",
     position: "absolute",
-    bottom: 20,
+    bottom: 50,
   },
+
   btnThem: {
     width: "90%",
     height: 50,
@@ -166,16 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFA500",
     justifyContent: "center",
     alignItems: "center",
-  },
-
-  btnXoa: {
-    width: "90%",
-    height: 50,
-    borderRadius: 20,
-    backgroundColor: "red",
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 20,
+    alignSelf: "center",
   },
   nameBtn: { fontSize: 22, color: "#FFFFFF" },
 });
