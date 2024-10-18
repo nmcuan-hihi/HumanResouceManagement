@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Image,
   FlatList,
   StyleSheet,
   Modal,
@@ -18,18 +16,12 @@ import HeaderNav from "../../Compoment/HeaderNav";
 const windowHeight = Dimensions.get("window").height;
 
 const dataPB = [
-  {
-    maPB: "PB01",
-    tenPB: "Phòng IT",
-  },
-
-  {
-    maPB: "PB02",
-    tenPB: "Phòng Marketing",
-  },
+  { maPB: "PB01", tenPB: "Phòng IT" },
+  { maPB: "PB02", tenPB: "Phòng Marketing" },
 ];
+
 const ListDepartementScreen = () => {
-  const [visibleModal, setVisibleModal] = useState(false);
+  const [visibleModal, setVisibleModal] = false;
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={"position"}>
@@ -37,10 +29,9 @@ const ListDepartementScreen = () => {
         nameIconLeft="arrow-back"
         name={"Phòng ban"}
         nameIconRight={"group-add"}
-        onEditPress={() => {
-          setVisibleModal(true);
-        }}
+        onEditPress={() => setVisibleModal(true)}
       />
+
       <FlatList
         data={dataPB}
         renderItem={({ item }) => <ItemDepartment item={item} />}
@@ -54,19 +45,19 @@ const ListDepartementScreen = () => {
               <HeaderNav
                 name={"Thêm phòng ban"}
                 nameIconRight={"close"}
-                onEditPress={() => {
-                  setVisibleModal(false);
-                }}
+                onEditPress={() => setVisibleModal(false)}
               />
             </View>
 
             <View style={styles.body}>
               <TextInput style={styles.TextInput} placeholder="Mã phòng ban" />
-              <Text></Text>
               <TextInput style={styles.TextInput} placeholder="Tên phòng ban" />
 
               <View style={styles.bodyBtn}>
-                <TouchableOpacity style={styles.btnThem}>
+                <TouchableOpacity
+                  style={styles.btnThem}
+                  onPress={() => setVisibleModal(false)}
+                >
                   <Text style={styles.nameBtn}>Thêm</Text>
                 </TouchableOpacity>
               </View>
@@ -77,14 +68,9 @@ const ListDepartementScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  flatList: {
-    padding: 20,
-  },
 
+const styles = StyleSheet.create({
+  container: { flex: 1 },
   modalCtn: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     flex: 1,
@@ -97,7 +83,6 @@ styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 10,
   },
-
   body: {
     flex: 1,
     marginTop: 30,
