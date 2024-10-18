@@ -7,6 +7,7 @@ import HomeScreen from './app/Screen/HomeScreen/HomeScreen';
 import ChamCong from './app/Screen/MarkAttendaceScreen/MarkAttendace';
 import ChamCongNV from './app/Screen/MarkAttendaceScreen/MarkAttendaceNV';
 import EmployeeScreen from './app/Screen/HomeScreen/MangageEmployeeScreen';
+import BangcapDetail from './app/Screen/BangCapScreens/BangCapDetailScreen'
 import ListEmployee from './app/Screen/EmployeeScreen/ListEmployee';
 import EmployeeDetailScreen from './app/Screen/EmployeeScreen/EmployeeDetail';
 import EmployeeEditScreen from './app/Screen/EmployeeScreen/EditEmployee';
@@ -44,7 +45,7 @@ export default function App() {
         <Stack.Screen name="HomeScreenGD" component={HomeScreenGD} options={{ headerShown: false }} />
 
 
-
+        
 
 
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
@@ -57,6 +58,9 @@ export default function App() {
         <Stack.Screen name="PhongBanScreen" component={PhongBanScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotificeScreen" component={NotificeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AddMember" component={AddMember} options={{ headerShown: false }} />
+
+
+        <Stack.Screen name="BangCapDetail" component={BangcapDetail} options={{ headerShown: false }} />
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />

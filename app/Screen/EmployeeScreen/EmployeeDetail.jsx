@@ -3,15 +3,33 @@ import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollVi
 import BackNav from '../../Compoment/BackNav';
 
 export default function EmployeeDetailScreen({ navigation }) {
-  // Hàm xử lý khi nhấn vào nút chỉnh sửa
+  // Dữ liệu về các bằng cấp của nhân viên
+  const certificates = [
+    {
+      id: '1',
+      name: 'Bằng Đại Học',
+      issueDate: '20/05/2019',
+    },
+    {
+      id: '2',
+      name: 'Thạc sĩ',
+      issueDate: '15/06/2022',
+    },
+    // Thêm các bằng cấp khác nếu có
+  ];
+
   const handlePress = () => {
     navigation.navigate('EditEmployee');
+  };
+
+  const BangCapDetail = (certificate) => {
+    // Điều hướng đến màn hình chi tiết bằng cấp với thông tin của bằng cấp đó
+    navigation.navigate('BangCapDetail', { certificate });
   };
 
   return (
     <>
       <View style={styles.header}>
-        {/* Sử dụng BackNav với onEditPress */}
         <BackNav navigation={navigation} name={"Chi tiết nhân viên"} btn={"Chỉnh sửa"} onEditPress={handlePress} />
       </View>
 
@@ -24,17 +42,27 @@ export default function EmployeeDetailScreen({ navigation }) {
 
           {/* Thông tin nhân viên */}
           <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Account Information</Text>
-            <InfoItem label="Owner Name" value="Value" />
-            <InfoItem label="Phone Number" value="Value" />
-            <InfoItem label="Email Address" value="Value" />
-            <InfoItem label="Reg Time" value="Value" />
+            <Text style={styles.sectionTitle}>Thông tin tài khoản</Text>
+            <InfoItem label="Họ tên" value="Nguyễn Văn A" />
+            <InfoItem label="Số điện thoại" value="0123456789" />
+            <InfoItem label="Email" value="email@example.com" />
           </View>
 
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Membership</Text>
-            <InfoItem label="Status" value="Value" />
-            <InfoItem label="Expiry Date" value="Value" />
+            <InfoItem label="Status" value="Active" />
+            <InfoItem label="Chức vụ" value="Nhân viên" />
+            <InfoItem label="Ngày làm" value="01/01/2020" />
+          </View>
+
+          {/* Danh sách bằng cấp */}
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Danh sách bằng cấp</Text>
+            {certificates.map((certificate) => (
+              <TouchableOpacity key={certificate.id} onPress={() => BangCapDetail(certificate)}>
+                <InfoItem label="Tên bằng" value={certificate.name} />
+              </TouchableOpacity>
+            ))}
           </View>
         </ScrollView>
       </SafeAreaView>
