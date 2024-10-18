@@ -16,6 +16,8 @@ import AddMember from './app/Screen/DepartmentsScreen/AddMemberCode';
 import { useFonts } from 'expo-font';
 import TestScreen from './app/Screen/FolderTest/TestScreen';
 import TabNavigation from './app/Navigation/TabNavigation';
+import DanhSachBangCap from './app/Screen/BangCapScreen/DanhSachBangCap';
+import DetailBangCap from './app/Screen/BangCapScreen/DetailBangCap';
 const Stack = createStackNavigator();
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -43,7 +45,8 @@ export default function App() {
         <Stack.Screen name="UserTabNav" component={TabNavigation} options={{ headerShown: false }} />
         <Stack.Screen name="HomeScreenGD" component={HomeScreenGD} options={{ headerShown: false }} />
 
-
+        <Stack.Screen name="DanhSachBangCap" component={DanhSachBangCap} options={{ headerShown: false }} />
+        <Stack.Screen name="DetailBangCap" component={DetailBangCap} options={{ headerShown: false }} />
 
 
 
