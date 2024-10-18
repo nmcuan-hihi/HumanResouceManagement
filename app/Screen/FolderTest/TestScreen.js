@@ -8,7 +8,7 @@ export default function TestScreen({ navigation }) {
     const employee = {
       cccd: "123456789",
       chucvuId: "CV001",
-      employeeId: "EMP001X",
+      employeeId: "E01X",
       luongcobanId: "LCB001",
       name: "Nguyễn Văn A",
       ngaybatdau: "2024-01-01",
@@ -22,8 +22,7 @@ export default function TestScreen({ navigation }) {
     // Ghi nhân viên vào Firebase
     writeUserData(employee);
     console.log("Employee added");
-    // Điều hướng đến màn hình
-    navigation.navigate('ChamCong');
+  
   };
 
   // Hàm điều hướng đến các màn hình khác

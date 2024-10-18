@@ -1,142 +1,236 @@
-import { View, Text, StyleSheet, FlatList, Modal, TextInput } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Modal,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import BackNav from '../../Compoment/BackNav';
-import ItemListEmployee from '../../Compoment/ItemEmployee';
-import { TouchableOpacity } from 'react-native';
 import HeaderNav from '../../Compoment/HeaderNav';
+import { readEmployees, readPhongBan, writePhongBan } from '../../services/database';
+import ItemDepartment from '../../Compoment/ItemDepartment';
 
 export default function PhongBanScreen({ navigation }) {
-  const handlePress = () => {
-    navigation.navigate('TeamMember');
-  };
-  const hienThiModal = () => {
-    setVisibleModal(true)
-  }
+  const [phongBanData, setPhongBanData] = useState([]);
+  const [employeeData, setEmployeeData] = useState([]);
   const [visibleModal, setVisibleModal] = useState(false);
-  const employeeData = [
-    { manv: "IT01", name: "Phòng IT01" },
-    { manv: "IT02", name: "Phòng IT02" },
-    { manv: "IT03", name: "Phòng IT03" },
-    { manv: "KT01", name: "Phòng kế toán 1" },
-    { manv: "KT02", name: "Phòng kế toán 2" },
-    { manv: "KT03", name: "Phòng kế toán 3" },
-    { manv: "NS01", name: "Phòng nhân sự 1" },
-    { manv: "NS02", name: "Phòng nhân sự 2" },
-    { manv: "NS03", name: "Phòng nhân sự 3" },
+  const [searchText, setSearchText] = useState('');
+  const [selectedManager, setSelectedManager] = useState({ name: '', employeeID: '' });
+  const [maPhongBan, setMaPhongBan] = useState('');
+  const [tenPhongBan, setTenPhongBan] = useState('');
 
-    // Thêm nhiều nhân viên khác vào đây
-  ];
-  const itemCount = employeeData.length;
+  // Fetch dữ liệu từ Firebase
+  const fetchData = async () => {
+    try {
+      const data = await readPhongBan();
+      const phongBanArray = Object.keys(data).map((key) => ({
+        ...data[key],
+        maPhongBan: key,
+      }));
+      setPhongBanData(phongBanArray);
+
+      const dataEmp = await readEmployees();
+      const dataEmpArray = Object.keys(dataEmp).map((key) => ({
+        ...dataEmp[key],
+        employeeID: key,
+      }));
+      setEmployeeData(dataEmpArray);
+    } catch (error) {
+      console.error('Lỗi khi đọc dữ liệu:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const hienThiModal = () => setVisibleModal(true);
+
+  const handleSelectEmployee = (employee) => {
+    setSelectedManager({ name: employee.name, employeeID: employee.employeeID });
+  };
+
+  const handleAddPhongBan = async () => {
+    try {
+      const phongban = {
+        maPhongBan,
+        tenPhongBan,
+        maQuanLy: selectedManager.employeeID,
+      };
+
+      await writePhongBan(phongban); // Ghi dữ liệu vào Firebase
+      await fetchData(); // Làm mới dữ liệu sau khi thêm mới
+
+      // Reset các trường sau khi thêm
+      setMaPhongBan('');
+      setTenPhongBan('');
+      setSelectedManager({ name: '', employeeID: '' });
+      setSearchText('');
+      setVisibleModal(false); // Đóng modal
+    } catch (error) {
+      console.error('Lỗi khi thêm phòng ban:', error);
+    }
+  };
+
   return (
-    <><BackNav navigation={navigation} name={"Phòng ban"} soLuong={itemCount} btn={"Add"} onEditPress={hienThiModal}/>
+    <>
+      <BackNav
+        navigation={navigation}
+        name="Phòng ban"
+        soLuong={phongBanData.length}
+        btn="Add"
+        onEditPress={hienThiModal}
+      />
       <View style={styles.container}>
-
-
         <FlatList
-          style={{ marginTop: 20 }} // Adjust margin as needed
-          data={employeeData}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={handlePress} ><ItemListEmployee manv={item.manv} name={item.name} /></TouchableOpacity>
-
+          style={styles.list}
+          data={phongBanData.filter((item) =>
+            item.tenPhongBan.toLowerCase().includes(searchText.toLowerCase())
           )}
-          keyExtractor={(item, index) => index.toString()} // Use index as a key
+          renderItem={({ item }) => (
+            <TouchableOpacity>
+              <ItemDepartment item={item} />
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.maPhongBan}
         />
 
         <Modal visible={visibleModal} transparent={true} animationType="slide">
-          <View style={styles.modalCtn}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.modalCtn}
+          >
             <View style={styles.bodyModal}>
-              <View style={{ width: "95%", alignSelf: "center" }}>
-                <HeaderNav
-                  name={"Thêm phòng ban"}
-                  nameIconRight={"close"}
-                  onEditPress={() => {
-                    setVisibleModal(false);
-                  }}
-                />
-              </View>
+              <HeaderNav
+                name="Thêm phòng ban"
+                nameIconRight="close"
+                onEditPress={() => setVisibleModal(false)}
+              />
 
               <View style={styles.body}>
-                <TextInput style={styles.TextInput} placeholder="Mã phòng ban" />
-                <Text></Text>
-                <TextInput style={styles.TextInput} placeholder="Tên phòng ban" />
+                <TextInput
+                  style={styles.TextInput}
+                  placeholder="Mã phòng ban"
+                  value={maPhongBan}
+                  onChangeText={setMaPhongBan}
+                />
+                <TextInput
+                  style={styles.TextInput}
+                  placeholder="Tên phòng ban"
+                  value={tenPhongBan}
+                  onChangeText={setTenPhongBan}
+                />
+                <TextInput
+                  style={styles.TextInput}
+                  placeholder="Quản lý phòng ban"
+                  value={selectedManager.name}
+                  editable={false}
+                />
 
-                <View style={styles.bodyBtn}>
-                  <TouchableOpacity style={styles.btnThem}>
-                    <Text style={styles.nameBtn}>Thêm</Text>
-                  </TouchableOpacity>
-                </View>
+                <Text style={{ padding: 5 }}>Chỉ định trưởng phòng</Text>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Tìm kiếm nhân viên"
+                  value={searchText}
+                  onChangeText={setSearchText}
+                />
+
+                <FlatList
+                  style={styles.employeeList}
+                  data={employeeData.filter((item) =>
+                    item.name.toLowerCase().includes(searchText.toLowerCase())
+                  )}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.employeeItem}
+                      onPress={() => handleSelectEmployee(item)}
+                    >
+                      <Text>{`${item.employeeID} - ${item.name}`}</Text>
+                    </TouchableOpacity>
+                  )}
+                  keyExtractor={(item) => item.employeeID}
+                />
+
+                <TouchableOpacity
+                  style={styles.btnThem}
+                  onPress={handleAddPhongBan}
+                >
+                  <Text style={styles.nameBtn}>Thêm</Text>
+                </TouchableOpacity>
               </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
-      </View></>
-
+      </View>
+    </>
   );
-
 }
+
 const styles = StyleSheet.create({
   container: {
-    flex: 9,
+    flex: 9.5,
     backgroundColor: '#f8f8f8',
-
   },
-  headerSection: {
-    flexDirection: 'row', // Align items in a row
-    alignItems: 'center', // Center items vertically
-    justifyContent: 'space-between', // Add space between BackNav and number text
-    paddingHorizontal: 15,
-    paddingBottom: 10,
+  list: {
+    paddingHorizontal: 10,
   },
-  headerText: {
-    fontSize: 24, // Font size for "120"
-    fontWeight: 'bold',
-    color: '#000000', // Black color
-    marginRight: 100, // Optional: Add margin to space from BackNav
-  },
-
-
-
-  // modal styles
   modalCtn: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   bodyModal: {
-    width: "85%",
-    height: 500,
-    backgroundColor: "#FFFFFF",
+    width: '85%',
+    height: 600,
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
+    overflow: 'hidden',
   },
   body: {
     flex: 1,
-    marginTop: 30,
-    alignItems: "center",
-    width: "100%",
+    padding: 20,
   },
   TextInput: {
-    width: "90%",
+    width: '100%',
     height: 50,
     borderBottomWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    marginVertical: 10,
-    fontSize: 20,
+    marginBottom: 10,
+    fontSize: 18,
   },
-  bodyBtn: {
-    width: "100%",
-    alignItems: "center",
-    position: "absolute",
-    bottom: 20,
+  searchInput: {
+    width: '100%',
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 8,
+    marginBottom: 10,
+  },
+  employeeList: {
+    flex: 1,
+    marginBottom: 10,
+  },
+  employeeItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
   },
   btnThem: {
-    width: "90%",
+    width: '100%',
     height: 50,
-    borderRadius: 20,
-    backgroundColor: "#FFA500",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#FFA500',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    marginTop: 10,
   },
-  nameBtn: { fontSize: 22, color: "#FFFFFF" },
+  nameBtn: {
+    fontSize: 20,
+    color: '#FFFFFF',
+  },
 });

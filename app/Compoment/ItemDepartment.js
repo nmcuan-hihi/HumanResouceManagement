@@ -4,35 +4,42 @@ import { View, Image, Text, TouchableOpacity, StyleSheet } from "react-native";
 const ItemDepartment = ({ item, onPress }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Text style={styles.maPB}>{item.maPB}</Text>
+      <Text style={styles.maPB}>{item.maPhongBan}</Text>
 
-      <Text style={styles.namePB}>{item.tenPB}</Text>
+      <Text style={styles.namePB}>{item.tenPhongBan}</Text>
     </TouchableOpacity>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     alignSelf: "center",
     width: "90%",
-    height: 60,
-    borderRadius: 20,
-    backgroundColor: "#E5E5E5",
+    height: 70, 
+    borderRadius: 5, 
+    backgroundColor: "#FFFFFF",
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 10,
-    elevation: 5,
-    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1, // Thêm độ mờ cho bóng
+    shadowRadius: 4, // Thêm độ mềm cho bóng
   },
   maPB: {
-    fontSize: 25,
+    flex: 2,
+    fontSize: 15,
     fontWeight: "bold",
+    color: "#333",
     marginStart: 20,
   },
-
   namePB: {
-    fontSize: 18,
-    marginStart: 60,
+    flex: 5,
+    fontSize: 20, 
+    color: "blue", 
+    marginStart: 20, 
   },
 });
 
