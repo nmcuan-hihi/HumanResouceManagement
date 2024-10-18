@@ -24,7 +24,7 @@ export default function PhongBanScreen({navigation}) {
       ];
       const itemCount = employeeData.length;
     return (
-        <><BackNav navigation={navigation} name={"Phòng ban"} btn={itemCount} />
+        <><BackNav navigation={navigation} name={"Phòng ban"} soLuong={itemCount} btn={"Add"} />
         <View style={styles.container}>
 
 
