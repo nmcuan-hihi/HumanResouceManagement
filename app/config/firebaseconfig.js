@@ -1,5 +1,7 @@
 // app/config/firebaseconfig.js
 import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database"; // Import getDatabase
+import { getStorage } from "firebase/storage"; // Import getStorage
 import {
   FIREBASE_API_KEY,
   FIREBASE_AUTH_DOMAIN,
@@ -25,5 +27,7 @@ const firebaseConfig = {
 
 // Khởi tạo Firebase
 const app = initializeApp(firebaseConfig);
+const database = getDatabase(app); // Khởi tạo Realtime Database
+const storage = getStorage(app); // Khởi tạo Firebase Storage
 
-export { app };
+export { app, database, storage }; // Xuất cả app, database và storage

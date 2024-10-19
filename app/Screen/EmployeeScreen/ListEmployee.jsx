@@ -7,6 +7,9 @@ import { readEmployees } from '../../services/database'; // Nhập hàm đọc d
 export default function EmployeeList({ navigation }) {
   const [employeeData, setEmployeeData] = useState([]); // State để lưu dữ liệu nhân viên
 
+  const handleAddEmployee = () => {
+    navigation.navigate("AddMember")
+  }
   useEffect(() => {
     // Gọi hàm để đọc dữ liệu nhân viên khi component được mount
     const fetchData = async () => {
@@ -30,7 +33,7 @@ export default function EmployeeList({ navigation }) {
     <View style={styles.container}>
       {/* Header Section */}
       <View style={styles.headerSection}>
-        <BackNav navigation={navigation} name={"Danh sách nhân viên"} btn={employeeData.length} />
+        <BackNav navigation={navigation} name={"Danh sách nhân viên"} soLuong={employeeData.length} btn={"Add"} onEditPress={handleAddEmployee}/>
       </View>
 
       {/* Employee List */}
