@@ -17,6 +17,7 @@ export function writeUserData(employee) {
 }
 export async function addEmployee(employeeData, profileImage) {
   try {
+    employeeData.matKhau = employeeData.employeeId
     // Tạo tham chiếu tới nơi lưu trữ hình ảnh
     const imageRef = storageRef(storage, `employee/${employeeData.employeeId}.jpg`);
 
