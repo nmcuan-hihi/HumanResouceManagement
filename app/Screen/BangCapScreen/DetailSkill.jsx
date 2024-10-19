@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   View,
@@ -15,19 +16,19 @@ import HeaderNav from "../../Compoment/HeaderNav";
 import Feather from 'react-native-vector-icons/Feather';
 
 
-export default function DetailBangCap({ navigation, route }) {
+export default function DetailSkill({ navigation, route }) {
   // const { maBC, tenBC } = route.params.item;
-maBC = "BC0011 ";
-tenBC = " Chứng chỉ IELTS";
+maSK = "SK001 ";
+tenSK = "Java";
   const [isEditing, setIsEditing] = useState(false);
-  const [currentTenBC, setCurrentTenBC] = useState(tenBC);
-  const [editedTenBC, setEditedTenBC] = useState(tenBC);
+  const [currentTenSK, setCurrentTenBC] = useState(tenSK);
+  const [editedTenSK, setEditedTenSK] = useState(tenSK);
   const [visibleModal, setVisibleModal] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false); // State to show confirmation modal for delete
 
   // Handle save
   const handleSave = () => {
-    setCurrentTenBC(editedTenBC);
+    setCurrentTenBC(editedTenSK);
     setIsEditing(false);
   };
 
@@ -52,7 +53,7 @@ tenBC = " Chứng chỉ IELTS";
         {/* Sử dụng BackNav với onEditPress */}
         <BackNav
           navigation={navigation}
-          name={"Chi tiết bằng cấp"}
+          name={"Chi tiết kỹ năng"}
           
         />
       </View>
@@ -61,22 +62,22 @@ tenBC = " Chứng chỉ IELTS";
       <ScrollView>
   {/* Thông tin bằng cấp */}
   <View style={styles.infoSection}>
-    <Text style={styles.sectionTitle}>Mã bằng cấp</Text>
-    <Text style={styles.sectionTitle1}>{maBC}</Text>
+    <Text style={styles.sectionTitle}>Mã skill</Text>
+    <Text style={styles.sectionTitle1}>{maSK}</Text>
   </View>
 
   <View style={styles.infoSection}>
-    <Text style={styles.sectionTitle}>Tên bằng cấp</Text>
+    <Text style={styles.sectionTitle}>Tên skill</Text>
     {isEditing ? (
       <TextInput
         style={styles.TextInput}
-        placeholder="Tên bằng cấp"
-        value={editedTenBC}
-        onChangeText={(text) => setEditedTenBC(text)}
+        placeholder="Tên skill"
+        value={editedTenSK}
+        onChangeText={(text) => setEditedTenSK(text)}
       />
     ) : (
       <View style={styles.inlineEditContainer}>
-        <Text style={styles.sectionTitle22}>{currentTenBC}</Text>
+        <Text style={styles.sectionTitle22}>{currentTenSK}</Text>
         <TouchableOpacity
           onPress={() => setIsEditing(true)}
           style={styles.editBtn}
@@ -107,7 +108,7 @@ tenBC = " Chứng chỉ IELTS";
           <View style={styles.modalCtn}>
             <View style={styles.bodyModal}>
               <Text style={styles.confirmText}>
-                Bạn có chắc chắn muốn xóa bằng cấp này không?
+                Bạn có chắc chắn muốn xóa skill này không?
               </Text>
               <View style={styles.modalBtnContainer}>
                 <TouchableOpacity style={styles.modalBtn} onPress={confirmDeleteYes}>

@@ -25,6 +25,9 @@ import DashboardGD from './app/Compoment/DashboardGD';
 import HomeScreenGD from './app/Screen/HomeScreen/HomeScreenGD';
 import NotificeScreen from './app/Screen/NotificeScreen/NotificeScreen';
 import QuanLyMucLuong from './app/Screen/QuanLyLuong/QuanLyMucLuong';
+import DanhSachSkill from './app/Screen/BangCapScreen/Skill';
+import DetailSkill from './app/Screen/BangCapScreen/DetailSkill';
+
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -62,6 +65,9 @@ export default function App() {
         <Stack.Screen name="PhongBanScreen" component={PhongBanScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotificeScreen" component={NotificeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AddMember" component={AddMember} options={{ headerShown: false }} />
+
+        <Stack.Screen name="Skill" component={DanhSachSkill} options={{ headerShown: false }} />
+        <Stack.Screen name="SkillDetail" component={DetailSkill} options={{ headerShown: false }} />
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />

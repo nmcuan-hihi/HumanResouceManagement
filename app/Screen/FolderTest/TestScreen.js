@@ -65,6 +65,10 @@ export default function TestScreen({ navigation }) {
         <Text style={styles.buttonText}>DirectorScreen</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('Skill')}>
+        <Text style={styles.buttonText}>Kỹ năng</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
