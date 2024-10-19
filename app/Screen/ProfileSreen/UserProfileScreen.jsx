@@ -1,12 +1,19 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
-export default function UserProfileScreen() {
+export default function UserProfileScreen({ navigation }) {
+  
+  const handleLogOut = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }], // Quay lại Login và xóa lịch sử điều hướng
+    });
+  };
+
   return (
-    
     <View style={styles.container}>
       <Text style={styles.greeting}>Hi Shallender! 👋</Text>
-      
+
       <View style={styles.profileContainer}>
         <Image 
           source={require('../../../assets/image/images.png')}
@@ -19,8 +26,8 @@ export default function UserProfileScreen() {
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Thông Tin Cá Nhân</Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity style={[styles.button, styles.logoutButton]}>
+
+      <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogOut}>
         <Text style={styles.buttonText}>Đăng Xuất</Text>
       </TouchableOpacity>
     </View>
@@ -34,7 +41,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingTop: 50,
     padding: 20,
-    backgroundColor: '#fff', // Màu nền
+    backgroundColor: '#fff',
   },
   greeting: {
     fontSize: 24,
@@ -48,7 +55,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     padding: 20,
     width: '100%',
-    maxWidth: 400, // Độ rộng tối đa cho màn hình
+    maxWidth: 400,
     marginBottom: 20,
   },
   profileImage: {
@@ -67,17 +74,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#E3E3E3', // Màu nền nút
+    backgroundColor: '#E3E3E3',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginVertical: 5,
     width: '100%',
-    maxWidth: 350, // Độ rộng tối đa cho nút
+    maxWidth: 350,
     alignItems: 'center',
   },
   logoutButton: {
-    backgroundColor: '#00BFFF', // Màu nền cho nút Đăng Xuất
+    backgroundColor: '#00BFFF',
   },
   buttonText: {
     fontSize: 16,

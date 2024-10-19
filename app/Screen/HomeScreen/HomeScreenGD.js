@@ -41,8 +41,8 @@ export default function HomeScreenGD({ navigation }) { // Nhận navigation từ
             <Text style={styles.statValue}>Phòng ban</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.statItem} onPress={() => {}}>
-            <Icon name="paid" size={24} color="#F44336" />
-            <Text style={styles.statValue}>Lương nhân viên</Text>
+            <Icon name="badge" size={24} color="#F44336" />
+            <Text style={styles.statValue}>Chức Vụ</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('QuanLyMucLuong')}>
             <Icon name="credit-card" size={24} color="#9C27B0" />
