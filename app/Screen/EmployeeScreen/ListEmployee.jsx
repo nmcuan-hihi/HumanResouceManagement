@@ -16,8 +16,6 @@ export default function EmployeeList({ navigation }) {
         ...data[key],
         manv: key // Thêm mã nhân viên từ key
       }));
-      console.log(data);
-      
       setEmployeeData(employeeArray); // Cập nhật state
     };
 
@@ -27,12 +25,14 @@ export default function EmployeeList({ navigation }) {
   const handlePress = (item) => {
     navigation.navigate('EmployeeDetail', { manv: item.manv, name: item.name });
   };
-
+  const handlePress1 = (item) => {
+    navigation.navigate('AddEmployee');
+  };
   return (
     <View style={styles.container}>
       {/* Header Section */}
       <View style={styles.headerSection}>
-        <BackNav navigation={navigation} name={"Danh sách nhân viên"} btn={employeeData.length} />
+        <BackNav navigation={navigation} name={"Danh sách nhân viên"} soLuong={employeeData.length} btn={"Add"}  onEditPress={handlePress1}/>
       </View>
 
       {/* Employee List */}

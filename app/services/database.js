@@ -34,6 +34,36 @@ export async function readEmployees() {
   }
 }
 
+export function writeEmployeeData(employee) {
+  console.log("Employee data:", employee); // In ra dữ liệu nhân viên để kiểm tra
+
+  // Kiểm tra từng thuộc tính trong đối tượng employee
+  const requiredFields = ['employeeId', 'cccd', 'chucvuId', 'luongcobanId', 'name', 'ngaybatdau', 'ngaysinh', 'phongbanId', 'sdt', 'trangthai'];
+
+  for (const field of requiredFields) {
+    if (employee[field] === undefined) {
+      console.error(`Field ${field} is undefined`);
+      return; // Ngưng thực hiện nếu một trường bắt buộc không có giá trị
+    }
+  }
+
+  const employeeId = employee.employeeId; // Lấy ID nhân viên
+  if (!employeeId) {
+    console.error("Employee ID is undefined");
+    return; // Ngưng thực hiện nếu employeeId không hợp lệ
+  }
+
+  // Ghi dữ liệu vào Firebase
+  set(ref(database, `employees/${employeeId}`), employee)
+    .then(() => {
+      console.log(`Employee ${employeeId} written successfully!`);
+    })
+    .catch((error) => {
+      console.error(`Error writing employee ${employeeId}:`, error);
+    });
+}
+
+
 export function writePhongBan(phongBan) {
   const maPhongBan = phongBan.maPhongBan; 
 

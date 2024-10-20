@@ -4,12 +4,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './app/Screen/LoginSreen/LoginScreen';
 import HomeScreen from './app/Screen/HomeScreen/HomeScreen';
+
 import ChamCong from './app/Screen/MarkAttendaceScreen/MarkAttendace';
 import ChamCongNV from './app/Screen/MarkAttendaceScreen/MarkAttendaceNV';
 import EmployeeScreen from './app/Screen/HomeScreen/MangageEmployeeScreen';
 import ListEmployee from './app/Screen/EmployeeScreen/ListEmployee';
 import EmployeeDetailScreen from './app/Screen/EmployeeScreen/EmployeeDetail';
 import EmployeeEditScreen from './app/Screen/EmployeeScreen/EditEmployee';
+import AddEmployeeScreen from './app/Screen/EmployeeScreen/AddEmployee';
+
 import PhongBanScreen from './app/Screen/DepartmentsScreen/DepartmentsScreen';
 import TeamMembersScreen from './app/Screen/DepartmentsScreen/TeamMember';
 import AddMember from './app/Screen/DepartmentsScreen/AddMemberCode';
@@ -27,6 +30,7 @@ import NotificeScreen from './app/Screen/NotificeScreen/NotificeScreen';
 import QuanLyMucLuong from './app/Screen/QuanLyLuong/QuanLyMucLuong';
 import DanhSachSkill from './app/Screen/BangCapScreen/Skill';
 import DetailSkill from './app/Screen/BangCapScreen/DetailSkill';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -58,6 +62,8 @@ export default function App() {
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
         <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />
         <Stack.Screen name="EmployeeScreen" component={EmployeeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="AddEmployee" component={AddEmployeeScreen} options={{ headerShown: false }} />
+
        
         <Stack.Screen name="ListEmployee" component={ListEmployee} options={{ headerShown: false }} />
         <Stack.Screen name="EmployeeDetail" component={EmployeeDetailScreen} options={{ headerShown: false }} />
