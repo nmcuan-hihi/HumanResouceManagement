@@ -16,6 +16,8 @@ export default function EmployeeList({ navigation }) {
         ...data[key],
         manv: key // Thêm mã nhân viên từ key
       }));
+      console.log(data);
+      
       setEmployeeData(employeeArray); // Cập nhật state
     };
 
