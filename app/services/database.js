@@ -201,7 +201,7 @@ export function deleteBangCap(bangCapId) {
 
 // Hàm sửa dữ liệu bằng cấp
 export function updateBangCap(bangcap_id, tenBang) {
-  set(ref(database, `bangcap/${bangcap_id}`), { bangcap_id, tenBang }) // Cập nhật dữ liệu vào node 'bangcap'
+  update(ref(database, `bangcap/${bangcap_id}`),{tenBang}) // Cập nhật dữ liệu vào node 'bangcap'
     .then(() => {
       console.log(`Bằng cấp ${bangcap_id} updated successfully!`);
     })

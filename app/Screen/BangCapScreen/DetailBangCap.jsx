@@ -27,7 +27,7 @@ export default function DetailBangCap({ navigation, route }) {
   // Handle save
   const handleSave = async () => {
     setCurrentTenBC(editedTenBC);
-    updateBangCap(bangcap_id,editedTenBC)
+    await updateBangCap(bangcap_id, editedTenBC);
     setIsEditing(false);
   };
 
@@ -37,9 +37,8 @@ export default function DetailBangCap({ navigation, route }) {
   };
 
   const confirmDeleteYes = async () => {
-    deleteBangCap(bangcap_id);
+    await deleteBangCap(bangcap_id);
     navigation.goBack();
-    // Logic to delete the item
     setConfirmDelete(false);
     // Possibly navigate back or reset form
   };
