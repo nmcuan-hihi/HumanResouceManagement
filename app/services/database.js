@@ -24,6 +24,48 @@ export function writeUserData(employee) {
     });
 }
 
+// them chuc vu
+export const createChucVu = async (chucVu) => {
+  try {
+    const docRef = await db.collection('chucvu').add(chucVu);
+    return docRef.id; // Trả về ID của chức vụ đã được thêm
+  } catch (error) {
+    console.error("Error adding chuc vu: ", error);
+    throw error;
+  }
+};
+export const readChucVu = async () => {
+  try {
+    const snapshot = await get(ref(database, 'chucvu')); // Đọc dữ liệu từ node 'chucvu'
+    if (snapshot.exists()) {
+      return snapshot.val(); // Trả về dữ liệu nếu tồn tại
+    } else {
+      console.log('No data available');
+      return null; // Không có dữ liệu
+    }
+  } catch (error) {
+    console.error('Error reading chuc vu data:', error);
+    return null; // Xử lý lỗi
+  }
+};
+export const updateChucVu = async (chucvuId, updatedData) => {
+  try {
+    await db.collection('chucvu').doc(chucvuId).update(updatedData);
+  } catch (error) {
+    console.error("Error updating chuc vu: ", error);
+    throw error;
+  }
+};
+export const deleteChucVu = async (chucvuId) => {
+  try {
+    await db.collection('chucvu').doc(chucvuId).delete();
+  } catch (error) {
+    console.error("Error deleting chuc vu: ", error);
+    throw error;
+  }
+};
+
+
 export const readAllSkill = async () => {
   try {
     const snapshot = await get(ref(database, 'skills')); // Đọc dữ liệu từ node 'skills'
