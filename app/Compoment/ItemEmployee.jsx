@@ -1,14 +1,14 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
 import React from 'react';
 
-export default function ItemListEmployee({ manv, name, imageURL }) {
+export default function ItemListEmployee({ manv, name, imageUrl }) {
   return (
     <View style={styles.itemContainer}>
       <View style={styles.infoContainer}>
         <Text style={styles.employeeCode}>{manv}</Text>
         <Text style={styles.employeeName} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
       </View>
-      <Image source={{ uri: imageURL }} style={styles.employeeImage} /> 
+      <Image source={{ uri: imageUrl }} style={styles.employeeImage} /> 
     </View>
   );
 }

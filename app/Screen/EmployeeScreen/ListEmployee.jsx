@@ -41,7 +41,7 @@ export default function EmployeeList({ navigation }) {
         data={employeeData}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => handlePress(item)}>
-            <ItemListEmployee manv={item.manv} name={item.name} imageURL={item.imageURL} />
+            <ItemListEmployee manv={item.manv} name={item.name} imageUrl={item.imageUrl} />
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.manv} // Sử dụng mã nhân viên làm khóa

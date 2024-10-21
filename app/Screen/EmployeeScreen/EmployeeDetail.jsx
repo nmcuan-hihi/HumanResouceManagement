@@ -47,7 +47,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
           {employeeData ? (
             <>
               <Image
-                source={employeeData.imageURL ? { uri: employeeData.imageURL } : require("../../../assets/image/images.png")}
+                source={employeeData.imageUrl ? { uri: employeeData.imageUrl } : require("../../../assets/image/images.png")}
                 style={styles.image}
               />
 
