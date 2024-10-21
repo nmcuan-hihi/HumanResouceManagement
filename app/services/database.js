@@ -117,6 +117,25 @@ export async function readPhongBan() {
     console.error("Error reading phong ban:", error);
   }
 }
+export const editPhongBan = async (maPhongBan, updatedData) => {
+  try {
+    const phongBanRef = ref(database, `phongban/${maPhongBan}`); // Sử dụng ref từ database
+    await update(phongBanRef, updatedData); // Sử dụng hàm update
+    console.log('Cập nhật phòng ban thành công');
+  } catch (error) {
+    console.error('Lỗi khi cập nhật phòng ban:', error);
+  }
+};
+
+export const removePhongBan = async (maPhongBan) => {
+  try {
+    const phongBanRef = ref(database, `phongban/${maPhongBan}`); // Đường dẫn tới phòng ban cần xóa
+    await remove(phongBanRef); // Xóa phòng ban
+    console.log(`Phòng ban ${maPhongBan} đã được xóa thành công`);
+  } catch (error) {
+    console.error(`Lỗi khi xóa phòng ban ${maPhongBan}:`, error);
+  }
+};
 
 // bằng cấp
 // Hàm ghi dữ liệu bằng cấp

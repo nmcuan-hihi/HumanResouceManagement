@@ -14,6 +14,7 @@ import EmployeeEditScreen from './app/Screen/EmployeeScreen/EditEmployee';
 import AddEmployeeScreen from './app/Screen/EmployeeScreen/AddEmployee';
 
 import PhongBanScreen from './app/Screen/DepartmentsScreen/DepartmentsScreen';
+import DetailPB from './app/Screen/DepartmentsScreen/DetailPhongBan';
 import TeamMembersScreen from './app/Screen/DepartmentsScreen/TeamMember';
 import AddMember from './app/Screen/DepartmentsScreen/AddMemberCode';
 import { useFonts } from 'expo-font';
@@ -71,6 +72,8 @@ export default function App() {
         <Stack.Screen name="PhongBanScreen" component={PhongBanScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotificeScreen" component={NotificeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AddMember" component={AddMember} options={{ headerShown: false }} />
+        <Stack.Screen name="DetailPB" component={DetailPB} options={{ headerShown: false }} />
+
 
         <Stack.Screen name="Skill" component={DanhSachSkill} options={{ headerShown: false }} />
         <Stack.Screen name="SkillDetail" component={DetailSkill} options={{ headerShown: false }} />

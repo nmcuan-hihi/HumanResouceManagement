@@ -55,6 +55,10 @@ export default function PhongBanScreen({ navigation }) {
     setSelectedManager({ name: employee.name, employeeID: employee.employeeID });
   };
 
+  const handlePress = (item) => {
+    navigation.navigate('DetailPB', { maPhongBan: item.maPhongBan });
+  };
+
   const handleAddPhongBan = async () => {
     try {
       const phongban = {
@@ -93,12 +97,11 @@ export default function PhongBanScreen({ navigation }) {
             item.tenPhongBan.toLowerCase().includes(searchText.toLowerCase())
           )}
           renderItem={({ item }) => (
-            <TouchableOpacity>
-              <ItemDepartment item={item} />
-            </TouchableOpacity>
+            <ItemDepartment item={item} onPress={() => handlePress(item)} />
           )}
           keyExtractor={(item) => item.maPhongBan}
         />
+
 
         <Modal visible={visibleModal} transparent={true} animationType="slide">
           <KeyboardAvoidingView
