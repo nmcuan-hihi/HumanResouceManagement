@@ -1,145 +1,244 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, ScrollView,TouchableOpacity,Text ,Alert} from 'react-native';
-import { writeEmployeeData } from '../../services/database';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, TextInput, StyleSheet, SafeAreaView,
+  ScrollView, TouchableOpacity, Image, Alert
+} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import BackNav from '../../Compoment/BackNav';
+import RNPickerSelect from 'react-native-picker-select';
+import { addEmployee, readPhongBan } from '../../services/database'; // Import hàm thêm nhân viên và đọc phòng ban
 
-export default function AddEmployeeScreen({navigation}) {
-
-  const [showDatePicker, setShowDatePicker] = useState(false); // Để điều khiển hiển thị DatePicker
-  const [selectedDate, setSelectedDate] = useState(new Date()); // Ngày được chọn
-  const [dateField, setDateField] = useState(''); // Trường ngày hiện đang chỉnh sửa
-
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || new Date();
-    setShowDatePicker(false); // Ẩn DatePicker sau khi chọn ngày
-    setSelectedDate(currentDate);
-
-    const formattedDate = currentDate.toLocaleDateString('en-GB'); // Định dạng ngày (dd/mm/yyyy)
-    handleInputChange(dateField, formattedDate); // Cập nhật trường ngày trong employeeData
-  };
-
-  const showDatePickerForField = (field) => {
-    setDateField(field);
-    setShowDatePicker(true); // Hiển thị DatePicker
-  };
-
+export default function AddMember({ navigation }) {
   const [employeeData, setEmployeeData] = useState({
-    employee_id: '',
-    name: '',
     cccd: '',
-    chucvu_id: '',
-    luongcoban_id: '',
-    ngaybatdau: '',
-    ngaysinh: '',
-    phongban_id: '',
+    employeeId: '',
+    name: '',
+    diachi: '',
     sdt: '',
-    trangthai: true, // Mặc định trạng thái là true
+    gioitinh: 'Nam',
+    phongbanId: '',
+    chucvuId: '',
+    luongcoban: '',
+    ngaysinh: '',
+    ngaybatdau: '',
+    matKhau: '',
   });
 
-  const handleInputChange = (field, value) => {
-    setEmployeeData(prev => ({ ...prev, [field]: value }));
+  const [profileImage, setProfileImage] = useState(null);
+  const [phongBans, setPhongBans] = useState([]);
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Quyền bị từ chối!', 'Vui lòng cấp quyền để chọn ảnh.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+    }
   };
 
-  const handleSubmit = () => {
-    writeEmployeeData(employeeData);
-    Alert.alert('Thông báo', 'Thêm nhân viên thành công!');
-    navigation.navigate('ListEmployee',  { refresh: true });
-    console.log("Employee added:", employeeData);
+  const updateField = (field, value) => {
+    setEmployeeData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const handleAddEmployee = async () => {
+    if (!profileImage) {
+      Alert.alert('Chưa chọn hình ảnh!', 'Vui lòng chọn hình ảnh cho nhân viên.');
+      return;
+    }
+    await addEmployee(employeeData, profileImage);
+    navigation.goBack(); // Quay lại màn hình trước
+  };
+
+  useEffect(() => {
+    const fetchPhongBan = async () => {
+      const data = await readPhongBan();
+      if (data) {
+        const phongBanArray = Object.values(data).map(p => ({
+          label: p.tenPhongBan,
+          value: p.maPhongBan,
+        }));
+        setPhongBans(phongBanArray);
+      }
+    };
+
+    fetchPhongBan();
+  }, []);
 
   return (
-
-    <><BackNav name={"Thêm nhân viên"} navigation={navigation} /><ScrollView>
-      <View style={styles.container}>
-        <TextInput
-          style={styles.input}
-          placeholder="Mã Nhân Viên"
-          value={employeeData.employeeId}
-          onChangeText={(value) => handleInputChange('employeeId', value)} />
-        <TextInput
-          style={styles.input}
-          placeholder="Tên"
-          value={employeeData.name}
-          onChangeText={(value) => handleInputChange('name', value)} />
-        <TextInput
-          style={styles.input}
-          placeholder="CCCD"
-          value={employeeData.cccd}
-          onChangeText={(value) => handleInputChange('cccd', value)} />
-        <TextInput
-          style={styles.input}
-          placeholder="Chức vụ ID"
-          value={employeeData.chucvu_id}
-          onChangeText={(value) => handleInputChange('chucvu_id', value)} />
-        <TextInput
-          style={styles.input}
-          placeholder="Lương cơ bản ID"
-          value={employeeData.luongcoban_id}
-          onChangeText={(value) => handleInputChange('luongcoban_id', value)} />
-        {/* Ngày bắt đầu */}
-        <TouchableOpacity onPress={() => showDatePickerForField('ngaybatdau')}>
-          <View style={styles.datePickerContainer}>
-            <Text style={styles.datePickerText}>
-              {employeeData.ngaybatdau ? employeeData.ngaybatdau : 'Chọn ngày bắt đầu'}
-            </Text>
+    <>
+      <BackNav
+        navigation={navigation}
+        name={"Add Member"}
+        btn={"Lưu"}
+        onEditPress={handleAddEmployee} // Gọi hàm thêm nhân viên
+      />
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={{ paddingHorizontal: 15 }}>
+          <View style={styles.avatarContainer}>
+            <TouchableOpacity onPress={pickImage}>
+              <Image
+                source={profileImage
+                  ? { uri: profileImage }
+                  : require("../../../assets/image/images.png")}
+                style={styles.avatar}
+              />
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
 
-        {/* Ngày sinh */}
-        <TouchableOpacity onPress={() => showDatePickerForField('ngaysinh')}>
-          <View style={styles.datePickerContainer}>
-            <Text style={styles.datePickerText}>
-              {employeeData.ngaysinh ? employeeData.ngaysinh : 'Chọn ngày sinh'}
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="Phòng ban ID"
-          value={employeeData.phongban_id}
-          onChangeText={(value) => handleInputChange('phongban_id', value)} />
-        <TextInput
-          style={styles.input}
-          placeholder="Số điện thoại"
-          value={employeeData.sdt}
-          onChangeText={(value) => handleInputChange('sdt', value)} />
-        <Button title="Thêm Nhân Viên" onPress={handleSubmit} />
-        {/* DatePicker component */}
-        {showDatePicker && (
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            display="default"
-            onChange={handleDateChange} />
-        )}
-      </View>
-    </ScrollView></>
+          <Text style={styles.label}>Mã số CCCD</Text>
+          <TextInput
+            style={styles.input}
+            value={employeeData.cccd}
+            onChangeText={(value) => updateField('cccd', value)}
+          />
+
+          <Text style={styles.label}>Mã Nhân Viên</Text>
+          <TextInput
+            style={styles.input}
+            value={employeeData.employeeId}
+            onChangeText={(value) => updateField('employeeId', value)}
+          />
+
+          <Text style={styles.label}>Họ Tên</Text>
+          <TextInput
+            style={styles.input}
+            value={employeeData.name}
+            onChangeText={(value) => updateField('name', value)}
+          />
+
+          <Text style={styles.label}>Địa chỉ</Text>
+          <TextInput
+            style={styles.input}
+            value={employeeData.diachi}
+            onChangeText={(value) => updateField('diachi', value)}
+          />
+
+          <Text style={styles.label}>Số điện thoại</Text>
+          <TextInput
+            style={styles.input}
+            value={employeeData.sdt}
+            onChangeText={(value) => updateField('sdt', value)}
+            keyboardType="phone-pad"
+          />
+
+          <Text style={styles.label}>Giới tính</Text>
+          <RNPickerSelect
+            onValueChange={(value) => updateField('gioitinh', value)}
+            items={[
+              { label: 'Nam', value: 'Nam' },
+              { label: 'Nữ', value: 'Nữ' },
+              { label: 'Khác', value: 'Khác' },
+            ]}
+            style={pickerSelectStyles}
+          />
+
+          <Text style={styles.label}>Phòng ban</Text>
+          <RNPickerSelect
+            onValueChange={(value) => updateField('phongbanId', value)}
+            value={employeeData.phongbanId}
+            items={phongBans}
+            style={pickerSelectStyles}
+          />
+
+          <Text style={styles.label}>Chức vụ</Text>
+          <RNPickerSelect
+            onValueChange={(value) => updateField('chucvuId', value)}
+            value={employeeData.chucvuId || 'NV'} // Giá trị mặc định là 'NV'
+            items={[
+              { label: 'Trưởng Phòng', value: 'TP' },
+              { label: 'Nhân viên', value: 'NV' },
+              { label: 'Thực tập sinh', value: 'TTS' },
+              { label: 'Phó Phòng', value: 'PP' },
+            ]}
+            style={pickerSelectStyles}
+          />
+
+          <Text style={styles.label}>Ngày sinh</Text>
+          <TextInput
+            style={styles.input}
+            value={employeeData.ngaysinh}
+            onChangeText={(value) => updateField('ngaysinh', value)}
+          />
+
+          <Text style={styles.label}>Ngày bắt đầu</Text>
+          <TextInput
+            style={styles.input}
+            value={employeeData.ngaybatdau}
+            onChangeText={(value) => updateField('ngaybatdau', value)}
+          />
+          <Text style={styles.label}>Mức lương cơ bản</Text>
+          <TextInput
+            style={styles.input}
+            value={employeeData.luongcoban}
+            onChangeText={(value) => updateField('luongcoban', value)}
+            keyboardType="numeric"
+          />
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#F2F2F7',
+    flex: 10,
+    backgroundColor: '#fff',
+    marginTop: -20,
+    padding: 16,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#e0e0e0',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
   },
   input: {
+    color: "blue",
     height: 40,
-    borderColor: '#ccc',
     borderWidth: 1,
-    marginBottom: 15,
-    padding: 10,
-  },
-  datePickerContainer: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    justifyContent: 'center',
+    borderColor: '#ddd',
+    borderRadius: 4,
     paddingHorizontal: 10,
-    marginBottom: 15,
-  },
-  datePickerText: {
-    color: '#333',
+    marginBottom: 16,
   },
 });
+
+// Styles cho RNPickerSelect
+const pickerSelectStyles = {
+  inputIOS: {
+    color: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+  inputAndroid: {
+    color: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+};
