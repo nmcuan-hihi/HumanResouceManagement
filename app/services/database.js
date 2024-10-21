@@ -8,9 +8,10 @@ import {
   remove,
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
-
+import { initializeApp } from "firebase/app";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 const database = getDatabase(app);
-
+const storage = getStorage(app); // Khởi tạo Firebase Storage
 export function writeUserData(employee) {
   const employeeId = employee.employeeId; // Sử dụng employeeId
 
@@ -22,7 +23,30 @@ export function writeUserData(employee) {
       console.error(`Error writing employee ${employeeId}:`, error);
     });
 }
+export async function addEmployee(employeeData, profileImage) {
+  try {
+    employeeData.matKhau = employeeData.employeeId
+    // Tạo tham chiếu tới nơi lưu trữ hình ảnh
+    const imageRef = storageRef(storage, `employee/${employeeData.employeeId}.jpg`);
 
+    // Tải lên hình ảnh
+    const response = await fetch(profileImage);
+    const blob = await response.blob();
+    await uploadBytes(imageRef, blob);
+
+    // Lấy URL hình ảnh
+    const imageUrl = await getDownloadURL(imageRef);
+
+    // Cập nhật imageUrl vào employeeData
+    const employee = { ...employeeData, imageUrl };
+
+    // Ghi dữ liệu nhân viên vào Realtime Database
+    await set(ref(database, `employees/${employeeData.employeeId}`), employee);
+    console.log(`Employee ${employeeData.employeeId} added successfully!`);
+  } catch (error) {
+    console.error("Error adding employee:", error);
+  }
+}
 // Hàm đọc danh sách nhân viên
 export async function readEmployees() {
   try {

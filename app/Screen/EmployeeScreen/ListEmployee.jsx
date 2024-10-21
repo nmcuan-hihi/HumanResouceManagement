@@ -7,6 +7,9 @@ import { readEmployees } from '../../services/database'; // Nhập hàm đọc d
 export default function EmployeeList({ navigation }) {
   const [employeeData, setEmployeeData] = useState([]); // State để lưu dữ liệu nhân viên
 
+  const handleAddEmployee = () => {
+    navigation.navigate("AddMember")
+  }
   useEffect(() => {
     // Gọi hàm để đọc dữ liệu nhân viên khi component được mount
     const fetchData = async () => {

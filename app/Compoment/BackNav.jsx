@@ -33,7 +33,7 @@ export default function BackNav({ navigation, name, soLuong, btn, onEditPress })
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffff',
   },
   header: {
     flexDirection: 'row',
