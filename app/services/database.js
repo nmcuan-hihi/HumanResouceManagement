@@ -1,4 +1,4 @@
-import { getDatabase, ref,set, get, child } from "firebase/database";
+import { getDatabase, ref,set, get, child, update, remove } from "firebase/database";
 import { app } from "../config/firebaseconfig";
 
 const database = getDatabase(app);
@@ -34,11 +34,35 @@ export async function readEmployees() {
   }
 }
 
+// Hàm cập nhật thông tin nhân viên
+export const updateEmployee = async (employee_id, employeeData) => {
+  try {
+    const employeeRef = ref(database, `employees/${employee_id}`); // Đường dẫn đến nhân viên cần cập nhật
+    await update(employeeRef, employeeData); // Cập nhật dữ liệu nhân viên
+    console.log(`Employee ${employee_id} updated successfully!`);
+  } catch (error) {
+    console.error(`Error updating employee ${employee_id}:`, error);
+    throw error; // Ném lỗi để xử lý ở component
+  }
+};
+
+// Hàm xóa nhân viên
+export const deleteEmployee = async (employee_id) => {
+  try {
+    const employeeRef = ref(database, `employees/${employee_id}`); // Đường dẫn đến nhân viên cần xóa
+    await remove(employeeRef); // Xóa nhân viên khỏi Firebase
+    console.log(`Employee ${employee_id} deleted successfully!`);
+  } catch (error) {
+    console.error(`Error deleting employee ${employee_id}:`, error);
+    throw error; // Ném lỗi để xử lý ở component
+  }
+};
+
 export function writeEmployeeData(employee) {
   console.log("Employee data:", employee); // In ra dữ liệu nhân viên để kiểm tra
 
   // Kiểm tra từng thuộc tính trong đối tượng employee
-  const requiredFields = ['employeeId', 'cccd', 'chucvuId', 'luongcobanId', 'name', 'ngaybatdau', 'ngaysinh', 'phongbanId', 'sdt', 'trangthai'];
+  const requiredFields = ['employee_id', 'cccd', 'chucvu_id', 'luongcoban_id', 'name', 'ngaybatdau', 'ngaysinh', 'phongban_id', 'sdt', 'trangthai'];
 
   for (const field of requiredFields) {
     if (employee[field] === undefined) {

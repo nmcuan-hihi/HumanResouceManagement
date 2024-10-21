@@ -3,11 +3,15 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } fr
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Dashboard from '../../Compoment/Dashboard';
 
-export default function ChammCong() {
+export default function ChammCong({navigation}) {
+  const handlePress = () => {
+    navigation.navigate('ChamCongNV'); // Điều hướng đến màn hình chấm công
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <Dashboard/>
+        <Dashboard />
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
@@ -48,11 +52,14 @@ export default function ChammCong() {
             <Text style={styles.statValue}>0</Text>
             <Text style={styles.statLabel}>Lương</Text>
           </View>
-          <View style={styles.statItem}>
+
+          {/* Bọc toàn bộ View bên trong TouchableOpacity */}
+          <TouchableOpacity onPress={handlePress} style={styles.statItem}>
             <Icon name="fingerprint" size={24} color="#9C27B0" />
             <Text style={styles.statValue}>0</Text>
             <Text style={styles.statLabel}>Chấm công nhân viên</Text>
-          </View>
+          </TouchableOpacity>
+
           <View style={styles.statItem}>
             <Icon name="star" size={24} color="#FF9800" />
             <Text style={styles.statValue}>0</Text>
@@ -69,63 +76,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     margin: 10,
-  },
-  header: {
-    padding: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: 'gray',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 16,
-    marginTop: 16,
-  },
-  overviewContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  overviewCard: {
-    width: '48%',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  overviewNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  overviewLabel: {
-    fontSize: 14,
-    color: 'white',
-  },
-  overviewIcon: {
-    position: 'absolute',
-    right: 8,
-    top: 8,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3',
-    padding: 16,
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  actionButtonText: {
-    color: 'white',
-    marginLeft: 8,
-    fontSize: 16,
   },
   summaryCard: {
     backgroundColor: '#FFF9C4',
@@ -175,4 +125,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

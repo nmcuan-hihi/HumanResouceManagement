@@ -1,31 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import { readEmployees, updateEmployee, deleteEmployee } from '../../services/database'; // Nhập hàm đọc, cập nhật và xóa dữ liệu
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { readEmployees, updateEmployee, deleteEmployee } from '../../services/database';
 
 export default function EmployeeEditScreen({ navigation, route }) {
-  const { manv } = route.params; // Nhận mã nhân viên từ params
-  const [employeeData, setEmployeeData] = useState(null); // State để lưu dữ liệu nhân viên
+  const { manv } = route.params;
+  const [employeeData, setEmployeeData] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateField, setDateField] = useState('');
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
-      const data = await readEmployees(); // Đọc dữ liệu từ Firebase
-      const employee = data[manv]; // Tìm nhân viên dựa trên mã nhân viên
+      const data = await readEmployees();
+      const employee = data[manv];
       if (employee) {
-        setEmployeeData(employee); // Cập nhật state với dữ liệu nhân viên
+        setEmployeeData(employee);
       }
     };
 
-    fetchEmployeeData(); // Gọi hàm để đọc dữ liệu nhân viên
-  }, [manv]); // Chạy khi manv thay đổi
+    fetchEmployeeData();
+  }, [manv]);
 
   const updateField = (field, value) => {
     setEmployeeData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || employeeData[dateField];
+    setShowDatePicker(false);
+    if (currentDate) {
+      updateField(dateField, currentDate.toISOString().split('T')[0]); // Cập nhật trường ngày
+    }
+  };
+
+  const showDatePickerModal = (field) => {
+    setDateField(field);
+    setShowDatePicker(true);
+  };
+
   const handleUpdate = async () => {
     try {
-      await updateEmployee(manv, employeeData); // Cập nhật dữ liệu nhân viên vào Firebase
-      Alert.alert("Thông báo", "Cập nhật thành công!", [{ text: "OK", onPress: () => navigation.goBack() }]);
+      await updateEmployee(manv, employeeData);
+      Alert.alert("Thông báo", "Cập nhật thành công!", [
+        { text: "OK", onPress: () => navigation.goBack() },
+      ]);
     } catch (error) {
       console.error("Error updating employee:", error);
       Alert.alert("Thông báo", "Cập nhật không thành công!");
@@ -34,22 +52,23 @@ export default function EmployeeEditScreen({ navigation, route }) {
 
   const handleDelete = async () => {
     try {
-      await deleteEmployee(manv); // Xóa nhân viên khỏi Firebase
-      Alert.alert("Thông báo", "Xóa thành công!", [{ text: "OK", onPress: () => navigation.goBack() }]);
+      await deleteEmployee(manv);
+      Alert.alert("Thông báo", "Xóa thành công!", [
+        { text: "OK", onPress: () => navigation.goBack() },
+      ]);
     } catch (error) {
       console.error("Error deleting employee:", error);
       Alert.alert("Thông báo", "Xóa không thành công!");
     }
   };
 
-  // Nếu dữ liệu nhân viên chưa được tải, hiển thị loading hoặc gì đó tương tự
   if (!employeeData) {
     return <Text>Loading...</Text>;
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.avatarContainer}>
           <Image
             source={employeeData.imageURL ? { uri: employeeData.imageURL } : require("../../../assets/image/images.png")}
@@ -57,17 +76,26 @@ export default function EmployeeEditScreen({ navigation, route }) {
           />
         </View>
 
-        {/* Sử dụng InputField cho các trường dữ liệu */}
+        {/* Các trường dữ liệu khác */}
         <InputField label="Chọn phòng" value={employeeData.room} onChangeText={(value) => updateField('room', value)} isDropdown />
         <InputField label="Chức vụ" value={employeeData.position} onChangeText={(value) => updateField('position', value)} isDropdown />
-        <InputField label="Mật Khẩu" value={employeeData.password} onChangeText={(value) => updateField('password', value)} secureTextEntry />
-        <InputField label="Mã Nhân Viên" value={employeeData.employeeId} onChangeText={(value) => updateField('employeeId', value)} />
+        <InputField label="Mã Nhân Viên" value={employeeData.employee_id} onChangeText={(value) => updateField('employeeId', value)} />
         <InputField label="Họ Tên" value={employeeData.name} onChangeText={(value) => updateField('name', value)} />
-        <InputField label="Địa chỉ" value={employeeData.address} onChangeText={(value) => updateField('address', value)} />
-        <InputField label="Ngày sinh" value={employeeData.ngaysinh} onChangeText={(value) => updateField('birthDate', value)} />
+
+        {/* Trường Ngày sinh */}
+        <TouchableOpacity onPress={() => showDatePickerModal('ngaysinh')} style={styles.datePicker}>
+          <Text style={styles.label}>Ngày sinh</Text>
+          <Text>{employeeData.ngaysinh || "Chọn ngày"}</Text>
+        </TouchableOpacity>
+
+        {/* Trường Ngày vào */}
+        <TouchableOpacity onPress={() => showDatePickerModal('ngaybatdau')} style={styles.datePicker}>
+          <Text style={styles.label}>Ngày vào</Text>
+          <Text>{employeeData.ngaybatdau || "Chọn ngày"}</Text>
+        </TouchableOpacity>
+
         <InputField label="Số điện thoại" value={employeeData.sdt} onChangeText={(value) => updateField('phone', value)} keyboardType="phone-pad" />
         <InputField label="Lương cơ bản" value={employeeData.luongcoban_id} onChangeText={(value) => updateField('salary', value)} keyboardType="numeric" />
-        <InputField label="Ngày vào" value={employeeData.ngaybatdau} onChangeText={(value) => updateField('joinDate', value)} />
 
         <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
           <Text style={styles.updateButtonText}>Cập Nhật</Text>
@@ -76,32 +104,29 @@ export default function EmployeeEditScreen({ navigation, route }) {
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
           <Text style={styles.deleteButtonText}>Xóa</Text>
         </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={new Date(employeeData[dateField])}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const InputField = ({ label, value, onChangeText, isDropdown, secureTextEntry, keyboardType }) => (
+const InputField = ({ label, value, onChangeText, isDropdown }) => (
   <View style={styles.inputContainer}>
     <Text style={styles.label}>{label}</Text>
-    {isDropdown ? (
-      // Nếu là dropdown, sử dụng Picker (cần nhập 'react-native-picker-select')
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={`Chọn ${label}`}
-      />
-    ) : (
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
-        placeholder={`Nhập ${label}`}
-      />
-    )}
+    <TextInput
+      style={styles.input}
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={isDropdown ? `Chọn ${label}` : `Nhập ${label}`}
+    />
   </View>
 );
 
@@ -110,6 +135,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F2F2F7',
     margin: 10,
+  },
+  scrollView: {
+    padding: 10,
+    paddingBottom: 20,
   },
   avatarContainer: {
     alignItems: 'center',
@@ -134,6 +163,16 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingLeft: 10,
     backgroundColor: 'white',
+    justifyContent: 'center',
+  },
+  datePicker: {
+    marginVertical: 10,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    backgroundColor: 'white',
+    justifyContent: 'center',
   },
   updateButton: {
     backgroundColor: '#4CAF50',

@@ -59,6 +59,7 @@ const EmployeeScreen = ({ navigation }) => {
               color="#9C27B0"
               value="0"
               label="Chấm công nhân viên"
+              onPress={() => navigateTo('ChamCongNV')}
             />
             <StatItem
               icon="tasks"
