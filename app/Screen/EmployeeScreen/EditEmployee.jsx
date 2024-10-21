@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { readEmployees, updateEmployee, deleteEmployee, readPhongBan } from '../../services/database';
-import RNPickerSelect from 'react-native-picker-select'; // Thêm thư viện chọn
+import RNPickerSelect from 'react-native-picker-select';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function EmployeeEditScreen({ navigation, route }) {
   const { manv } = route.params;
@@ -49,9 +50,35 @@ export default function EmployeeEditScreen({ navigation, route }) {
     setDateField(field);
     setShowDatePicker(true);
   };
+  const [profileImage, setProfileImage] = useState(null);
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Quyền bị từ chối!', 'Vui lòng cấp quyền để chọn ảnh.');
+      return;
+    }
+  
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+  
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri); // Lưu đường dẫn hình ảnh
+      updateField('profileImage', result.assets[0].uri); // Cập nhật đường dẫn vào employeeData
+    }
+  };
+  
 
   const handleUpdate = async () => {
     try {
+      // Cập nhật hình ảnh vào employeeData
+      if (profileImage) {
+        employeeData.profileImage = profileImage;
+      }
+  
       await updateEmployee(manv, employeeData);
       Alert.alert("Thông báo", "Cập nhật thành công!", [
         { text: "OK", onPress: () => navigation.goBack() },
@@ -61,6 +88,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
       Alert.alert("Thông báo", "Cập nhật không thành công!");
     }
   };
+  
 
   const handleDelete = async () => {
     try {
@@ -82,10 +110,15 @@ export default function EmployeeEditScreen({ navigation, route }) {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.avatarContainer}>
-          <Image
-            source={employeeData.imageURL ? { uri: employeeData.imageURL } : require("../../../assets/image/images.png")}
-            style={styles.avatar}
-          />
+          
+        <TouchableOpacity onPress={pickImage}>
+              <Image
+                source={profileImage
+                  ? { uri: profileImage }
+                  : require("../../../assets/image/images.png")}
+                style={styles.avatar}
+              />
+            </TouchableOpacity>
         </View>
 
         <InputField label="Chọn phòng ban" value={employeeData.phongbanId} onChangeText={(value) => updateField('phongbanId', value)} isDropdown items={phongBans} />
@@ -172,6 +205,16 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
   },
+  imagePickerButton: {
+    marginTop: 10,
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+  },
+  imagePickerButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
   inputContainer: {
     marginVertical: 10,
   },
@@ -218,24 +261,27 @@ const styles = StyleSheet.create({
   },
 });
 
-// Styles cho RNPickerSelect
-const pickerSelectStyles = {
+const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
-    color: 'black',
+    fontSize: 16,
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    marginBottom: 16,
+    borderColor: 'gray',
+    borderRadius: 5,
+    backgroundColor: 'white',
+    color: 'black',
+    marginTop: 5,
   },
   inputAndroid: {
-    color: 'black',
-    paddingVertical: 12,
+    fontSize: 16,
+    paddingVertical: 8,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    marginBottom: 16,
+    borderColor: 'gray',
+    borderRadius: 5,
+    backgroundColor: 'white',
+    color: 'black',
+    marginTop: 5,
   },
-};
+});
