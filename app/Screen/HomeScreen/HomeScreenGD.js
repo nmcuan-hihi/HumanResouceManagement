@@ -53,6 +53,10 @@ export default function HomeScreenGD({ navigation }) { // Nhận navigation từ
             <Icon name="book" size={24} color="#FF9966" />
             <Text style={styles.statValue}>Bằng cấp</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.statItem}  onPress={() => navigation.navigate('Skill')}>
+            <Icon name="code" size={24} color="#FF9966" />
+            <Text style={styles.statValue}>Kỹ năng</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>

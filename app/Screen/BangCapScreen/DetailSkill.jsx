@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,38 +8,46 @@ import {
   ScrollView,
   TextInput,
   Modal,
-  Alert,
 } from "react-native";
 import BackNav from "../../Compoment/BackNav";
-import HeaderNav from "../../Compoment/HeaderNav";
 import Feather from 'react-native-vector-icons/Feather';
-
+import {
+  readSkill,
+  editSkill,
+  removeSkill,
+} from  "../../services/database";
 
 export default function DetailSkill({ navigation, route }) {
-  // const { maBC, tenBC } = route.params.item;
-maSK = "SK001 ";
-tenSK = "Java";
+  const { maSK, tenSK } = route.params; // Lấy giá trị từ params
   const [isEditing, setIsEditing] = useState(false);
-  const [currentTenSK, setCurrentTenBC] = useState(tenSK);
+  const [currentTenSK, setCurrentTenSK] = useState(tenSK);
   const [editedTenSK, setEditedTenSK] = useState(tenSK);
-  const [visibleModal, setVisibleModal] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false); // State to show confirmation modal for delete
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Handle save
-  const handleSave = () => {
-    setCurrentTenBC(editedTenSK);
+  useEffect(() => {
+    const fetchSkill = async () => {
+      const skillData = await readSkill(maSK);
+      if (skillData) {
+        setCurrentTenSK(skillData.tensk);
+        setEditedTenSK(skillData.tensk);
+      }
+    };
+    fetchSkill();
+  }, [maSK]);
+
+  const handleSave = async () => {
+    await editSkill(maSK, { tensk: editedTenSK });
+    setCurrentTenSK(editedTenSK);
     setIsEditing(false);
   };
 
-  // Handle delete confirmation
   const handleDelete = () => {
     setConfirmDelete(true);
   };
 
-  const confirmDeleteYes = () => {
-    // Logic to delete the item
-    setConfirmDelete(false);
-    // Possibly navigate back or reset form
+  const confirmDeleteYes = async () => {
+    await removeSkill(maSK);
+    navigation.goBack(); // Quay lại sau khi xóa
   };
 
   const confirmDeleteNo = () => {
@@ -50,65 +57,58 @@ tenSK = "Java";
   return (
     <>
       <View style={styles.header}>
-        {/* Sử dụng BackNav với onEditPress */}
-        <BackNav
-          navigation={navigation}
-          name={"Chi tiết kỹ năng"}
-          
-        />
+        <BackNav navigation={navigation} name={"Chi tiết kỹ năng"} />
       </View>
 
       <SafeAreaView style={styles.container}>
-      <ScrollView>
-  {/* Thông tin bằng cấp */}
-  <View style={styles.infoSection}>
-    <Text style={styles.sectionTitle}>Mã skill</Text>
-    <Text style={styles.sectionTitle1}>{maSK}</Text>
-  </View>
+        <ScrollView>
+          {/* Thông tin kỹ năng */}
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Mã kỹ năng</Text>
+            <Text style={styles.sectionTitle1}>{maSK}</Text>
+          </View>
 
-  <View style={styles.infoSection}>
-    <Text style={styles.sectionTitle}>Tên skill</Text>
-    {isEditing ? (
-      <TextInput
-        style={styles.TextInput}
-        placeholder="Tên skill"
-        value={editedTenSK}
-        onChangeText={(text) => setEditedTenSK(text)}
-      />
-    ) : (
-      <View style={styles.inlineEditContainer}>
-        <Text style={styles.sectionTitle22}>{currentTenSK}</Text>
-        <TouchableOpacity
-          onPress={() => setIsEditing(true)}
-          style={styles.editBtn}
-        >
-          <Feather name="edit-2" size={20} color="#FFFFFF" style={styles.fea} />
-        </TouchableOpacity>
-      </View>
-    )}
-  </View>
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Tên kỹ năng</Text>
+            {isEditing ? (
+              <TextInput
+                style={styles.TextInput}
+                placeholder="Tên kỹ năng"
+                value={editedTenSK}
+                onChangeText={(text) => setEditedTenSK(text)}
+              />
+            ) : (
+              <View style={styles.inlineEditContainer}>
+                <Text style={styles.sectionTitle22}>{currentTenSK}</Text>
+                <TouchableOpacity
+                  onPress={() => setIsEditing(true)}
+                  style={styles.editBtn}
+                >
+                  <Feather name="edit-2" size={20} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
 
-  {/* Ensure some spacing between info section and buttons */}
-  <View style={styles.buttonSection}>
-    {isEditing ? (
-      <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
-        <Text style={styles.nameBtn}>Lưu</Text>
-      </TouchableOpacity>
-    ) : (
-      <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
-        <Text style={styles.nameBtn}>Xóa</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-</ScrollView>
+          <View style={styles.buttonSection}>
+            {isEditing ? (
+              <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
+                <Text style={styles.nameBtn}>Lưu</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
+                <Text style={styles.nameBtn}>Xóa</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
 
-
-        {/* Delete Confirmation Modal */}
+        {/* Modal xác nhận xóa */}
         <Modal visible={confirmDelete} transparent={true} animationType="slide">
           <View style={styles.modalCtn}>
             <View style={styles.bodyModal}>
               <Text style={styles.confirmText}>
-                Bạn có chắc chắn muốn xóa skill này không?
+                Bạn có chắc chắn muốn xóa kỹ năng này không?
               </Text>
               <View style={styles.modalBtnContainer}>
                 <TouchableOpacity style={styles.modalBtn} onPress={confirmDeleteYes}>
@@ -127,7 +127,6 @@ tenSK = "Java";
 }
 
 const styles = StyleSheet.create({
-  
   container: {
     flex: 1,
     backgroundColor: "#F2F2F7",
@@ -168,17 +167,10 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: "#FFA500",
     borderRadius: 5,
-    marginBottom: 30,
   },
-  editText: {
-    color: "#FFFFFF",
-    fontSize: 20,
-    marginBottom: 20,
-  },
-  // Updated the button section layout
   buttonSection: {
-    marginTop: 20,  // Adds space between the info section and buttons
-    alignItems: "center",  // Centers the buttons horizontally
+    marginTop: 20,
+    alignItems: "center",
   },
   btnSave: {
     width: "90%",
@@ -195,43 +187,12 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,  // Added margin to separate from other content
+    marginTop: 20,
   },
   nameBtn: {
     fontSize: 22,
     color: "#FFFFFF",
   },
-
-  // Button styles
-  bodyBtn: {
-    width: "100%",
-    alignItems: "center",
-    position: "absolute",
-    bottom: 20,
-  },
-  btnSave: {
-    width: "90%",
-    height: 50,
-    borderRadius: 20,
-    backgroundColor: "#FFA500",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  btnXoa: {
-    width: "90%",
-    height: 50,
-    borderRadius: 20,
-    backgroundColor: "red",
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  nameBtn: {
-    fontSize: 22,
-    color: "#FFFFFF",
-  },
-
-  // Modal styles
   modalCtn: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     flex: 1,

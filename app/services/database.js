@@ -22,6 +22,82 @@ export function writeUserData(employee) {
       console.error(`Error writing employee ${employeeId}:`, error);
     });
 }
+export const readAllSkill = async () => {
+  try {
+    const snapshot = await get(ref(database, 'skills')); // Đọc dữ liệu từ node 'skills'
+    if (snapshot.exists()) {
+      return snapshot.val(); // Trả về dữ liệu nếu tồn tại
+    } else {
+      console.log('No data available');
+      return null; // Không có dữ liệu
+    }
+  } catch (error) {
+    console.error('Error reading skill data:', error);
+    return null;
+  }
+};
+
+// thêm skill
+
+export function writeSkill(skill) {
+  const { mask, tensk } = skill;
+
+  // Construct the data object to be written to Firebase
+  const skillData = {
+    mask: mask,
+    tensk: tensk
+  };
+
+  // Set the data at the specified location in Firebase database
+  set(ref(database, `skills/${mask}`), skillData)
+    .then(() => {
+      console.log(`Skill ${tensk} with mask ${mask} written successfully!`);
+    })
+    .catch((error) => {
+      console.error(`Error writing skill ${mask}:`, error);
+    });
+}
+
+//đọc skill
+export async function readSkill(mask) {
+  try {
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, `skills/${mask}`));
+
+    if (snapshot.exists()) {
+      const skillData = snapshot.val();
+      console.log("Skill data:", skillData);
+      return skillData; // Trả về dữ liệu skill cụ thể
+    } else {
+      console.log("No data available for this skill.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error reading skill:", error);
+  }
+}
+
+///edit skill
+export async function editSkill(mask, updatedSkill) {
+  try {
+    const skillRef = ref(database, `skills/${mask}`);
+    await update(skillRef, updatedSkill);
+    console.log('Skill updated successfully!');
+  } catch (error) {
+    console.error('Error updating skill:', error);
+  }
+}
+
+//xoa skill
+export async function removeSkill(mask) {
+  try {
+    const skillRef = ref(database, `skills/${mask}`);
+    await remove(skillRef);
+    console.log('Skill removed successfully!');
+  } catch (error) {
+    console.error('Error removing skill:', error);
+  }
+}
 
 // Hàm đọc danh sách nhân viên
 export async function readEmployees() {
