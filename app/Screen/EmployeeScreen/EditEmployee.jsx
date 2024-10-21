@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { readEmployees, updateEmployee, deleteEmployee } from '../../services/database';
+import { readEmployees, updateEmployee, deleteEmployee, readPhongBan } from '../../services/database';
+import RNPickerSelect from 'react-native-picker-select'; // Thêm thư viện chọn
 
 export default function EmployeeEditScreen({ navigation, route }) {
   const { manv } = route.params;
   const [employeeData, setEmployeeData] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateField, setDateField] = useState('');
+  const [phongBans, setPhongBans] = useState([]);
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
@@ -18,7 +20,17 @@ export default function EmployeeEditScreen({ navigation, route }) {
       }
     };
 
+    const fetchPhongBan = async () => {
+      const data = await readPhongBan();
+      const phongBanArray = Object.values(data).map(p => ({
+        label: p.tenPhongBan,
+        value: p.maPhongBan,
+      }));
+      setPhongBans(phongBanArray);
+    };
+
     fetchEmployeeData();
+    fetchPhongBan();
   }, [manv]);
 
   const updateField = (field, value) => {
@@ -29,7 +41,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
     const currentDate = selectedDate || employeeData[dateField];
     setShowDatePicker(false);
     if (currentDate) {
-      updateField(dateField, currentDate.toISOString().split('T')[0]); // Cập nhật trường ngày
+      updateField(dateField, currentDate.toISOString().split('T')[0]);
     }
   };
 
@@ -76,26 +88,28 @@ export default function EmployeeEditScreen({ navigation, route }) {
           />
         </View>
 
-        {/* Các trường dữ liệu khác */}
-        <InputField label="Chọn phòng" value={employeeData.room} onChangeText={(value) => updateField('room', value)} isDropdown />
-        <InputField label="Chức vụ" value={employeeData.position} onChangeText={(value) => updateField('position', value)} isDropdown />
-        <InputField label="Mã Nhân Viên" value={employeeData.employee_id} onChangeText={(value) => updateField('employeeId', value)} />
+        <InputField label="Chọn phòng ban" value={employeeData.phongbanId} onChangeText={(value) => updateField('phongbanId', value)} isDropdown items={phongBans} />
+        <InputField label="Chức vụ" value={employeeData.chucvuId} onChangeText={(value) => updateField('chucvuId', value)} isDropdown items={[
+          { label: 'Trưởng Phòng', value: 'TP' },
+          { label: 'Nhân viên', value: 'NV' },
+          { label: 'Thực tập sinh', value: 'TTS' },
+          { label: 'Phó Phòng', value: 'PP' },
+        ]} />
+        <InputField label="Mã Nhân Viên" value={employeeData.employeeId} onChangeText={(value) => updateField('employeeId', value)} />
         <InputField label="Họ Tên" value={employeeData.name} onChangeText={(value) => updateField('name', value)} />
 
-        {/* Trường Ngày sinh */}
         <TouchableOpacity onPress={() => showDatePickerModal('ngaysinh')} style={styles.datePicker}>
           <Text style={styles.label}>Ngày sinh</Text>
           <Text>{employeeData.ngaysinh || "Chọn ngày"}</Text>
         </TouchableOpacity>
 
-        {/* Trường Ngày vào */}
         <TouchableOpacity onPress={() => showDatePickerModal('ngaybatdau')} style={styles.datePicker}>
           <Text style={styles.label}>Ngày vào</Text>
           <Text>{employeeData.ngaybatdau || "Chọn ngày"}</Text>
         </TouchableOpacity>
 
-        <InputField label="Số điện thoại" value={employeeData.sdt} onChangeText={(value) => updateField('phone', value)} keyboardType="phone-pad" />
-        <InputField label="Lương cơ bản" value={employeeData.luongcoban_id} onChangeText={(value) => updateField('salary', value)} keyboardType="numeric" />
+        <InputField label="Số điện thoại" value={employeeData.sdt} onChangeText={(value) => updateField('sdt', value)} keyboardType="phone-pad" />
+        <InputField label="Lương cơ bản" value={employeeData.luongcoban} onChangeText={(value) => updateField('luongcoban', value)} keyboardType="numeric" />
 
         <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
           <Text style={styles.updateButtonText}>Cập Nhật</Text>
@@ -118,15 +132,24 @@ export default function EmployeeEditScreen({ navigation, route }) {
   );
 }
 
-const InputField = ({ label, value, onChangeText, isDropdown }) => (
+const InputField = ({ label, value, onChangeText, isDropdown, items }) => (
   <View style={styles.inputContainer}>
     <Text style={styles.label}>{label}</Text>
-    <TextInput
-      style={styles.input}
-      value={value}
-      onChangeText={onChangeText}
-      placeholder={isDropdown ? `Chọn ${label}` : `Nhập ${label}`}
-    />
+    {isDropdown ? (
+      <RNPickerSelect
+        onValueChange={onChangeText}
+        value={value}
+        items={items}
+        style={pickerSelectStyles}
+      />
+    ) : (
+      <TextInput
+        style={styles.input}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={`Nhập ${label}`}
+      />
+    )}
   </View>
 );
 
@@ -163,7 +186,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingLeft: 10,
     backgroundColor: 'white',
-    justifyContent: 'center',
   },
   datePicker: {
     marginVertical: 10,
@@ -172,7 +194,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     backgroundColor: 'white',
-    justifyContent: 'center',
   },
   updateButton: {
     backgroundColor: '#4CAF50',
@@ -196,3 +217,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+// Styles cho RNPickerSelect
+const pickerSelectStyles = {
+  inputIOS: {
+    color: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+  inputAndroid: {
+    color: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+};
