@@ -1,19 +1,19 @@
 class ChucVu {
-    constructor(id, loaiChucVu, hsChucVu) {
-        this.id = id; 
-        this.loaiChucVu = loaiChucVu;
-        this.hsChucVu = hsChucVu;
+    constructor(chucvu_id, loaichucvu, hschucvu) {
+        this.chucvu_id = chucvu_id; 
+        this.loaichucvu = loaichucvu;
+        this.hschucvu = hschucvu;
     }
 
     getChucVuDetails() {
         return {
             id: this.id,
-            loaiChucVu: this.loaiChucVu,
-            hsChucVu: this.hsChucVu
+            loaichucvu: this.loaichucvu,
+            hschucvu: this.hschucvu
         };
     }
 
     toString() {
-        return `Chức vụ: ${this.loaiChucVu} (ID: ${this.id})`;
+        return `Chức vụ: ${this.loaichucvu} (ID: ${this.chucvu_id})`;
     }
 }

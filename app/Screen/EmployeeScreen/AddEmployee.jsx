@@ -6,7 +6,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import BackNav from '../../Compoment/BackNav';
 import RNPickerSelect from 'react-native-picker-select';
-import { addEmployee, readPhongBan } from '../../services/database'; // Import hàm thêm nhân viên và đọc phòng ban
+import { addEmployee, readChucVu, readPhongBan } from '../../services/database'; // Import hàm thêm nhân viên và đọc phòng ban
 
 export default function AddMember({ navigation }) {
   const [employeeData, setEmployeeData] = useState({
@@ -26,6 +26,7 @@ export default function AddMember({ navigation }) {
 
   const [profileImage, setProfileImage] = useState(null);
   const [phongBans, setPhongBans] = useState([]);
+  const [chucVus, setChucVus] = useState([]);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -55,23 +56,51 @@ export default function AddMember({ navigation }) {
       Alert.alert('Chưa chọn hình ảnh!', 'Vui lòng chọn hình ảnh cho nhân viên.');
       return;
     }
-    await addEmployee(employeeData, profileImage);
-    navigation.goBack(); // Quay lại màn hình trước
+
+    try {
+      await addEmployee(employeeData, profileImage);
+      Alert.alert('Thành công!', 'Nhân viên đã được thêm thành công.');
+      navigation.goBack(); // Quay lại màn hình trước
+    } catch (error) {
+      Alert.alert('Lỗi!', 'Có lỗi xảy ra khi thêm nhân viên.');
+      console.error(error);
+    }
   };
 
   useEffect(() => {
     const fetchPhongBan = async () => {
-      const data = await readPhongBan();
-      if (data) {
-        const phongBanArray = Object.values(data).map(p => ({
-          label: p.tenPhongBan,
-          value: p.maPhongBan,
-        }));
-        setPhongBans(phongBanArray);
+      try {
+        const data = await readPhongBan();
+        if (data) {
+          const phongBanArray = Object.values(data).map(p => ({
+            label: p.tenPhongBan,
+            value: p.maPhongBan,
+          }));
+          setPhongBans(phongBanArray);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy phòng ban:", error);
+      }
+    };
+
+    const fetchChucVu = async () => {
+      try {
+        const data = await readChucVu();
+        if (data) {
+          const chucVuArr = Object.values(data).map(p => ({
+            label: p.loaichucvu,
+            value: p.chucvu_id,
+          }));
+          setChucVus(chucVuArr);
+          console.log(chucVus)
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy chức vụ:", error);
       }
     };
 
     fetchPhongBan();
+    fetchChucVu();
   }, []);
 
   return (
@@ -152,14 +181,9 @@ export default function AddMember({ navigation }) {
 
           <Text style={styles.label}>Chức vụ</Text>
           <RNPickerSelect
-            onValueChange={(value) => updateField('chucvuId', value)}
-            value={employeeData.chucvuId || 'NV'} // Giá trị mặc định là 'NV'
-            items={[
-              { label: 'Trưởng Phòng', value: 'TP' },
-              { label: 'Nhân viên', value: 'NV' },
-              { label: 'Thực tập sinh', value: 'TTS' },
-              { label: 'Phó Phòng', value: 'PP' },
-            ]}
+            onValueChange={(value) => updateField('chucvuId', value)} 
+            value={employeeData.chucvuId}
+            items={chucVus}
             style={pickerSelectStyles}
           />
 
@@ -176,6 +200,7 @@ export default function AddMember({ navigation }) {
             value={employeeData.ngaybatdau}
             onChangeText={(value) => updateField('ngaybatdau', value)}
           />
+
           <Text style={styles.label}>Mức lương cơ bản</Text>
           <TextInput
             style={styles.input}

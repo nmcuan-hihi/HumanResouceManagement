@@ -55,7 +55,7 @@ export async function readEmployees() {
 
     if (snapshot.exists()) {
       const employees = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
-      console.log("Employees data:", employees);
+     
       return employees; // Trả về danh sách nhân viên
     } else {
       console.log("No data available");
@@ -149,8 +149,26 @@ export async function readPhongBan() {
 
     if (snapshot.exists()) {
       const phongBans = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
-      console.log("Phong ban data:", phongBans);
+     
       return phongBans; // Trả về danh sách phòng ban
+    } else {
+      console.log("No data available");
+      return null; // Không có dữ liệu
+    }
+  } catch (error) {
+    console.error("Error reading phong ban:", error);
+  }
+}
+
+export async function readChucVu() {
+  try {
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, "chucvu"));
+
+    if (snapshot.exists()) {
+      const ChucVus = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
+      console.log("Chuc Vu data:", ChucVus);
+      return ChucVus; // Trả về danh sách phòng ban
     } else {
       console.log("No data available");
       return null; // Không có dữ liệu

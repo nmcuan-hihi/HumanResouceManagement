@@ -6,7 +6,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import BackNav from '../../Compoment/BackNav';
 import RNPickerSelect from 'react-native-picker-select';
-import { addEmployee, readPhongBan } from '../../services/database'; // Import hàm thêm nhân viên và đọc phòng ban
+import { addEmployee, readPhongBan, readChucVu } from '../../services/database'; // Import hàm thêm nhân viên và đọc phòng ban
 
 export default function AddMember({ navigation }) {
   const [employeeData, setEmployeeData] = useState({
@@ -26,6 +26,7 @@ export default function AddMember({ navigation }) {
 
   const [profileImage, setProfileImage] = useState(null);
   const [phongBans, setPhongBans] = useState([]);
+  const [chucVus, setchucVus] = useState([]);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -70,8 +71,19 @@ export default function AddMember({ navigation }) {
         setPhongBans(phongBanArray);
       }
     };
+    const fetchChucVu = async () => {
+      const data = await readChucVu();
+      if (data) {
+        const chucVuArr = Object.values(data).map(p => ({
+          label: p.loaichucvu,
+          value: p.chucvu_id,
+        }));
+        setchucVus(chucVuArr);
+      }
+    };
 
     fetchPhongBan();
+    fetchChucVu();
   }, []);
 
   return (
@@ -153,13 +165,8 @@ export default function AddMember({ navigation }) {
           <Text style={styles.label}>Chức vụ</Text>
           <RNPickerSelect
             onValueChange={(value) => updateField('chucvuId', value)}
-            value={employeeData.chucvuId || 'NV'} // Giá trị mặc định là 'NV'
-            items={[
-              { label: 'Trưởng Phòng', value: 'TP' },
-              { label: 'Nhân viên', value: 'NV' },
-              { label: 'Thực tập sinh', value: 'TTS' },
-              { label: 'Phó Phòng', value: 'PP' },
-            ]}
+            value={employeeData.chucvuId}
+            items={chucVus}
             style={pickerSelectStyles}
           />
 
