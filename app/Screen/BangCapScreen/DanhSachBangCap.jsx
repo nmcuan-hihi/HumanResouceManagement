@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -13,6 +13,7 @@ import ItemListEmployee from "../../Compoment/ItemEmployee";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
 import { readBangCap, writeBangCap } from "../../services/database";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function DanhSachBangCap({ navigation }) {
   const [data, setData] = useState([]); // Lưu danh sách bằng cấp
@@ -21,14 +22,18 @@ export default function DanhSachBangCap({ navigation }) {
   const [tenBC, setTenBC] = useState(""); // Tên bằng cấp
 
   // Đọc dữ liệu bằng cấp khi màn hình được load
-  useEffect(() => {
-    const fetchData = async () => {
-      const bangCapData = await readBangCap();
-      setData(Object.values(bangCapData || {})); // Cập nhật dữ liệu nếu có
-    };
-    fetchData();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const bangCapData = await readBangCap();
+        setData(Object.values(bangCapData || {})); // Cập nhật dữ liệu nếu có
+      };
+  
+      fetchData();
+  
+      // Không cần clean-up function ở đây vì không có listener
+    }, [])
+  );
   const handlePress = (item) => {
     navigation.navigate("DetailBangCap", { item });
   };

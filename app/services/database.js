@@ -1,12 +1,20 @@
-import { getDatabase, ref,set, get, child, update, remove } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  set,
+  get,
+  child,
+  update,
+  remove,
+} from "firebase/database";
 import { app } from "../config/firebaseconfig";
 
 const database = getDatabase(app);
 
 export function writeUserData(employee) {
-  const employeeId = employee.employeeId; // Sử dụng employeeId 
+  const employeeId = employee.employeeId; // Sử dụng employeeId
 
-  set(ref(database, `employees/${employeeId}`), employee) 
+  set(ref(database, `employees/${employeeId}`), employee)
     .then(() => {
       console.log(`Employee ${employeeId} written successfully!`);
     })
@@ -19,7 +27,7 @@ export function writeUserData(employee) {
 export async function readEmployees() {
   try {
     const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, 'employees')); // Lấy dữ liệu từ node 'employees'
+    const snapshot = await get(child(dbRef, "employees")); // Lấy dữ liệu từ node 'employees'
 
     if (snapshot.exists()) {
       const employees = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
@@ -62,7 +70,18 @@ export function writeEmployeeData(employee) {
   console.log("Employee data:", employee); // In ra dữ liệu nhân viên để kiểm tra
 
   // Kiểm tra từng thuộc tính trong đối tượng employee
-  const requiredFields = ['employee_id', 'cccd', 'chucvu_id', 'luongcoban_id', 'name', 'ngaybatdau', 'ngaysinh', 'phongban_id', 'sdt', 'trangthai'];
+  const requiredFields = [
+    "employee_id",
+    "cccd",
+    "chucvu_id",
+    "luongcoban_id",
+    "name",
+    "ngaybatdau",
+    "ngaysinh",
+    "phongban_id",
+    "sdt",
+    "trangthai",
+  ];
 
   for (const field of requiredFields) {
     if (employee[field] === undefined) {
@@ -87,9 +106,8 @@ export function writeEmployeeData(employee) {
     });
 }
 
-
 export function writePhongBan(phongBan) {
-  const maPhongBan = phongBan.maPhongBan; 
+  const maPhongBan = phongBan.maPhongBan;
 
   set(ref(database, `phongban/${maPhongBan}`), phongBan)
     .then(() => {
@@ -103,7 +121,7 @@ export function writePhongBan(phongBan) {
 export async function readPhongBan() {
   try {
     const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, 'phongban')); 
+    const snapshot = await get(child(dbRef, "phongban"));
 
     if (snapshot.exists()) {
       const phongBans = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
@@ -121,9 +139,9 @@ export const editPhongBan = async (maPhongBan, updatedData) => {
   try {
     const phongBanRef = ref(database, `phongban/${maPhongBan}`); // Sử dụng ref từ database
     await update(phongBanRef, updatedData); // Sử dụng hàm update
-    console.log('Cập nhật phòng ban thành công');
+    console.log("Cập nhật phòng ban thành công");
   } catch (error) {
-    console.error('Lỗi khi cập nhật phòng ban:', error);
+    console.error("Lỗi khi cập nhật phòng ban:", error);
   }
 };
 
@@ -155,7 +173,7 @@ export function writeBangCap(bangCap) {
 export async function readBangCap() {
   try {
     const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, 'bangcap')); // Lấy dữ liệu từ node 'bangcap'
+    const snapshot = await get(child(dbRef, "bangcap")); // Lấy dữ liệu từ node 'bangcap'
 
     if (snapshot.exists()) {
       const bangCaps = snapshot.val(); // Chuyển dữ liệu thành đối tượng
@@ -168,4 +186,26 @@ export async function readBangCap() {
   } catch (error) {
     console.error("Error reading bang cap:", error);
   }
+}
+
+// Hàm xóa bằng cấp
+export function deleteBangCap(bangCapId) {
+  set(ref(database, `bangcap/${bangCapId}`), null) // Xóa node 'bangcap' với ID tương ứng
+    .then(() => {
+      console.log(`Bằng cấp ${bangCapId} deleted successfully!`);
+    })
+    .catch((error) => {
+      console.error(`Error deleting bằng cấp ${bangCapId}:`, error);
+    });
+}
+
+// Hàm sửa dữ liệu bằng cấp
+export function updateBangCap(bangcap_id, tenBang) {
+  set(ref(database, `bangcap/${bangcap_id}`), { bangcap_id, tenBang }) // Cập nhật dữ liệu vào node 'bangcap'
+    .then(() => {
+      console.log(`Bằng cấp ${bangcap_id} updated successfully!`);
+    })
+    .catch((error) => {
+      console.error(`Error updating bằng cấp ${bangcap_id}:`, error);
+    });
 }

@@ -12,22 +12,22 @@ import {
 } from "react-native";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
-import Feather from 'react-native-vector-icons/Feather';
-
+import Feather from "react-native-vector-icons/Feather";
+import { deleteBangCap, updateBangCap } from "../../services/database";
 
 export default function DetailBangCap({ navigation, route }) {
-  // const { maBC, tenBC } = route.params.item;
-maBC = "BC0011 ";
-tenBC = " Chứng chỉ IELTS";
+  const { bangcap_id, tenBang } = route.params.item;
+
   const [isEditing, setIsEditing] = useState(false);
-  const [currentTenBC, setCurrentTenBC] = useState(tenBC);
-  const [editedTenBC, setEditedTenBC] = useState(tenBC);
+  const [currentTenBC, setCurrentTenBC] = useState(tenBang);
+  const [editedTenBC, setEditedTenBC] = useState(tenBang);
   const [visibleModal, setVisibleModal] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false); // State to show confirmation modal for delete
 
   // Handle save
-  const handleSave = () => {
+  const handleSave = async () => {
     setCurrentTenBC(editedTenBC);
+    updateBangCap(bangcap_id,editedTenBC)
     setIsEditing(false);
   };
 
@@ -36,7 +36,9 @@ tenBC = " Chứng chỉ IELTS";
     setConfirmDelete(true);
   };
 
-  const confirmDeleteYes = () => {
+  const confirmDeleteYes = async () => {
+    deleteBangCap(bangcap_id);
+    navigation.goBack();
     // Logic to delete the item
     setConfirmDelete(false);
     // Possibly navigate back or reset form
@@ -50,57 +52,57 @@ tenBC = " Chứng chỉ IELTS";
     <>
       <View style={styles.header}>
         {/* Sử dụng BackNav với onEditPress */}
-        <BackNav
-          navigation={navigation}
-          name={"Chi tiết bằng cấp"}
-          
-        />
+        <BackNav navigation={navigation} name={"Chi tiết bằng cấp"} />
       </View>
 
       <SafeAreaView style={styles.container}>
-      <ScrollView>
-  {/* Thông tin bằng cấp */}
-  <View style={styles.infoSection}>
-    <Text style={styles.sectionTitle}>Mã bằng cấp</Text>
-    <Text style={styles.sectionTitle1}>{maBC}</Text>
-  </View>
+        <ScrollView>
+          {/* Thông tin bằng cấp */}
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Mã bằng cấp</Text>
+            <Text style={styles.sectionTitle1}>{bangcap_id}</Text>
+          </View>
 
-  <View style={styles.infoSection}>
-    <Text style={styles.sectionTitle}>Tên bằng cấp</Text>
-    {isEditing ? (
-      <TextInput
-        style={styles.TextInput}
-        placeholder="Tên bằng cấp"
-        value={editedTenBC}
-        onChangeText={(text) => setEditedTenBC(text)}
-      />
-    ) : (
-      <View style={styles.inlineEditContainer}>
-        <Text style={styles.sectionTitle22}>{currentTenBC}</Text>
-        <TouchableOpacity
-          onPress={() => setIsEditing(true)}
-          style={styles.editBtn}
-        >
-          <Feather name="edit-2" size={20} color="#FFFFFF" style={styles.fea} />
-        </TouchableOpacity>
-      </View>
-    )}
-  </View>
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Tên bằng cấp</Text>
+            {isEditing ? (
+              <TextInput
+                style={styles.TextInput}
+                placeholder="Tên bằng cấp"
+                value={editedTenBC}
+                onChangeText={(text) => setEditedTenBC(text)}
+              />
+            ) : (
+              <View style={styles.inlineEditContainer}>
+                <Text style={styles.sectionTitle22}>{currentTenBC}</Text>
+                <TouchableOpacity
+                  onPress={() => setIsEditing(true)}
+                  style={styles.editBtn}
+                >
+                  <Feather
+                    name="edit-2"
+                    size={20}
+                    color="#FFFFFF"
+                    style={styles.fea}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
 
-  {/* Ensure some spacing between info section and buttons */}
-  <View style={styles.buttonSection}>
-    {isEditing ? (
-      <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
-        <Text style={styles.nameBtn}>Lưu</Text>
-      </TouchableOpacity>
-    ) : (
-      <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
-        <Text style={styles.nameBtn}>Xóa</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-</ScrollView>
-
+          {/* Ensure some spacing between info section and buttons */}
+          <View style={styles.buttonSection}>
+            {isEditing ? (
+              <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
+                <Text style={styles.nameBtn}>Lưu</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
+                <Text style={styles.nameBtn}>Xóa</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
 
         {/* Delete Confirmation Modal */}
         <Modal visible={confirmDelete} transparent={true} animationType="slide">
@@ -110,10 +112,16 @@ tenBC = " Chứng chỉ IELTS";
                 Bạn có chắc chắn muốn xóa bằng cấp này không?
               </Text>
               <View style={styles.modalBtnContainer}>
-                <TouchableOpacity style={styles.modalBtn} onPress={confirmDeleteYes}>
+                <TouchableOpacity
+                  style={styles.modalBtn}
+                  onPress={confirmDeleteYes}
+                >
                   <Text style={styles.modalBtnText}>Có</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.modalBtn} onPress={confirmDeleteNo}>
+                <TouchableOpacity
+                  style={styles.modalBtn}
+                  onPress={confirmDeleteNo}
+                >
                   <Text style={styles.modalBtnText}>Không</Text>
                 </TouchableOpacity>
               </View>
@@ -126,7 +134,6 @@ tenBC = " Chứng chỉ IELTS";
 }
 
 const styles = StyleSheet.create({
-  
   container: {
     flex: 1,
     backgroundColor: "#F2F2F7",
@@ -176,8 +183,8 @@ const styles = StyleSheet.create({
   },
   // Updated the button section layout
   buttonSection: {
-    marginTop: 20,  // Adds space between the info section and buttons
-    alignItems: "center",  // Centers the buttons horizontally
+    marginTop: 20, // Adds space between the info section and buttons
+    alignItems: "center", // Centers the buttons horizontally
   },
   btnSave: {
     width: "90%",
@@ -194,7 +201,7 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,  // Added margin to separate from other content
+    marginTop: 20, // Added margin to separate from other content
   },
   nameBtn: {
     fontSize: 22,
