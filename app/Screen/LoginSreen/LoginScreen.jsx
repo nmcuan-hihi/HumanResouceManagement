@@ -8,9 +8,8 @@ const database = getDatabase(app);
 
 export default function LoginScreen({ navigation }) {
   const [employeeId, setEmployeeId] = useState('');
-  const [password, setPassword] = useState(''); // Mock password input
+  const [password, setPassword] = useState('');
 
-  // Function to handle login and check role
   const handleLogin = async () => {
     if (!employeeId) {
         Alert.alert("Error", "Please enter your employee ID.");
@@ -19,22 +18,16 @@ export default function LoginScreen({ navigation }) {
 
     try {
         const dbRef = ref(database);
-        const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Fetch employee data
+        const snapshot = await get(child(dbRef, `employees/${employeeId}`));
 
         if (snapshot.exists()) {
-            const employeeData = snapshot.val(); // Get employee data
+            const employeeData = snapshot.val();
 
-            if (password === employeeData.matKhau) { // Assuming the password is stored as 'matKhau'
-                // Navigate based on role
-                switch (employeeData.chucvuId) {
-                    case 'GD':
-                        navigation.navigate('HomeScreenGD'); // Change to your actual director screen component name
-                        break;
-                    case 'TP':
-                        navigation.navigate('EmployeeScreen'); // Change to your actual HR screen component name
-                        break;
-                   
-                }
+            if (password === employeeData.matKhau) {
+                navigation.navigate('UserTabNav', { 
+                    employee: employeeData, 
+                    role: employeeData.chucvuId // Pass role to TabNavigation
+                });
             } else {
                 Alert.alert("Error", "Incorrect password.");
             }
@@ -46,6 +39,7 @@ export default function LoginScreen({ navigation }) {
         Alert.alert("Error", "An error occurred while logging in.");
     }
 };
+
   
 
   return (

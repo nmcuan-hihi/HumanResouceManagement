@@ -31,8 +31,9 @@ import NotificeScreen from './app/Screen/NotificeScreen/NotificeScreen';
 import QuanLyMucLuong from './app/Screen/QuanLyLuong/QuanLyMucLuong';
 import DanhSachSkill from './app/Screen/BangCapScreen/Skill';
 import DetailSkill from './app/Screen/BangCapScreen/DetailSkill';
-
-
+import ListChucVu from './app/Screen/ChucVuScreen/ChucVu';
+import ChucVuDetail from './app/Screen/ChucVuScreen/ChucVuDetail';
+import AddChucVu from './app/Screen/ChucVuScreen/AddChucVu';
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -64,7 +65,9 @@ export default function App() {
         <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />
         <Stack.Screen name="EmployeeScreen" component={EmployeeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AddEmployee" component={AddEmployeeScreen} options={{ headerShown: false }} />
-
+        <Stack.Screen name="ListChucVu" component={ListChucVu} options={{ headerShown: false }} />
+        <Stack.Screen name="ChucVuDetail" component={ChucVuDetail} options={{ headerShown: false }} />
+        <Stack.Screen name="AddChucVu" component={AddChucVu} options={{ headerShown: false }} />
        
         <Stack.Screen name="ListEmployee" component={ListEmployee} options={{ headerShown: false }} />
         <Stack.Screen name="EmployeeDetail" component={EmployeeDetailScreen} options={{ headerShown: false }} />

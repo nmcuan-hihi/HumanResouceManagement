@@ -160,23 +160,49 @@ export async function readPhongBan() {
   }
 }
 
-export async function readChucVu() {
+export const createChucVu = async (maChucVu, chucVu) => {
   try {
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "chucvu"));
-
+    const chucVuRef = ref(database, `chucvu/${maChucVu}`); // Tham chiếu tới đường dẫn chức vụ
+    await set(chucVuRef, chucVu); // Sử dụng hàm set để thêm chức vụ
+    console.log(`Chức vụ ${maChucVu} đã được thêm thành công`);
+  } catch (error) {
+    console.error(`Lỗi khi thêm chức vụ ${maChucVu}:`, error);
+  }
+};
+export const readChucVu = async () => {
+  try {
+    const snapshot = await get(ref(database, 'chucvu')); // Đọc dữ liệu từ node 'chucvu'
     if (snapshot.exists()) {
-      const ChucVus = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
-      console.log("Chuc Vu data:", ChucVus);
-      return ChucVus; // Trả về danh sách phòng ban
+      return snapshot.val(); // Trả về dữ liệu nếu tồn tại
     } else {
-      console.log("No data available");
+      console.log('No data available');
       return null; // Không có dữ liệu
     }
   } catch (error) {
-    console.error("Error reading phong ban:", error);
+    console.error('Error reading chuc vu data:', error);
+    return null; // Xử lý lỗi
   }
-}
+};
+export const updateChucVu = async (maChucVu, updatedData) => {
+  try {
+    const chucVuRef = ref(database, `chucvu/${maChucVu}`); // Sử dụng ref để tham chiếu tới chức vụ
+    await update(chucVuRef, updatedData); // Sử dụng hàm update để cập nhật dữ liệu
+    console.log(`Chức vụ ${maChucVu} đã được cập nhật thành công`);
+  } catch (error) {
+    console.error(`Lỗi khi cập nhật chức vụ ${maChucVu}:`, error);
+  }
+};
+
+// Hàm xóa chức vụ
+export const deleteChucVu = async (maChucVu) => {
+  try {
+    const chucVuRef = ref(database, `chucvu/${maChucVu}`); // Tham chiếu tới chức vụ cần xóa
+    await remove(chucVuRef); // Sử dụng hàm remove để xóa chức vụ
+    console.log(`Chức vụ ${maChucVu} đã được xóa thành công`);
+  } catch (error) {
+    console.error(`Lỗi khi xóa chức vụ ${maChucVu}:`, error);
+  }
+};
 export const editPhongBan = async (maPhongBan, updatedData) => {
   try {
     const phongBanRef = ref(database, `phongban/${maPhongBan}`); // Sử dụng ref từ database
