@@ -38,6 +38,8 @@ export default function TabNavigation({ route }) {
       <Tab.Screen
         name="Profile"
         component={UserProfileScreen}
+        initialParams={{ employee }}
+
         options={{
           tabBarLabel: ({ color }) => (
             <Text style={{ color, fontSize: 15, marginTop: -7 }}>Profile</Text>
