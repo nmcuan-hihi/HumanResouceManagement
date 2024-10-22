@@ -17,6 +17,7 @@ const Tab = createBottomTabNavigator();
 
 export default function TabNavigation({ route }) {
     const { role } = route.params || {}; // Lấy role từ params
+    const { keyID } = route.params || {}; // Lấy userlogin từ params
 
     // Các tab dùng chung cho mọi role
     const CommonTabs = () => (
@@ -81,6 +82,7 @@ export default function TabNavigation({ route }) {
                 return (
                     <Tab.Screen 
                         name="SalaryManagement" 
+                        initialParams={{ keyID }}
                         component={ChammCong} 
                         options={{
                             tabBarLabel: 'Salary',

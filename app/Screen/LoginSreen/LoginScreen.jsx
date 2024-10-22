@@ -8,7 +8,7 @@ const database = getDatabase(app);
 
 export default function LoginScreen({ navigation }) {
   const [employeeId, setEmployeeId] = useState('');
-  const [password, setPassword] = useState(''); // Mock password input
+  const [password, setPassword] = useState('');
 
   // Function to handle login and check role
   const handleLogin = async () => {
@@ -19,29 +19,28 @@ export default function LoginScreen({ navigation }) {
 
     try {
       const dbRef = ref(database);
-      const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Fetch employee data
+      const snapshot = await get(child(dbRef, `employees/${employeeId}`));
 
       if (snapshot.exists()) {
-        const employeeData = snapshot.val(); // Get employee data
+        const employeeData = snapshot.val();
 
-        if (password === employeeData.matKhau) { // Assuming the password is stored as 'matKhau'
-          if (employeeData.chucvuId === 'GD') { // Check if employee is a manager
-            navigation.navigate('HomeScreenGD', { employee: employeeData }); // Navigate to ManagerScreen
-          } else if(employeeData.chucvuId === 'TP'){
-            navigation.navigate('EmployeeScreen', { employee: employeeData });
-          }
-           else {
-            navigation.navigate('UserTabNav', { employee: employeeData }); // Navigate to regular user screen
+        if (password === employeeData.matKhau) { 
+      
+          if (employeeData.chucvuId === 'GD') { 
+            navigation.navigate('UserTabNav', { role: "GD" });
+          } else if (employeeData.chucvuId === 'TP') {
+            navigation.navigate('UserTabNav', { role: employeeData.phongbanId, keyID: employeeData.employeeId }); 
+          }else {
+            navigation.navigate('UserTabNav', { role: "NV", keyID: employeeData.employeeId }); 
           }
         } else {
-          Alert.alert("Error", "Incorrect password.");
+          Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
         }
       } else {
-        Alert.alert("Error", "Employee not found.");
+        Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
       }
     } catch (error) {
-      console.error("Error fetching employee data:", error);
-      Alert.alert("Error", "An error occurred while logging in.");
+      Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
     }
   };
 
@@ -61,7 +60,6 @@ export default function LoginScreen({ navigation }) {
         placeholder="Employee ID"
         value={employeeId}
         onChangeText={setEmployeeId}
-       
       />
       <TextInput
         style={styles.input}
@@ -74,22 +72,6 @@ export default function LoginScreen({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Continue →</Text>
       </TouchableOpacity>
-
-      {/* Test login buttons */}
-      <View style={styles.testButtons}>
-        <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('NV')}>
-          <Text style={styles.testButtonText}>Test as NV</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('GD')}>
-          <Text style={styles.testButtonText}>Test as GD</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('KT')}>
-          <Text style={styles.testButtonText}>Test as KT</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('NS')}>
-          <Text style={styles.testButtonText}>Test as NS</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -140,20 +122,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  testButtons: {
-    marginTop: 30,
-  },
-  testButton: {
-    backgroundColor: '#d3d3d3',
-    borderRadius: 15,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 5,
-  },
-  testButtonText: {
-    color: '#000',
-    fontSize: 16,
   },
 });

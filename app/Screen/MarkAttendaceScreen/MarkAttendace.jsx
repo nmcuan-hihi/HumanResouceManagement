@@ -2,8 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Dashboard from '../../Compoment/Dashboard';
+import { getEmployeeById } from '../../services/InfoDataLogin';
 
-export default function ChammCong({navigation}) {
+export default function ChammCong({navigation, route}) {
+  const { keyID } = route.params || {}; // Lấy role từ params
+  const userLogin = getEmployeeById(keyID);
+  
   const handlePress = () => {
     navigation.navigate('ChamCongNV'); // Điều hướng đến màn hình chấm công
   };
@@ -11,7 +15,7 @@ export default function ChammCong({navigation}) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <Dashboard />
+        <Dashboard employee={userLogin}/>
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>

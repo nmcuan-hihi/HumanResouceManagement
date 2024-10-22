@@ -17,20 +17,30 @@ export default function EmployeeList({ navigation }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await readEmployees();
-      if (data) {
-        const employeeArray = Object.keys(data).map(key => ({
-          ...data[key],
-          manv: key
-        }));
-        setEmployeeData(employeeArray);
-        setFilteredData(employeeArray);
+      try {
+        const data = await readEmployees();
+        if (data && typeof data === 'object') {
+          const employeeArray = Object.keys(data).map((key) => ({
+            ...data[key],
+            manv: data[key].employeeId, // Giả sử employeeId tồn tại trong data[key]
+          }));
+          setEmployeeData(employeeArray);
+          setFilteredData(employeeArray); // Kiểm tra xem setFilteredData đã được định nghĩa
+        } else {
+          console.warn('Dữ liệu nhân viên không hợp lệ:', data);
+        }
+    
+        const phongBans = await readPhongBan1();
+        if (phongBans) {
+          setPhongBanList(phongBans);
+        } else {
+          console.warn('Dữ liệu phòng ban không hợp lệ:', phongBans);
+        }
+      } catch (error) {
+        console.error('Lỗi khi fetching dữ liệu:', error);
       }
-
-      const phongBans = await readPhongBan1();
-      setPhongBanList(phongBans);
     };
-
+    
     fetchData();
   }, []);
 

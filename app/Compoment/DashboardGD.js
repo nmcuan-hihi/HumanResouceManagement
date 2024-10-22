@@ -57,7 +57,7 @@ const DashboardGD = () => {
         </View>
       </View>
 
-      <Text style={[styles.overviewTitle, { color: "blue" }]}>Chức năng</Text>
+    
     </View>
   );
 };
@@ -65,11 +65,12 @@ const DashboardGD = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#f8f8f8", // Thêm màu nền để làm nổi bật
+    backgroundColor: "#ffff", // Thêm màu nền để làm nổi bật
     flex: 1,
   },
   header: {
     marginBottom: 20,
+   
     flexDirection: "row",
     alignItems: "center", // Canh giữa icon và chữ
   },
@@ -77,10 +78,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     flex: 1, // Cho phép chữ chiếm không gian còn lại
-  },
-  overview: {
-    marginBottom: 20,
-  },
+  },  
   overviewTitle: {
     fontSize: 18,
     fontWeight: "bold",

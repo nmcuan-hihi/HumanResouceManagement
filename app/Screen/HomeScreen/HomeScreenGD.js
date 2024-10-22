@@ -6,9 +6,9 @@ import DashboardGD from "../../Compoment/DashboardGD";
 export default function HomeScreenGD({ navigation }) { // Nhận navigation từ props
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView style={{padding: 10,}}>
         <DashboardGD />
-
+        <Text style={[styles.overviewTitle, { color: "blue", marginStart: 20, }]}>Chức năng</Text>
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <Text>Tổng nhân viên</Text>
@@ -62,8 +62,7 @@ export default function HomeScreenGD({ navigation }) { // Nhận navigation từ
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-    margin: 10,
+    backgroundColor: "#ffff",
   },
   summaryCard: {
     backgroundColor: "#FFF9C4",
@@ -76,18 +75,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 8,
   },
+  overviewTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   summaryValue: {
     fontWeight: "bold",
   },
   chartPlaceholder: {
     height: 100,
+    width: 100,
     backgroundColor: "#FFD54F",
-    borderRadius: 50,
+    borderRadius: 500,
     marginTop: 16,
   },
   dateText: {
     textAlign: "center",
-    marginVertical: 16,
   },
   statsContainer: {
     flexDirection: "row",

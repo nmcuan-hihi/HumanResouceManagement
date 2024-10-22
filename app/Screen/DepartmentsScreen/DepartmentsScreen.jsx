@@ -94,14 +94,13 @@ export default function PhongBanScreen({ navigation }) {
         <FlatList
           style={styles.list}
           data={phongBanData.filter((item) =>
-            item.tenPhongBan.toLowerCase().includes(searchText.toLowerCase())
+            item.tenPhongBan && item.tenPhongBan.toLowerCase().includes(searchText.toLowerCase())
           )}
           renderItem={({ item }) => (
             <ItemDepartment item={item} onPress={() => handlePress(item)} />
           )}
           keyExtractor={(item) => item.maPhongBan}
         />
-
 
         <Modal visible={visibleModal} transparent={true} animationType="slide">
           <KeyboardAvoidingView
@@ -146,7 +145,7 @@ export default function PhongBanScreen({ navigation }) {
                 <FlatList
                   style={styles.employeeList}
                   data={employeeData.filter((item) =>
-                    item.name.toLowerCase().includes(searchText.toLowerCase())
+                    item.name && item.name.toLowerCase().includes(searchText.toLowerCase())
                   )}
                   renderItem={({ item }) => (
                     <TouchableOpacity
@@ -234,6 +233,7 @@ const styles = StyleSheet.create({
   },
   nameBtn: {
     fontSize: 20,
+    
     color: '#FFFFFF',
   },
 });
