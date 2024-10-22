@@ -159,6 +159,28 @@ export async function readPhongBan() {
     console.error("Error reading phong ban:", error);
   }
 }
+export async function readPhongBan1() {
+  try {
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, "phongban"));
+
+    if (snapshot.exists()) {
+      const phongBans = snapshot.val(); // Lấy dữ liệu
+      // Chuyển đổi thành mảng
+      return Object.keys(phongBans).map(key => ({
+        maPhongBan: key,
+        tenPhongBan: phongBans[key].tenPhongBan
+      }));
+    } else {
+      console.log("No data available");
+      return []; // Trả về mảng rỗng nếu không có dữ liệu
+    }
+  } catch (error) {
+    console.error("Error reading phong ban:", error);
+    return []; // Trả về mảng rỗng nếu có lỗi
+  }
+}
+
 
 export async function readChucVu() {
   try {
