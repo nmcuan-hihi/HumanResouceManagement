@@ -114,6 +114,7 @@ export default function TabNavigation({ route }) {
           <Tab.Screen
             name="Home"
             component={HomeScreen}
+            initialParams={{ employee }}
             options={{
               tabBarLabel: "Home",
               tabBarIcon: ({ color }) => (

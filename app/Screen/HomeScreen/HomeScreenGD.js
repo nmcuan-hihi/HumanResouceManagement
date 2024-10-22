@@ -15,6 +15,7 @@ export default function HomeScreenGD({ navigation, route }) {
   const [listEmployee, setListEmployee] = useState([]);
   const [listPhongBan, setListPhongBan] = useState([]);
 
+  const date = new Date();
   // lấy danh sách nv
 
   const getListNV = async () => {
@@ -59,7 +60,9 @@ export default function HomeScreenGD({ navigation, route }) {
           <View style={styles.chartPlaceholder} />
         </View>
 
-        <Text style={styles.dateText}>Hôm nay, 20/09/2024</Text>
+        <Text style={styles.dateText}>
+          Hôm nay, {date.toLocaleDateString("vi-VN")}
+        </Text>
 
         <View style={styles.statsContainer}>
           <TouchableOpacity

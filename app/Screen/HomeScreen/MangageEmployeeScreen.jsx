@@ -9,12 +9,15 @@ import {
 } from "react-native";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import Dashboard from "../../Compoment/Dashboard";
-import { readEmployees } from "../../services/database";
+import { readEmployees, readPhongBan } from "../../services/database";
 
 const EmployeeScreen = ({ navigation, route }) => {
   const { employee } = route.params;
   const [listEmployeeMyPB, setListEmployeeMyPB] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
+
+  const [listPhongBan, setListPhongBan] = useState([]);
+  const date = new Date();
 
   const navigateTo = (screen) => {
     navigation.navigate(screen);
@@ -35,8 +38,17 @@ const EmployeeScreen = ({ navigation, route }) => {
     console.log(newData);
   };
 
+  // lấy danh sách pb
+
+  const getListPB = async () => {
+    const data = await readPhongBan();
+
+    setListPhongBan(Object.values(data));
+  };
+
   useEffect(() => {
     getListNV();
+    getListPB();
   }, []);
 
   return (
@@ -47,7 +59,9 @@ const EmployeeScreen = ({ navigation, route }) => {
         <View style={styles.container}>
           <Text style={styles.contentText}>Chức năng</Text>
 
-          <Text style={styles.dateText}>Hôm nay, 20/09/2024</Text>
+          <Text style={styles.dateText}>
+            Hôm nay, {date.toLocaleDateString("vi-VN")}
+          </Text>
 
           <View style={styles.statsContainer}>
             <StatItem
@@ -60,7 +74,7 @@ const EmployeeScreen = ({ navigation, route }) => {
             <StatItem
               icon="id-badge"
               color="#F44336"
-              value="0"
+              value={listPhongBan.length}
               label="Phòng ban"
               onPress={() => navigateTo("PhongBanScreen")}
             />
