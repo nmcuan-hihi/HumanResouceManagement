@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Text, Button } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Text } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
 import BackNav from '../../Compoment/BackNav';
@@ -79,23 +79,25 @@ export default function EmployeeList({ navigation }) {
   };
 
   return (
-    <><BackNav
-      navigation={navigation}
-      name={"Danh sách nhân viên"}
-      soLuong={filteredData.length}
-      btn={"Add"}
-      onEditPress={handleAddEmployee} /><View style={styles.container}>
-
-
+    <>
+      <BackNav
+        navigation={navigation}
+        name={"Danh sách nhân viên"}
+        soLuong={filteredData.length}
+        btn={"Add"}
+        onEditPress={handleAddEmployee} 
+      />
+      <View style={styles.container}>
         {/* Search Section */}
         <View style={styles.searchSection}>
           <TextInput
             style={styles.searchInput}
             placeholder="Tìm kiếm theo tên hoặc mã nhân viên"
             value={searchTerm}
-            onChangeText={setSearchTerm} />
+            onChangeText={setSearchTerm}
+          />
           <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-            <Text style={{ color: 'white', fontSize: 16 }}>Tìm kiếm</Text>
+            <Text style={styles.buttonText}>Tìm kiếm</Text>
           </TouchableOpacity>
         </View>
 
@@ -109,7 +111,8 @@ export default function EmployeeList({ navigation }) {
             }))}
             value={selectedPhongBan}
             placeholder={{ label: "Phòng ban", value: "" }}
-            style={pickerSelectStyles} />
+            style={pickerSelectStyles} 
+          />
 
           <RNPickerSelect
             onValueChange={(itemValue) => setSelectedGender(itemValue)}
@@ -119,7 +122,8 @@ export default function EmployeeList({ navigation }) {
             ]}
             value={selectedGender}
             placeholder={{ label: "Giới tính", value: "" }}
-            style={pickerSelectStyles} />
+            style={pickerSelectStyles} 
+          />
 
           <RNPickerSelect
             onValueChange={(itemValue) => setSelectedStatus(itemValue)}
@@ -129,32 +133,35 @@ export default function EmployeeList({ navigation }) {
             ]}
             value={selectedStatus}
             placeholder={{ label: "Trạng thái", value: "" }}
-            style={pickerSelectStyles} />
+            style={pickerSelectStyles} 
+          />
         </View>
 
         {/* Employee List */}
         <FlatList
-          style={{ marginTop: 20 }}
+          style={styles.employeeList}
           data={filteredData}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handlePress(item)}>
               <ItemListEmployee manv={item.manv} name={item.name} imageUrl={item.imageUrl} />
             </TouchableOpacity>
           )}
-          keyExtractor={(item) => item.manv} />
-      </View></>
+          keyExtractor={(item) => item.manv} 
+        />
+      </View>
+    </>
   );
 }
 
-// Styles cho RNPickerSelect
+// Styles for RNPickerSelect
 const pickerSelectStyles = {
   inputIOS: {
     color: 'black',
-    paddingVertical: 12,
+    paddingVertical: 7,
     paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 8,
+    borderRadius: 3,
     backgroundColor: '#fff',
     marginBottom: 16,
     shadowColor: '#000',
@@ -182,34 +189,23 @@ const pickerSelectStyles = {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 9,
-    backgroundColor: '#f8f8f8',
-    paddingTop: 20,
-  },
-  headerSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flex: 14,
+    backgroundColor: '#ffff',
+    paddingTop: 10,
     paddingHorizontal: 15,
-    paddingBottom: 10,
-    backgroundColor: '#007AFF',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
   },
   searchSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
+    alignItems: 'center',
     marginBottom: 10,
   },
   searchInput: {
     flex: 1,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 3,
     paddingHorizontal: 15,
-    marginRight: 10,
     height: 40,
     backgroundColor: '#fff',
     shadowColor: '#000',
@@ -217,18 +213,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+    marginRight: 10,
   },
   filterSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    marginBottom: 20,
     alignItems: 'center',
+    marginBottom: 5,
   },
   searchButton: {
     backgroundColor: '#007AFF',
-    borderRadius: 8,
+    borderRadius: 3,
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+
 });
