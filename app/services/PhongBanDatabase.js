@@ -59,29 +59,28 @@ export async function filterEmployeesByGender(gender) {
 
 // Hàm lọc nhân viên theo trạng thái hoạt động
 export async function filterEmployeesByStatus(status) {
-    try {
-      const dbRef = ref(database);
-      const snapshot = await get(child(dbRef, "employees"));
-  
-      if (snapshot.exists()) {
-        const employees = snapshot.val();
-        const filteredEmployees = Object.keys(employees).reduce((acc, key) => {
-          if (String(employees[key].trangthai) === status) {
-            acc.push({ ...employees[key], manv: key }); // Thêm mã nhân viên vào đối tượng
-          }
-          return acc;
-        }, []);
-        return filteredEmployees;
-      } else {
-        console.log("No data available");
-        return [];
-      }
-    } catch (error) {
-      console.error("Error filtering employees by status:", error);
+  try {
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, "employees"));
+
+    if (snapshot.exists()) {
+      const employees = snapshot.val();
+      const filteredEmployees = Object.keys(employees).reduce((acc, key) => {
+        if (employees[key].trangthai === status) {
+          acc.push({ ...employees[key], manv: key }); // Thêm mã nhân viên vào đối tượng
+        }
+        return acc;
+      }, []);
+      return filteredEmployees;
+    } else {
+      console.log("No data available");
       return [];
     }
+  } catch (error) {
+    console.error("Error filtering employees by status:", error);
+    return [];
   }
-  
+}
 
 // Hàm tìm kiếm nhân viên theo tên hoặc mã nhân viên
 export async function searchEmployeesByNameOrId(searchTerm) {
