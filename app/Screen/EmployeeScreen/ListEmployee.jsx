@@ -49,7 +49,9 @@ export default function EmployeeList({ navigation }) {
       }
 
       if (selectedStatus) {
-        filteredResults = await filterEmployeesByStatus(selectedStatus);
+        // Chuyển đổi selectedStatus thành chuỗi để so sánh
+        const statusToCompare = selectedStatus === "true" ? "true" : "false"; 
+        filteredResults = await filterEmployeesByStatus(statusToCompare);
       }
 
       setFilteredData(filteredResults);
@@ -130,8 +132,8 @@ export default function EmployeeList({ navigation }) {
             onValueChange={(itemValue) => setSelectedStatus(itemValue)}
           >
             <Picker.Item label="Trạng thái" value="" />
-            <Picker.Item label="Đang làm" value="active" />
-            <Picker.Item label="Đã nghỉ" value="inactive" />
+            <Picker.Item label="Đang làm" value="true" />
+            <Picker.Item label="Đã nghỉ" value="false" />
           </Picker>
         </View>
 
