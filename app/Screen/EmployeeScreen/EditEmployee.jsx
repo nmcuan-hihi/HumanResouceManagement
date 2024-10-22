@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableO
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { readEmployees, updateEmployee, toggleEmployeeStatus, readPhongBan1, readChucVu } from '../../services/database';
 import { Picker } from '@react-native-picker/picker';
+import RNPickerSelect from 'react-native-picker-select';
 
 export default function EmployeeEditScreen({ navigation, route }) {
   const { manv } = route.params;
@@ -87,35 +88,27 @@ export default function EmployeeEditScreen({ navigation, route }) {
           />
         </View>
 
-        {/* Chọn phòng */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Chọn phòng</Text>
-          <Picker
-            selectedValue={employeeData.room}
-            onValueChange={(itemValue) => updateField('room', itemValue)}
-            style={styles.input}
-          >
-            <Picker.Item label="Chọn phòng" value="" />
-            {phongBans.map((phong) => (
-              <Picker.Item key={phong.maPhongBan} label={phong.tenPhongBan} value={phong.maPhongBan} />
-            ))}
-          </Picker>
-        </View>
+        <RNPickerSelect
+          onValueChange={(itemValue) => updateField('room', itemValue)}
+          items={phongBans.map((phong) => ({
+            label: phong.tenPhongBan,
+            value: phong.maPhongBan,
+          }))}
+          value={employeeData?.room}
+          placeholder={{ label: "Chọn phòng", value: "" }}
+          style={pickerSelectStyles}
+        />
 
-        {/* Chức vụ */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Chức vụ</Text>
-          <Picker
-            selectedValue={employeeData.position}
-            onValueChange={(itemValue) => updateField('position', itemValue)}
-            style={styles.input}
-          >
-            <Picker.Item label="Chọn chức vụ" value="" />
-            {Object.entries(chucVus).map(([key, value]) => (
-              <Picker.Item key={key} label={value.loaichucvu} value={key} />
-            ))}
-          </Picker>
-        </View>
+        <RNPickerSelect
+          onValueChange={(itemValue) => updateField('position', itemValue)}
+          items={Object.entries(chucVus).map(([key, value]) => ({
+            label: value.loaichucvu,
+            value: key,
+          }))}
+          value={employeeData?.position}
+          placeholder={{ label: "Chọn chức vụ", value: "" }}
+          style={pickerSelectStyles}
+        />
 
         {/* Các trường dữ liệu khác */}
         <InputField label="Mã Nhân Viên" value={employeeData.employeeId} onChangeText={(value) => updateField('employeeId', value)} />
@@ -128,20 +121,16 @@ export default function EmployeeEditScreen({ navigation, route }) {
           <Text>{employeeData.ngaysinh || "Chọn ngày"}</Text>
         </TouchableOpacity>
 
-        {/* Giới tính */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Giới tính</Text>
-          <Picker
-            selectedValue={employeeData.gioitinh} // Đảm bảo rằng bạn đã cập nhật trường gender trong employeeData
-            onValueChange={(itemValue) => updateField('gioitinh', itemValue)} // Cập nhật giá trị gender
-            style={styles.input}
-          >
-            <Picker.Item label="Chọn giới tính" value="" />
-            <Picker.Item label="Nam" value="male" />
-            <Picker.Item label="Nữ" value="female" />
-            <Picker.Item label="Khác" value="other" />
-          </Picker>
-        </View>
+        <RNPickerSelect
+          onValueChange={(value) => updateField('gioitinh', value)}
+          items={[
+            { label: 'Nam', value: 'Nam' },
+            { label: 'Nữ', value: 'Nữ' },
+            { label: 'Khác', value: 'Khác' },
+          ]}
+          style={pickerSelectStyles}
+        />
+
 
         {/* Trường Ngày vào */}
         <TouchableOpacity onPress={() => showDatePickerModal('ngaybatdau')} style={styles.datePicker}>
@@ -187,6 +176,7 @@ const InputField = ({ label, value, onChangeText }) => (
 );
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: '#F2F2F7',
@@ -253,4 +243,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+// Styles cho RNPickerSelect
+const pickerSelectStyles = {
+  inputIOS: {
+    color: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+  inputAndroid: {
+    color: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+};
 
