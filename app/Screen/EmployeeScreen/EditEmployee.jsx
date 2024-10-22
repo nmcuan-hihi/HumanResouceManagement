@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { readEmployees, updateEmployee, toggleEmployeeStatus } from '../../services/database'; // Sử dụng toggleEmployeeStatus
+import { readEmployees, updateEmployee, toggleEmployeeStatus, readPhongBan1, readChucVu } from '../../services/database';
+import { Picker } from '@react-native-picker/picker';
 
 export default function EmployeeEditScreen({ navigation, route }) {
   const { manv } = route.params;
   const [employeeData, setEmployeeData] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateField, setDateField] = useState('');
+  const [phongBans, setPhongBans] = useState([]);
+  const [chucVus, setChucVus] = useState([]);
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
@@ -18,7 +21,15 @@ export default function EmployeeEditScreen({ navigation, route }) {
       }
     };
 
+    const fetchDropdownData = async () => {
+      const phongBanData = await readPhongBan1();
+      setPhongBans(phongBanData);
+      const chucVuData = await readChucVu();
+      setChucVus(chucVuData);
+    };
+
     fetchEmployeeData();
+    fetchDropdownData();
   }, [manv]);
 
   const updateField = (field, value) => {
@@ -29,7 +40,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
     const currentDate = selectedDate || employeeData[dateField];
     setShowDatePicker(false);
     if (currentDate) {
-      updateField(dateField, currentDate.toISOString().split('T')[0]); // Cập nhật trường ngày
+      updateField(dateField, currentDate.toISOString().split('T')[0]);
     }
   };
 
@@ -50,10 +61,9 @@ export default function EmployeeEditScreen({ navigation, route }) {
     }
   };
 
-  // Hàm chuyển đổi trạng thái
   const handleToggleStatus = async () => {
     try {
-      await toggleEmployeeStatus(manv, employeeData.trangthai); // Truyền trạng thái hiện tại
+      await toggleEmployeeStatus(manv, employeeData.trangthai);
       Alert.alert("Thông báo", `Trạng thái đã được ${employeeData.trangthai ? 'ngưng hoạt động' : 'hoạt động lại'}!`, [
         { text: "OK", onPress: () => navigation.goBack() },
       ]);
@@ -77,10 +87,38 @@ export default function EmployeeEditScreen({ navigation, route }) {
           />
         </View>
 
+        {/* Chọn phòng */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Chọn phòng</Text>
+          <Picker
+            selectedValue={employeeData.room}
+            onValueChange={(itemValue) => updateField('room', itemValue)}
+            style={styles.input}
+          >
+            <Picker.Item label="Chọn phòng" value="" />
+            {phongBans.map((phong) => (
+              <Picker.Item key={phong.maPhongBan} label={phong.tenPhongBan} value={phong.maPhongBan} />
+            ))}
+          </Picker>
+        </View>
+
+        {/* Chức vụ */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Chức vụ</Text>
+          <Picker
+            selectedValue={employeeData.position}
+            onValueChange={(itemValue) => updateField('position', itemValue)}
+            style={styles.input}
+          >
+            <Picker.Item label="Chọn chức vụ" value="" />
+            {Object.entries(chucVus).map(([key, value]) => (
+              <Picker.Item key={key} label={value.loaichucvu} value={key} />
+            ))}
+          </Picker>
+        </View>
+
         {/* Các trường dữ liệu khác */}
-        <InputField label="Chọn phòng" value={employeeData.room} onChangeText={(value) => updateField('room', value)} isDropdown />
-        <InputField label="Chức vụ" value={employeeData.position} onChangeText={(value) => updateField('position', value)} isDropdown />
-        <InputField label="Mã Nhân Viên" value={employeeData.employee_id} onChangeText={(value) => updateField('employeeId', value)} />
+        <InputField label="Mã Nhân Viên" value={employeeData.employeeId} onChangeText={(value) => updateField('employeeId', value)} />
         <InputField label="Họ Tên" value={employeeData.name} onChangeText={(value) => updateField('name', value)} />
         <InputField label="Mật khẩu" value={employeeData.matKhau} onChangeText={(value) => updateField('matKhau', value)} />
 
@@ -89,6 +127,21 @@ export default function EmployeeEditScreen({ navigation, route }) {
           <Text style={styles.label}>Ngày sinh</Text>
           <Text>{employeeData.ngaysinh || "Chọn ngày"}</Text>
         </TouchableOpacity>
+
+        {/* Giới tính */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Giới tính</Text>
+          <Picker
+            selectedValue={employeeData.gioitinh} // Đảm bảo rằng bạn đã cập nhật trường gender trong employeeData
+            onValueChange={(itemValue) => updateField('gioitinh', itemValue)} // Cập nhật giá trị gender
+            style={styles.input}
+          >
+            <Picker.Item label="Chọn giới tính" value="" />
+            <Picker.Item label="Nam" value="male" />
+            <Picker.Item label="Nữ" value="female" />
+            <Picker.Item label="Khác" value="other" />
+          </Picker>
+        </View>
 
         {/* Trường Ngày vào */}
         <TouchableOpacity onPress={() => showDatePickerModal('ngaybatdau')} style={styles.datePicker}>
@@ -121,14 +174,14 @@ export default function EmployeeEditScreen({ navigation, route }) {
   );
 }
 
-const InputField = ({ label, value, onChangeText, isDropdown }) => (
+const InputField = ({ label, value, onChangeText }) => (
   <View style={styles.inputContainer}>
     <Text style={styles.label}>{label}</Text>
     <TextInput
       style={styles.input}
       value={value}
       onChangeText={onChangeText}
-      placeholder={isDropdown ? `Chọn ${label}` : `Nhập ${label}`}
+      placeholder={`Nhập ${label}`}
     />
   </View>
 );
@@ -186,16 +239,18 @@ const styles = StyleSheet.create({
   },
   updateButtonText: {
     color: 'white',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
   deleteButton: {
-    backgroundColor: '#F44336',
+    backgroundColor: 'red',
     padding: 10,
     alignItems: 'center',
     borderRadius: 5,
+    marginVertical: 10,
   },
   deleteButtonText: {
     color: 'white',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
+
