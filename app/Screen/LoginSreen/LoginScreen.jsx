@@ -13,37 +13,40 @@ export default function LoginScreen({ navigation }) {
   // Function to handle login and check role
   const handleLogin = async () => {
     if (!employeeId) {
-      Alert.alert("Error", "Please enter your employee ID.");
-      return;
+        Alert.alert("Error", "Please enter your employee ID.");
+        return;
     }
 
     try {
-      const dbRef = ref(database);
-      const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Fetch employee data
+        const dbRef = ref(database);
+        const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Fetch employee data
 
-      if (snapshot.exists()) {
-        const employeeData = snapshot.val(); // Get employee data
+        if (snapshot.exists()) {
+            const employeeData = snapshot.val(); // Get employee data
 
-        if (password === employeeData.matKhau) { // Assuming the password is stored as 'matKhau'
-          if (employeeData.chucvuId === 'GD') { // Check if employee is a manager
-            navigation.navigate('HomeScreenGD', { employee: employeeData }); // Navigate to ManagerScreen
-          } else if(employeeData.chucvuId === 'TP'){
-            navigation.navigate('EmployeeScreen', { employee: employeeData });
-          }
-           else {
-            navigation.navigate('UserTabNav', { employee: employeeData }); // Navigate to regular user screen
-          }
+            if (password === employeeData.matKhau) { // Assuming the password is stored as 'matKhau'
+                // Navigate based on role
+                switch (employeeData.chucvuId) {
+                    case 'GD':
+                        navigation.navigate('HomeScreenGD'); // Change to your actual director screen component name
+                        break;
+                    case 'TP':
+                        navigation.navigate('EmployeeScreen'); // Change to your actual HR screen component name
+                        break;
+                   
+                }
+            } else {
+                Alert.alert("Error", "Incorrect password.");
+            }
         } else {
-          Alert.alert("Error", "Incorrect password.");
+            Alert.alert("Error", "Employee not found.");
         }
-      } else {
-        Alert.alert("Error", "Employee not found.");
-      }
     } catch (error) {
-      console.error("Error fetching employee data:", error);
-      Alert.alert("Error", "An error occurred while logging in.");
+        console.error("Error fetching employee data:", error);
+        Alert.alert("Error", "An error occurred while logging in.");
     }
-  };
+};
+  
 
   return (
     <View style={styles.container}>
@@ -61,7 +64,6 @@ export default function LoginScreen({ navigation }) {
         placeholder="Employee ID"
         value={employeeId}
         onChangeText={setEmployeeId}
-       
       />
       <TextInput
         style={styles.input}

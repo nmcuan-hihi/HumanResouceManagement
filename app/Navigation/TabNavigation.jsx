@@ -3,22 +3,21 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
-// Import các màn hình
+// Import screens
 import TestScreen from '../Screen/FolderTest/TestScreen';
 import HomeScreen from '../Screen/HomeScreen/HomeScreen';
 import UserProfileScreen from '../Screen/ProfileSreen/UserProfileScreen';
 import NotificeScreen from '../Screen/NotificeScreen/NotificeScreen';
 import HomeScreenGD from '../Screen/HomeScreen/HomeScreenGD';
-import QuanLyMucLuong from '../Screen/QuanLyLuong/QuanLyMucLuong';
 import ChammCong from '../Screen/MarkAttendaceScreen/MarkAttendace';
 import EmployeeScreen from '../Screen/HomeScreen/MangageEmployeeScreen';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigation({ route }) {
-    const { role } = route.params || {}; // Lấy role từ params
+    const { role } = route.params || {}; // Get role from params
 
-    // Các tab dùng chung cho mọi role
+    // Common tabs for all roles
     const CommonTabs = () => (
         <>
             <Tab.Screen 
@@ -36,6 +35,7 @@ export default function TabNavigation({ route }) {
             <Tab.Screen 
                 name="Profile" 
                 component={UserProfileScreen} 
+                initialParams={{ manv: route.params.employee ? route.params.employee.id : null }} // Pass employee ID
                 options={{
                     tabBarLabel: ({ color }) => (
                         <Text style={{ color, fontSize: 15, marginTop: -7 }}>Profile</Text>
@@ -48,7 +48,7 @@ export default function TabNavigation({ route }) {
         </>
     );
 
-    // Cấu hình tab riêng dựa trên role
+    // Role-specific tab configuration
     const RoleSpecificTabs = () => {
         switch (role) {
             case 'NV':
