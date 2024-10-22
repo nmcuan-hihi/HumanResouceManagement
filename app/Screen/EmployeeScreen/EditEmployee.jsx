@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { readEmployees, updateEmployee, deleteEmployee } from '../../services/database';
+import { readEmployees, updateEmployee, toggleEmployeeStatus } from '../../services/database'; // Sử dụng toggleEmployeeStatus
 
 export default function EmployeeEditScreen({ navigation, route }) {
   const { manv } = route.params;
@@ -50,15 +50,16 @@ export default function EmployeeEditScreen({ navigation, route }) {
     }
   };
 
-  const handleDelete = async () => {
+  // Hàm chuyển đổi trạng thái
+  const handleToggleStatus = async () => {
     try {
-      await deleteEmployee(manv);
-      Alert.alert("Thông báo", "Xóa thành công!", [
+      await toggleEmployeeStatus(manv, employeeData.trangthai); // Truyền trạng thái hiện tại
+      Alert.alert("Thông báo", `Trạng thái đã được ${employeeData.trangthai ? 'ngưng hoạt động' : 'hoạt động lại'}!`, [
         { text: "OK", onPress: () => navigation.goBack() },
       ]);
     } catch (error) {
-      console.error("Error deleting employee:", error);
-      Alert.alert("Thông báo", "Xóa không thành công!");
+      console.error("Error toggling employee status:", error);
+      Alert.alert("Thông báo", "Cập nhật trạng thái không thành công!");
     }
   };
 
@@ -98,12 +99,13 @@ export default function EmployeeEditScreen({ navigation, route }) {
         <InputField label="Số điện thoại" value={employeeData.sdt} onChangeText={(value) => updateField('phone', value)} keyboardType="phone-pad" />
         <InputField label="Lương cơ bản" value={employeeData.luongcoban_id} onChangeText={(value) => updateField('salary', value)} keyboardType="numeric" />
 
-        <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
-          <Text style={styles.updateButtonText}>Cập Nhật</Text>
+        {/* Nút chuyển đổi trạng thái */}
+        <TouchableOpacity style={employeeData.trangthai ? styles.deleteButton : styles.updateButton} onPress={handleToggleStatus}>
+          <Text style={styles.deleteButtonText}>{employeeData.trangthai ? 'Ngưng hoạt động' : 'Hoạt động lại'}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Xóa</Text>
+        <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
+          <Text style={styles.updateButtonText}>Cập Nhật</Text>
         </TouchableOpacity>
 
         {showDatePicker && (

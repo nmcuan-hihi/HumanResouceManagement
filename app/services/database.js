@@ -89,6 +89,24 @@ export const deleteEmployee = async (employee_id) => {
     throw error; // Ném lỗi để xử lý ở component
   }
 };
+// Hàm chuyển đổi trạng thái nhân viên
+export const toggleEmployeeStatus = async (employee_id, currentStatus) => {
+  try {
+    const employeeRef = ref(database, `employees/${employee_id}`); // Đường dẫn đến nhân viên cần cập nhật
+    const newStatus = !currentStatus; // Đảo ngược trạng thái
+
+    // Cập nhật trạng thái mới
+    await update(employeeRef, {
+      trangthai: newStatus,
+    });
+
+    console.log(`Employee ${employee_id} status updated to ${newStatus ? 'active' : 'inactive'} successfully!`);
+  } catch (error) {
+    console.error(`Error updating employee ${employee_id} status:`, error);
+    throw error; // Ném lỗi để xử lý ở component
+  }
+};
+
 
 export function writeEmployeeData(employee) {
   console.log("Employee data:", employee); // In ra dữ liệu nhân viên để kiểm tra

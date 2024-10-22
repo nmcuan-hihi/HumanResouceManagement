@@ -49,7 +49,9 @@ export default function EmployeeList({ navigation }) {
       }
 
       if (selectedStatus) {
-        filteredResults = await filterEmployeesByStatus(selectedStatus);
+        // Chuyển đổi selectedStatus thành chuỗi để so sánh
+        const statusToCompare = selectedStatus === "true" ? "true" : "false"; 
+        filteredResults = await filterEmployeesByStatus(statusToCompare);
       }
 
       setFilteredData(filteredResults);
@@ -83,75 +85,80 @@ export default function EmployeeList({ navigation }) {
   };
 
   return (
-    <><BackNav
-      navigation={navigation}
-      name={"Danh sách nhân viên"}
-      soLuong={filteredData.length}
-      btn={"Add"}
-      onEditPress={handleAddEmployee} /><View style={styles.container}>
+    <View style={styles.container}>
+      <View style={styles.headerSection}>
+        <BackNav 
+          navigation={navigation} 
+          name={"Danh sách nhân viên"} 
+          soLuong={filteredData.length} 
+          btn={"Add"} 
+          onEditPress={handleAddEmployee} 
+        />
+      </View>
 
+      {/* Search Section */}
+      <View style={styles.searchSection}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Tìm kiếm theo tên hoặc mã nhân viên"
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+        />
+        <Button title="Tìm kiếm" onPress={handleSearch} />
+      </View>
 
-        {/* Search Section */}
-        <View style={styles.searchSection}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm kiếm theo tên hoặc mã nhân viên"
-            value={searchTerm}
-            onChangeText={setSearchTerm} />
-          <Button title="Tìm kiếm" onPress={handleSearch} />
-        </View>
+      {/* Filter Section */}
+      <View style={styles.filterSection}>
+        <Picker
+          selectedValue={selectedPhongBan}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSelectedPhongBan(itemValue)}
+        >
+          <Picker.Item label="Phòng ban" value="" />
+          {phongBanList.map((phongBan) => (
+            <Picker.Item key={phongBan.maPhongBan} label={phongBan.tenPhongBan} value={phongBan.maPhongBan} />
+          ))}
+        </Picker>
 
-        {/* Filter Section */}
-        <View style={styles.filterSection}>
-          <Picker
-            selectedValue={selectedPhongBan}
-            style={styles.picker}
-            onValueChange={(itemValue) => setSelectedPhongBan(itemValue)}
-          >
-            <Picker.Item label="Phòng ban" value="" />
-            {phongBanList.map((phongBan) => (
-              <Picker.Item key={phongBan.maPhongBan} label={phongBan.tenPhongBan} value={phongBan.maPhongBan} />
-            ))}
-          </Picker>
+        <Picker
+          selectedValue={selectedGender}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSelectedGender(itemValue)}
+        >
+          <Picker.Item label="Giới tính" value="" />
+          <Picker.Item label="Nam" value="Nam" />
+          <Picker.Item label="Nữ" value="Nữ" />
+        </Picker>
 
-          <Picker
-            selectedValue={selectedGender}
-            style={styles.picker}
-            onValueChange={(itemValue) => setSelectedGender(itemValue)}
-          >
-            <Picker.Item label="Giới tính" value="" />
-            <Picker.Item label="Nam" value="Nam" />
-            <Picker.Item label="Nữ" value="Nữ" />
-          </Picker>
+        <Picker
+          selectedValue={selectedStatus}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSelectedStatus(itemValue)}
+        >
+          <Picker.Item label="Trạng thái" value="" />
+          <Picker.Item label="Đang làm" value="true" />
+          <Picker.Item label="Đã nghỉ" value="false" />
+        </Picker>
+      </View>
 
-          <Picker
-            selectedValue={selectedStatus}
-            style={styles.picker}
-            onValueChange={(itemValue) => setSelectedStatus(itemValue)}
-          >
-            <Picker.Item label="Trạng thái" value="" />
-            <Picker.Item label="Đang làm" value="active" />
-            <Picker.Item label="Đã nghỉ" value="inactive" />
-          </Picker>
-        </View>
-
-        {/* Employee List */}
-        <FlatList
-          style={{ marginTop: 20 }}
-          data={filteredData}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handlePress(item)}>
-              <ItemListEmployee manv={item.manv} name={item.name} imageUrl={item.imageUrl} />
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item.manv} />
-      </View></>
+      {/* Employee List */}
+      <FlatList
+        style={{ marginTop: 20 }}
+        data={filteredData}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handlePress(item)}>
+            <ItemListEmployee manv={item.manv} name={item.name} imageUrl={item.imageUrl} />
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item.manv}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 9,
+    flex: 1,
     backgroundColor: '#f8f8f8',
     paddingTop: 20,
   },

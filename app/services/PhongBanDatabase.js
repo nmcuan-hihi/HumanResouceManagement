@@ -66,7 +66,7 @@ export async function filterEmployeesByStatus(status) {
     if (snapshot.exists()) {
       const employees = snapshot.val();
       const filteredEmployees = Object.keys(employees).reduce((acc, key) => {
-        if (employees[key].trangthai === status) {
+        if (String(employees[key].trangthai) === status) {
           acc.push({ ...employees[key], manv: key }); // Thêm mã nhân viên vào đối tượng
         }
         return acc;
@@ -81,6 +81,7 @@ export async function filterEmployeesByStatus(status) {
     return [];
   }
 }
+
 
 // Hàm tìm kiếm nhân viên theo tên hoặc mã nhân viên
 export async function searchEmployeesByNameOrId(searchTerm) {
