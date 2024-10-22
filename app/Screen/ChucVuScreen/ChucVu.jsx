@@ -7,9 +7,15 @@ import ItemListEmployee from '../../Compoment/ItemEmployee';
 export default function ListChucVu({ navigation }) {
   const [chucVuData, setChucVuData] = useState([]);
 
-  const handleAddChucVu = () => {
-    navigation.navigate("AddChucVu"); // Correctly handle navigation
+  // const handleAddChucVu = () => {
+  //   navigation.navigate("AddChucVu"); // Điều hướng đến màn hình AddChucVu
+  // };
+
+  const handleOtherButtonPress = () => {
+    navigation.navigate("AddChucVu")
+    console.log("Nút khác đã được nhấn!"); // Có thể hiển thị một thông báo hoặc thực hiện hành động khác
   };
+
   useEffect(() => {
     const fetchData = async () => {
       const data = await readChucVu();
@@ -25,7 +31,6 @@ export default function ListChucVu({ navigation }) {
     fetchData();
   }, []);
 
-
   return (
     <View style={styles.container}>
       <View style={styles.headerSection}>
@@ -33,9 +38,14 @@ export default function ListChucVu({ navigation }) {
           navigation={navigation} 
           name={"Danh sách chức vụ"} 
           soLuong={chucVuData.length} 
-          btn={"Add"} 
-          onAddPress={handleAddChucVu} // Pass function instead of executing it
+          // Nút chính để thêm chức vụ
+          
         />
+        
+        {/* Nút khác không điều hướng */}
+        <TouchableOpacity onPress={handleOtherButtonPress} style={styles.otherButton}>
+          <Text style={styles.otherButtonText}>Add</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -67,6 +77,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 15,
     paddingBottom: 10,
+  },
+  otherButton: {
+    padding: 17,
+    margin:2,
+    backgroundColor: '#007BFF', // Màu nền của nút
+    borderRadius: 5,
+  },
+  otherButtonText: {
+    color: '#FFFFFF', // Màu chữ
+    fontWeight: 'bold',
   },
   itemContainer: {
     padding: 15,

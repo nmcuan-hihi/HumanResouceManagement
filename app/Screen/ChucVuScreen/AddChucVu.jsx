@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Text } from 'react-native';
 import { createChucVu } from '../../services/database'; // Giả sử bạn có một hàm này để thêm chức vụ vào cơ sở dữ liệu
 
 export default function AddChucVu({ navigation }) {
-  const [maChucVu, setMaChucVu] = useState(''); // Thêm trường mã chức vụ
-
+  const [maChucVu, setMaChucVu] = useState('');
   const [tenChucVu, setTenChucVu] = useState('');
   const [heSoChucVu, setHeSoChucVu] = useState('');
 
   const handleAddChucVu = async () => {
-    if (!maChucVu || !tenChucVu || !heSoChucVu) { // Kiểm tra mã chức vụ nữ
+    if (!maChucVu || !tenChucVu || !heSoChucVu) {
       Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin!");
       return;
     }
@@ -17,13 +16,13 @@ export default function AddChucVu({ navigation }) {
     const chucVuData = {
       hschucvu: heSoChucVu,
       loaichucvu: tenChucVu,
-      maChucVu: maChucVu, // Thêm mã chức vụ nữ vào dữ liệu
+      maChucVu: maChucVu,
     };
   
     try {
-      await createChucVu(maChucVu, chucVuData); // Gọi hàm với tham số chính xác
+      await createChucVu(maChucVu, chucVuData);
       Alert.alert("Thành công", "Thêm chức vụ thành công!");
-      navigation.goBack(); // Quay lại màn hình trước đó
+      navigation.goBack();
     } catch (error) {
       console.error(error);
       Alert.alert("Lỗi", "Đã xảy ra lỗi trong quá trình thêm chức vụ.");
@@ -32,6 +31,8 @@ export default function AddChucVu({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Thêm Chức Vụ</Text>
+
       <TextInput
         style={styles.input}
         placeholder="Mã Chức Vụ"
@@ -50,9 +51,16 @@ export default function AddChucVu({ navigation }) {
         placeholder="Hệ Số Chức Vụ"
         value={heSoChucVu}
         onChangeText={setHeSoChucVu}
-        keyboardType="numeric" // Chỉ cho phép nhập số
+        keyboardType="numeric"
       />
-      <Button title="Thêm Chức Vụ" onPress={handleAddChucVu} />
+      
+      <TouchableOpacity style={styles.button} onPress={handleAddChucVu}>
+        <Text style={styles.buttonText}>Thêm Chức Vụ</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.cancelButtonText}>Hủy Bỏ</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -63,11 +71,40 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
     padding: 20,
   },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#333',
+  },
   input: {
-    height: 40,
+    height: 50,
     borderColor: '#ddd',
     borderWidth: 1,
+    borderRadius: 5,
     marginBottom: 15,
     paddingHorizontal: 10,
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#FF3B30',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
