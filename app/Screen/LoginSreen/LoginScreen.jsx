@@ -25,9 +25,12 @@ export default function LoginScreen({ navigation }) {
         const employeeData = snapshot.val(); // Get employee data
 
         if (password === employeeData.matKhau) { // Assuming the password is stored as 'matKhau'
-          if (employeeData.chucvuId === 'TP') { // Check if employee is a manager
+          if (employeeData.chucvuId === 'GD') { // Check if employee is a manager
             navigation.navigate('HomeScreenGD', { employee: employeeData }); // Navigate to ManagerScreen
-          } else {
+          } else if(employeeData.chucvuId === 'TP'){
+            navigation.navigate('EmployeeScreen', { employee: employeeData });
+          }
+           else {
             navigation.navigate('UserTabNav', { employee: employeeData }); // Navigate to regular user screen
           }
         } else {
