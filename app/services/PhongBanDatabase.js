@@ -92,12 +92,22 @@ export async function searchEmployeesByNameOrId(searchTerm) {
       const employees = snapshot.val();
       const searchResults = Object.keys(employees).reduce((result, key) => {
         const employee = employees[key];
+        const employeeName = employee.name || ""; // Đảm bảo có giá trị mặc định
+        const employeeId = employee.employeeId || ""; // Đảm bảo có giá trị mặc định
+
+        // Kiểm tra và sử dụng toLowerCase() chỉ khi là chuỗi
         if (
-          (employee.name && employee.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          (employee.employeeId && employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase()))
+          (typeof employeeName === 'string' && employeeName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (typeof employeeId === 'string' && employeeId.toLowerCase().includes(searchTerm.toLowerCase()))
         ) {
           result[key] = employee; // Thêm nhân viên vào kết quả
+        } else {
+          // Log nhân viên không hợp lệ (nếu cần)
+          if (!employeeId) {
+            console.warn(`Employee with key ${key} is missing employeeId.`);
+          }
         }
+
         return result;
       }, {});
 
@@ -111,6 +121,7 @@ export async function searchEmployeesByNameOrId(searchTerm) {
     return {}; // Trả về đối tượng rỗng trong trường hợp có lỗi
   }
 }
+
 
 // Hàm tìm kiếm nhân viên theo mã nhân viên
 export async function searchEmployeesById(employeeId) {
