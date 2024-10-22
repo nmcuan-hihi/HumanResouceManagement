@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const DashboardGD = () => {
+const DashboardGD = ({ listEmployee, listPhongBan }) => {
   return (
     <View style={styles.container}>
       {/* Phần chào hỏi */}
@@ -21,7 +21,7 @@ const DashboardGD = () => {
               style={styles.iconImage}
               source={require("../../assets/images/meeting.png")}
             />
-            <Text style={styles.statNumber}>4</Text>
+            <Text style={styles.statNumber}>{listPhongBan.length}</Text>
             <Text style={styles.statLabel}>Phòng ban</Text>
           </View>
 
@@ -31,7 +31,7 @@ const DashboardGD = () => {
               style={styles.iconImage}
               source={require("../../assets/images/user.png")}
             />
-            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statNumber}>{listEmployee.length}</Text>
             <Text style={styles.statLabel}>Nhân viên</Text>
           </View>
 
@@ -41,7 +41,7 @@ const DashboardGD = () => {
               style={styles.iconImage}
               source={require("../../assets/images/money-bag.png")}
             />
-            <Text style={styles.statNumber}>20.000.000 VNĐ</Text>
+            <Text style={styles.statNumber}>Chưa có </Text>
             <Text style={styles.statLabel}>Lương nhân viên</Text>
           </View>
 
@@ -51,7 +51,7 @@ const DashboardGD = () => {
               style={styles.iconImage}
               source={require("../../assets/images/badge.png")}
             />
-            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statNumber}>chưa có</Text>
             <Text style={styles.statLabel}>Khen thưởng</Text>
           </View>
         </View>

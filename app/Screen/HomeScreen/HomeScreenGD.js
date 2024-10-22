@@ -1,26 +1,60 @@
-import React from "react";
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DashboardGD from "../../Compoment/DashboardGD";
+import { readEmployees, readPhongBan } from "../../services/database";
+export default function HomeScreenGD({ navigation, route }) {
+  const { employee } = route.params;
+  const [listEmployee, setListEmployee] = useState([]);
+  const [listPhongBan, setListPhongBan] = useState([]);
 
-export default function HomeScreenGD({ navigation }) { // Nhận navigation từ props
+  // lấy danh sách nv
+
+  const getListNV = async () => {
+    const data = await readEmployees();
+
+    setListEmployee(Object.values(data));
+    console.log(listEmployee);
+  };
+
+  // lấy danh sách pb
+
+  const getListPB = async () => {
+    const data = await readPhongBan();
+
+    setListPhongBan(Object.values(data));
+
+    console.log(listPhongBan, "pb");
+  };
+
+  useEffect(() => {
+    getListNV();
+    getListPB();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <DashboardGD />
+        <DashboardGD listEmployee={listEmployee} listPhongBan={listPhongBan} />
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <Text>Tổng nhân viên</Text>
-            <Text style={styles.summaryValue}>120</Text>
+            <Text style={styles.summaryValue}>{listEmployee.length}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text>Tổng lương</Text>
-            <Text style={styles.summaryValue}>1000 tỷ đồng</Text>
+            <Text style={styles.summaryValue}>Chưa có</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text>Tổng phòng ban</Text>
-            <Text style={styles.summaryValue}>10</Text>
+            <Text style={styles.summaryValue}>{listPhongBan.length}</Text>
           </View>
           <View style={styles.chartPlaceholder} />
         </View>
@@ -28,15 +62,28 @@ export default function HomeScreenGD({ navigation }) { // Nhận navigation từ
         <Text style={styles.dateText}>Hôm nay, 20/09/2024</Text>
 
         <View style={styles.statsContainer}>
-          <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('ListEmployee')}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate("ListEmployee")}
+          >
             <Icon name="person" size={24} color="#2196F3" />
             <Text style={styles.statValue}>Nhân viên</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statItem} onPress={() => {navigation.navigate('NotificeScreen')}}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => {
+              navigation.navigate("NotificeScreen");
+            }}
+          >
             <Icon name="notifications" size={24} color="#4CAF50" />
             <Text style={styles.statValue}>Thông báo</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statItem} onPress={() => {navigation.navigate('PhongBanScreen')}}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => {
+              navigation.navigate("PhongBanScreen");
+            }}
+          >
             <Icon name="house" size={24} color="#FFC107" />
             <Text style={styles.statValue}>Phòng ban</Text>
           </TouchableOpacity>
@@ -44,12 +91,18 @@ export default function HomeScreenGD({ navigation }) { // Nhận navigation từ
             <Icon name="badge" size={24} color="#F44336" />
             <Text style={styles.statValue}>Chức Vụ</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('QuanLyMucLuong')}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate("QuanLyMucLuong")}
+          >
             <Icon name="credit-card" size={24} color="#9C27B0" />
             <Text style={styles.statValue}>Quản lý mức lương</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.statItem}  onPress={() => navigation.navigate('DanhSachBangCap')}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate("DanhSachBangCap")}
+          >
             <Icon name="book" size={24} color="#FF9966" />
             <Text style={styles.statValue}>Bằng cấp</Text>
           </TouchableOpacity>

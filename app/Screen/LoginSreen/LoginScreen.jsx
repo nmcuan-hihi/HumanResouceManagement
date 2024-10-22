@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { getDatabase, ref, get, child } from "firebase/database";
-import { app } from '../../services/database'; 
+import { app } from "../../services/database";
 
 const database = getDatabase(app);
 
 export default function LoginScreen({ navigation }) {
-  const [employeeId, setEmployeeId] = useState('');
-  const [password, setPassword] = useState(''); // Mock password input
+  const [employeeId, setEmployeeId] = useState("");
+  const [password, setPassword] = useState(""); // Mock password input
 
   // Function to handle login and check role
   const handleLogin = async () => {
@@ -24,15 +31,10 @@ export default function LoginScreen({ navigation }) {
       if (snapshot.exists()) {
         const employeeData = snapshot.val(); // Get employee data
 
-        if (password === employeeData.matKhau) { // Assuming the password is stored as 'matKhau'
-          if (employeeData.chucvuId === 'GD') { // Check if employee is a manager
-            navigation.navigate('HomeScreenGD', { employee: employeeData }); // Navigate to ManagerScreen
-          } else if(employeeData.chucvuId === 'TP'){
-            navigation.navigate('EmployeeScreen', { employee: employeeData });
-          }
-           else {
-            navigation.navigate('UserTabNav', { employee: employeeData }); // Navigate to regular user screen
-          }
+        if (password === employeeData.matKhau) {
+          // Assuming the password is stored as 'matKhau'
+
+          navigation.navigate("UserTabNav", { employee: employeeData }); // Navigate to ManagerScreen
         } else {
           Alert.alert("Error", "Incorrect password.");
         }
@@ -49,7 +51,12 @@ export default function LoginScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Enter your Employee ID</Text>
-        <Ionicons style={{ marginEnd: 30 }} name="person-circle-outline" size={24} color="blue" />
+        <Ionicons
+          style={{ marginEnd: 30 }}
+          name="person-circle-outline"
+          size={24}
+          color="blue"
+        />
       </View>
 
       <Text style={styles.subTitle}>
@@ -61,7 +68,6 @@ export default function LoginScreen({ navigation }) {
         placeholder="Employee ID"
         value={employeeId}
         onChangeText={setEmployeeId}
-       
       />
       <TextInput
         style={styles.input}
@@ -77,16 +83,28 @@ export default function LoginScreen({ navigation }) {
 
       {/* Test login buttons */}
       <View style={styles.testButtons}>
-        <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('NV')}>
+        <TouchableOpacity
+          style={styles.testButton}
+          onPress={() => handleLogin("NV")}
+        >
           <Text style={styles.testButtonText}>Test as NV</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('GD')}>
+        <TouchableOpacity
+          style={styles.testButton}
+          onPress={() => handleLogin("GD")}
+        >
           <Text style={styles.testButtonText}>Test as GD</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('KT')}>
+        <TouchableOpacity
+          style={styles.testButton}
+          onPress={() => handleLogin("KT")}
+        >
           <Text style={styles.testButtonText}>Test as KT</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('NS')}>
+        <TouchableOpacity
+          style={styles.testButton}
+          onPress={() => handleLogin("NS")}
+        >
           <Text style={styles.testButtonText}>Test as NS</Text>
         </TouchableOpacity>
       </View>
@@ -97,29 +115,29 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 20,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingTop: 100,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   title: {
-    color: 'blue',
+    color: "blue",
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   subTitle: {
     fontSize: 14,
-    color: '#6e6e6e',
+    color: "#6e6e6e",
     marginBottom: 30,
   },
   input: {
     height: 50,
-    borderColor: '#000',
+    borderColor: "#000",
     borderWidth: 2,
     borderRadius: 7,
     marginBottom: 20,
@@ -127,33 +145,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#00BFFF',
+    backgroundColor: "#00BFFF",
     borderRadius: 20,
     height: 50,
-    width: '80%',
-    alignItems: 'center',
-    alignSelf: 'center',
-    justifyContent: 'center',
+    width: "80%",
+    alignItems: "center",
+    alignSelf: "center",
+    justifyContent: "center",
     marginTop: 50,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   testButtons: {
     marginTop: 30,
   },
   testButton: {
-    backgroundColor: '#d3d3d3',
+    backgroundColor: "#d3d3d3",
     borderRadius: 15,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginVertical: 5,
   },
   testButtonText: {
-    color: '#000',
+    color: "#000",
     fontSize: 16,
   },
 });
