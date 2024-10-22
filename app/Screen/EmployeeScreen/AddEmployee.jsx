@@ -151,7 +151,7 @@ export default function AddMember({ navigation }) {
             value={employeeData.diachi}
             onChangeText={(value) => updateField('diachi', value)}
           />
-
+          
           <Text style={styles.label}>Số điện thoại</Text>
           <TextInput
             style={styles.input}

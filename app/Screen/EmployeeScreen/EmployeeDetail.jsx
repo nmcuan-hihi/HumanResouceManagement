@@ -58,6 +58,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 <InfoItem label="Ngày sinh" value={employeeData.ngaysinh || "N/A"} />
                 <InfoItem label="Số điện thoại" value={employeeData.sdt || "N/A"} />
                 <InfoItem label="CCCD" value={employeeData.cccd || "N/A"} />
+                <InfoItem label="Mật khẩu" value={employeeData.matKhau || "N/A"} />
                 <InfoItem label="Thời gian đăng ký" value={employeeData.ngaybatdau || "N/A"} />
               </View>
 

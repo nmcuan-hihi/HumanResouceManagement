@@ -1,34 +1,78 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getDatabase, ref, get, child } from "firebase/database";
+import { app } from '../../services/database'; 
+
+const database = getDatabase(app);
 
 export default function LoginScreen({ navigation }) {
-  
-  // Hàm điều hướng theo role
-  const handleLogin = (role) => {
-    navigation.navigate('UserTabNav', { role }); // Chuyển role vào params
+  const [employeeId, setEmployeeId] = useState('');
+  const [password, setPassword] = useState(''); // Mock password input
+
+  // Function to handle login and check role
+  const handleLogin = async () => {
+    if (!employeeId) {
+      Alert.alert("Error", "Please enter your employee ID.");
+      return;
+    }
+
+    try {
+      const dbRef = ref(database);
+      const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Fetch employee data
+
+      if (snapshot.exists()) {
+        const employeeData = snapshot.val(); // Get employee data
+
+        if (password === employeeData.matKhau) { // Assuming the password is stored as 'matKhau'
+          if (employeeData.chucvuId === 'TP') { // Check if employee is a manager
+            navigation.navigate('HomeScreenGD', { employee: employeeData }); // Navigate to ManagerScreen
+          } else {
+            navigation.navigate('UserTabNav', { employee: employeeData }); // Navigate to regular user screen
+          }
+        } else {
+          Alert.alert("Error", "Incorrect password.");
+        }
+      } else {
+        Alert.alert("Error", "Employee not found.");
+      }
+    } catch (error) {
+      console.error("Error fetching employee data:", error);
+      Alert.alert("Error", "An error occurred while logging in.");
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Enter your User</Text>
+        <Text style={styles.title}>Enter your Employee ID</Text>
         <Ionicons style={{ marginEnd: 30 }} name="person-circle-outline" size={24} color="blue" />
       </View>
 
       <Text style={styles.subTitle}>
-        Enter your mobile number to start using Gastos App.
+        Enter your employee ID and password to login.
       </Text>
 
-      <TextInput style={styles.input} placeholder="XXX-XXXX-XXX" keyboardType="numeric" />
-      <TextInput style={styles.input} placeholder="XXX" secureTextEntry />
+      <TextInput
+        style={styles.input}
+        placeholder="Employee ID"
+        value={employeeId}
+        onChangeText={setEmployeeId}
+       
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
 
-      {/* Nút đăng nhập gốc */}
-      <TouchableOpacity style={styles.button} onPress={() => handleLogin('NV')}>
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Continue →</Text>
       </TouchableOpacity>
 
-      {/* Nút test login cho từng role */}
+      {/* Test login buttons */}
       <View style={styles.testButtons}>
         <TouchableOpacity style={styles.testButton} onPress={() => handleLogin('NV')}>
           <Text style={styles.testButtonText}>Test as NV</Text>

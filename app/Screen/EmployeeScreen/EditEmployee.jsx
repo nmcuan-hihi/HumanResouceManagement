@@ -81,6 +81,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
         <InputField label="Chức vụ" value={employeeData.position} onChangeText={(value) => updateField('position', value)} isDropdown />
         <InputField label="Mã Nhân Viên" value={employeeData.employee_id} onChangeText={(value) => updateField('employeeId', value)} />
         <InputField label="Họ Tên" value={employeeData.name} onChangeText={(value) => updateField('name', value)} />
+        <InputField label="Mật khẩu" value={employeeData.matKhau} onChangeText={(value) => updateField('matKhau', value)} />
 
         {/* Trường Ngày sinh */}
         <TouchableOpacity onPress={() => showDatePickerModal('ngaysinh')} style={styles.datePicker}>
