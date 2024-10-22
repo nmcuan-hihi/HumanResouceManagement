@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Button } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Text, Button } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
 import BackNav from '../../Compoment/BackNav';
-import { readEmployees } from '../../services/database';
-import { readPhongBan1 } from '../../services/database'; // Nhập hàm đọc phòng ban
+import { readEmployees, readPhongBan1 } from '../../services/database';
 import { filterEmployeesByPhongBan, filterEmployeesByGender, filterEmployeesByStatus, searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 
 export default function EmployeeList({ navigation }) {
@@ -14,7 +13,7 @@ export default function EmployeeList({ navigation }) {
   const [selectedPhongBan, setSelectedPhongBan] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [phongBanList, setPhongBanList] = useState([]); // State để lưu danh sách phòng ban
+  const [phongBanList, setPhongBanList] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,9 +27,8 @@ export default function EmployeeList({ navigation }) {
         setFilteredData(employeeArray);
       }
 
-      // Lấy danh sách phòng ban
       const phongBans = await readPhongBan1();
-      setPhongBanList(phongBans); // Cập nhật danh sách phòng ban
+      setPhongBanList(phongBans);
     };
 
     fetchData();
@@ -49,8 +47,7 @@ export default function EmployeeList({ navigation }) {
       }
 
       if (selectedStatus) {
-        // Chuyển đổi selectedStatus thành chuỗi để so sánh
-        const statusToCompare = selectedStatus === "true" ? "true" : "false"; 
+        const statusToCompare = selectedStatus === "true" ? "true" : "false";
         filteredResults = await filterEmployeesByStatus(statusToCompare);
       }
 
@@ -68,97 +65,124 @@ export default function EmployeeList({ navigation }) {
     navigation.navigate('AddEmployee');
   };
 
-  // Hàm tìm kiếm theo tên hoặc mã nhân viên
   const handleSearch = async () => {
     if (searchTerm.trim() === '') {
-      setFilteredData(employeeData); // Reset lại nếu không có dữ liệu tìm kiếm
+      setFilteredData(employeeData);
     } else {
-      // Tìm kiếm theo tên hoặc mã nhân viên
       const searchResults = await searchEmployeesByNameOrId(searchTerm);
-      // Chuyển đổi kết quả từ đối tượng thành mảng
       const employeeArray = Object.keys(searchResults).map(key => ({
         ...searchResults[key],
-        manv: key // Thêm mã nhân viên vào mỗi nhân viên
+        manv: key
       }));
-      setFilteredData(employeeArray); // Cập nhật kết quả tìm kiếm
+      setFilteredData(employeeArray);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerSection}>
-        <BackNav 
-          navigation={navigation} 
-          name={"Danh sách nhân viên"} 
-          soLuong={filteredData.length} 
-          btn={"Add"} 
-          onEditPress={handleAddEmployee} 
-        />
-      </View>
+    <><BackNav
+      navigation={navigation}
+      name={"Danh sách nhân viên"}
+      soLuong={filteredData.length}
+      btn={"Add"}
+      onEditPress={handleAddEmployee} /><View style={styles.container}>
 
-      {/* Search Section */}
-      <View style={styles.searchSection}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Tìm kiếm theo tên hoặc mã nhân viên"
-          value={searchTerm}
-          onChangeText={setSearchTerm}
-        />
-        <Button title="Tìm kiếm" onPress={handleSearch} />
-      </View>
 
-      {/* Filter Section */}
-      <View style={styles.filterSection}>
-        <Picker
-          selectedValue={selectedPhongBan}
-          style={styles.picker}
-          onValueChange={(itemValue) => setSelectedPhongBan(itemValue)}
-        >
-          <Picker.Item label="Phòng ban" value="" />
-          {phongBanList.map((phongBan) => (
-            <Picker.Item key={phongBan.maPhongBan} label={phongBan.tenPhongBan} value={phongBan.maPhongBan} />
-          ))}
-        </Picker>
-
-        <Picker
-          selectedValue={selectedGender}
-          style={styles.picker}
-          onValueChange={(itemValue) => setSelectedGender(itemValue)}
-        >
-          <Picker.Item label="Giới tính" value="" />
-          <Picker.Item label="Nam" value="Nam" />
-          <Picker.Item label="Nữ" value="Nữ" />
-        </Picker>
-
-        <Picker
-          selectedValue={selectedStatus}
-          style={styles.picker}
-          onValueChange={(itemValue) => setSelectedStatus(itemValue)}
-        >
-          <Picker.Item label="Trạng thái" value="" />
-          <Picker.Item label="Đang làm" value="true" />
-          <Picker.Item label="Đã nghỉ" value="false" />
-        </Picker>
-      </View>
-
-      {/* Employee List */}
-      <FlatList
-        style={{ marginTop: 20 }}
-        data={filteredData}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handlePress(item)}>
-            <ItemListEmployee manv={item.manv} name={item.name} imageUrl={item.imageUrl} />
+        {/* Search Section */}
+        <View style={styles.searchSection}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Tìm kiếm theo tên hoặc mã nhân viên"
+            value={searchTerm}
+            onChangeText={setSearchTerm} />
+          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+            <Text style={{ color: 'white', fontSize: 16 }}>Tìm kiếm</Text>
           </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.manv}
-      />
-    </View>
+        </View>
+
+        {/* Filter Section */}
+        <View style={styles.filterSection}>
+          <RNPickerSelect
+            onValueChange={(itemValue) => setSelectedPhongBan(itemValue)}
+            items={phongBanList.map((phongBan) => ({
+              label: phongBan.tenPhongBan,
+              value: phongBan.maPhongBan,
+            }))}
+            value={selectedPhongBan}
+            placeholder={{ label: "Phòng ban", value: "" }}
+            style={pickerSelectStyles} />
+
+          <RNPickerSelect
+            onValueChange={(itemValue) => setSelectedGender(itemValue)}
+            items={[
+              { label: "Nam", value: "Nam" },
+              { label: "Nữ", value: "Nữ" },
+            ]}
+            value={selectedGender}
+            placeholder={{ label: "Giới tính", value: "" }}
+            style={pickerSelectStyles} />
+
+          <RNPickerSelect
+            onValueChange={(itemValue) => setSelectedStatus(itemValue)}
+            items={[
+              { label: "Đang làm", value: "true" },
+              { label: "Đã nghỉ", value: "false" },
+            ]}
+            value={selectedStatus}
+            placeholder={{ label: "Trạng thái", value: "" }}
+            style={pickerSelectStyles} />
+        </View>
+
+        {/* Employee List */}
+        <FlatList
+          style={{ marginTop: 20 }}
+          data={filteredData}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handlePress(item)}>
+              <ItemListEmployee manv={item.manv} name={item.name} imageUrl={item.imageUrl} />
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.manv} />
+      </View></>
   );
 }
 
+// Styles cho RNPickerSelect
+const pickerSelectStyles = {
+  inputIOS: {
+    color: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  inputAndroid: {
+    color: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+};
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 9,
     backgroundColor: '#f8f8f8',
     paddingTop: 20,
   },
@@ -168,6 +192,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 15,
     paddingBottom: 10,
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
   searchSection: {
     flexDirection: 'row',
@@ -179,31 +207,28 @@ const styles = StyleSheet.create({
     flex: 1,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+    borderRadius: 8,
+    paddingHorizontal: 15,
     marginRight: 10,
     height: 40,
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   filterSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 15,
-    marginBottom: 10,
+    marginBottom: 20,
     alignItems: 'center',
   },
-  picker: {
-    height: 50,
-    width: 120,
-    marginRight: 10,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    backgroundColor: '#fff',
+  searchButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
 });
