@@ -83,7 +83,6 @@ export default function EmployeeEditScreen({ navigation, route }) {
         return pb.maPhongBan == employeeData.phongbanId;
       });
 
-
       if (currentNV.chucvuId != "TP") {
         if (employeeData.chucvuId == "TP") {
           await editPhongBan(employeeData.phongbanId, { maQuanLy: manv });
@@ -97,11 +96,13 @@ export default function EmployeeEditScreen({ navigation, route }) {
           { text: "OK", onPress: () => navigation.goBack() },
         ]);
       } else {
-        if (currentNV.phongbanId == employeeData.phongbanId) {
-          if (employeeData.chucvuId != "TP") {
-            await editPhongBan(employeeData.phongbanId, { maQuanLy: "" });
-          }
-
+        if (employeeData.chucvuId != "TP") {
+          await editPhongBan(currentNV.phongbanId, { maQuanLy: "" });
+          await updateEmployee(manv, employeeData);
+          Alert.alert("Thông báo", `Cập nhật thành công!`, [
+            { text: "OK", onPress: () => navigation.goBack() },
+          ]);
+        } else if (currentNV.phongbanId == employeeData.phongbanId) {
           await updateEmployee(manv, employeeData);
           Alert.alert("Thông báo", `Cập nhật thành công!`, [
             { text: "OK", onPress: () => navigation.goBack() },
