@@ -251,19 +251,36 @@ const pickerSelectStyles = {
   inputIOS: {
     color: 'black',
     paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
+    borderColor: '#4CAF50', // Màu viền nổi bật hơn
+    borderRadius: 8, // Làm viền tròn hơn
+    backgroundColor: '#fff', // Màu nền trắng để nổi bật text
+    fontSize: 16,
     marginBottom: 16,
+    shadowColor: '#000', // Thêm shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2, // Shadow trên Android
   },
   inputAndroid: {
     color: 'black',
     paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
+    borderColor: '#4CAF50', // Màu viền nổi bật
+    borderRadius: 8, // Viền tròn
+    backgroundColor: '#fff', // Màu nền trắng
+    fontSize: 16,
     marginBottom: 16,
+    shadowColor: '#000', // Thêm shadow cho Android
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2, // Độ nổi cho Android
+  },
+  placeholder: {
+    color: '#a0a0a0', // Màu placeholder nhạt hơn
   },
 };
