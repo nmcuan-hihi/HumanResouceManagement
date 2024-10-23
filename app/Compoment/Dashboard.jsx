@@ -1,17 +1,17 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-<<<<<<< HEAD
-const Dashboard = ({ employee }) => {
+
+
   
-=======
+
 const Dashboard = ({ listEmployee }) => {
->>>>>>> Thu_br_HienThiTongQuan
+
   return (
     <View style={styles.container}>
       {/* Phần chào hỏi */}
       <View style={styles.header}>
-        <Text style={styles.greeting}>Chào User {employee}</Text>
+        <Text style={styles.greeting}>Chào User</Text>
         <Text style={styles.subText}>Phòng IT</Text>
       </View>
 

@@ -25,8 +25,8 @@ export default function EditMatKhau({ navigation, route }) {
         console.log(updateMK);
         try {
           await updateEmployee(employee.employeeId, updateMK);
-          Alert.alert("Thông báo", "Đổi mật khẩu thành công");
-          navigation.goBack();
+          Alert.alert("Thông báo", "Đổi Thành Công !! \n Vui Lòng Đăng Nhập Lại");
+          navigation.navigate("Login");
         } catch (error) {
           Alert.alert("Lỗi", "Không thể cập nhật mật khẩu. Vui lòng thử lại.");
         }

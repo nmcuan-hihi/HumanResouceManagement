@@ -29,7 +29,7 @@ export default function LoginScreen({ navigation }) {
       const snapshot = await get(child(dbRef, `employees/${employeeId}`));
 
       if (snapshot.exists()) {
-        const employeeData = snapshot.val();
+
 
         const employeeData = snapshot.val(); // Get employee data
 
@@ -81,37 +81,7 @@ export default function LoginScreen({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Continue →</Text>
       </TouchableOpacity>
-<<<<<<< HEAD
-=======
 
-      {/* Test login buttons */}
-      <View style={styles.testButtons}>
-        <TouchableOpacity
-          style={styles.testButton}
-          onPress={() => handleLogin("NV")}
-        >
-          <Text style={styles.testButtonText}>Test as NV</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.testButton}
-          onPress={() => handleLogin("GD")}
-        >
-          <Text style={styles.testButtonText}>Test as GD</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.testButton}
-          onPress={() => handleLogin("KT")}
-        >
-          <Text style={styles.testButtonText}>Test as KT</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.testButton}
-          onPress={() => handleLogin("NS")}
-        >
-          <Text style={styles.testButtonText}>Test as NS</Text>
-        </TouchableOpacity>
-      </View>
->>>>>>> Thu_br_HienThiTongQuan
     </View>
   );
 }
