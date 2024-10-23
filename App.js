@@ -32,6 +32,9 @@ import QuanLyMucLuong from './app/Screen/QuanLyLuong/QuanLyMucLuong';
 import DanhSachSkill from './app/Screen/BangCapScreen/Skill';
 import DetailSkill from './app/Screen/BangCapScreen/DetailSkill';
 
+import EditMatKhau from './app/Screen/ProfileSreen/EditMatKhau';
+
+
 
 const Tab = createBottomTabNavigator();
 
@@ -77,6 +80,10 @@ export default function App() {
 
         <Stack.Screen name="Skill" component={DanhSachSkill} options={{ headerShown: false }} />
         <Stack.Screen name="SkillDetail" component={DetailSkill} options={{ headerShown: false }} />
+
+
+        <Stack.Screen name="EditMatKhau" component={EditMatKhau} options={{ headerShown: false }} />
+
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />

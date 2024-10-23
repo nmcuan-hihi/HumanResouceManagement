@@ -1,8 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
+<<<<<<< HEAD
 const Dashboard = ({ employee }) => {
   
+=======
+const Dashboard = ({ listEmployee }) => {
+>>>>>>> Thu_br_HienThiTongQuan
   return (
     <View style={styles.container}>
       {/* Phần chào hỏi */}
@@ -18,25 +22,25 @@ const Dashboard = ({ employee }) => {
         <View style={styles.statsContainer}>
           {/* Nhiệm vụ hôm nay */}
           <View style={[styles.statBox, styles.statBoxYellow]}>
-            <Text style={styles.statNumber}>6</Text>
+            <Text style={styles.statNumber}>Chưa có </Text>
             <Text style={styles.statLabel}>Nhiệm vụ hôm nay</Text>
           </View>
 
           {/* Nhóm của bạn */}
           <View style={[styles.statBox, styles.statBoxGreen]}>
-            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statNumber}>{listEmployee.length}</Text>
             <Text style={styles.statLabel}>Nhóm của bạn</Text>
           </View>
 
           {/* Số giờ làm trong tháng */}
           <View style={[styles.statBox, styles.statBoxBlue]}>
-            <Text style={styles.statNumber}>42 Giờ</Text>
+            <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Số giờ làm trong tháng</Text>
           </View>
 
           {/* Số ngày làm trong tháng */}
           <View style={[styles.statBox, styles.statBoxCyan]}>
-            <Text style={styles.statNumber}>7</Text>
+            <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Số ngày làm trong tháng</Text>
           </View>
         </View>
@@ -52,76 +56,76 @@ const Dashboard = ({ employee }) => {
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
     marginBottom: 20,
   },
   greeting: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   subText: {
     fontSize: 16,
-    color: '#888',
+    color: "#888",
   },
   overview: {
     marginBottom: 20,
   },
   overviewTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   statsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   statBox: {
-    width: '48%',
+    width: "48%",
     borderRadius: 10,
     padding: 20,
     marginBottom: 15,
   },
   statNumber: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     margin: 10,
   },
   statLabel: {
     fontSize: 14,
-    color: '#555',
+    color: "#555",
   },
   statBoxYellow: {
-    backgroundColor: '#FFEB3B',
+    backgroundColor: "#FFEB3B",
   },
   statBoxGreen: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
   },
   statBoxBlue: {
-    backgroundColor: '#2196F3',
+    backgroundColor: "#2196F3",
   },
   statBoxCyan: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: "#00BCD4",
   },
   button: {
-    backgroundColor: '#00BFFF',
+    backgroundColor: "#00BFFF",
     paddingVertical: 15,
     borderRadius: 10,
     marginBottom: 15,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

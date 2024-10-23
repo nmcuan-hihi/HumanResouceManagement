@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
-export default function UserProfileScreen({ navigation }) {
+export default function UserProfileScreen({ navigation ,route}) {
+  const { employee } = route.params;
   
   const handleLogOut = () => {
     navigation.reset({
@@ -25,6 +26,10 @@ export default function UserProfileScreen({ navigation }) {
 
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Thông Tin Cá Nhân</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={()=>{navigation.navigate('EditMatKhau',{employee})}}>
+        <Text style={styles.buttonText}>Đổi mật khẩu</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogOut}>
