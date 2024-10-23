@@ -22,8 +22,8 @@ export const getEmployeeById = async (employeeId) => {
     
         if (snapshot.exists()) {
           const employee = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng      
-         
-          return employee.name; // Trả về thông tin nhân viên
+          // console.log("Employee Data:", JSON.stringify(employee, null, 2));
+          return employee; // Trả về thông tin nhân viên
         } else {
           console.log("No employee found with ID:", employeeId);
           return null; // Không tìm thấy nhân viên

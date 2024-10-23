@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Dashboard from '../../Compoment/Dashboard';
 import { getEmployeeById } from '../../services/InfoDataLogin';
 
-export default function ChammCong({navigation, route}) {
-  const { keyID } = route.params || {}; // Lấy role từ params
-  const userLogin = getEmployeeById(keyID);
-  
+export default function ChammCong({ navigation, route }) {
+  const { keyID } = route.params || {}; // Lấy keyID từ params
+  const [userLogin, setUserLogin] = useState(null); // State để lưu thông tin nhân viên
+
+  // Lấy thông tin nhân viên khi component được render
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const data = await getEmployeeById(keyID); // Đợi dữ liệu từ Firebase
+        setUserLogin(data); // Lưu dữ liệu vào state
+        console.log("Data:", JSON.stringify(data, null, 2)); // Log dữ liệu để kiểm tra
+      } catch (error) {
+        console.error("Error fetching user data:", error); // Xử lý lỗi
+      }
+    };
+
+    fetchUserData(); // Gọi hàm lấy dữ liệu
+  }, [keyID]); // Chỉ gọi lại khi keyID thay đổi
+
   const handlePress = () => {
     navigation.navigate('ChamCongNV'); // Điều hướng đến màn hình chấm công
   };
@@ -15,7 +30,8 @@ export default function ChammCong({navigation, route}) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <Dashboard employee={userLogin}/>
+        {/* <Dashboard employee={userLogin}/> */}
+        <Dashboard />
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
@@ -57,7 +73,6 @@ export default function ChammCong({navigation, route}) {
             <Text style={styles.statLabel}>Lương</Text>
           </View>
 
-          {/* Bọc toàn bộ View bên trong TouchableOpacity */}
           <TouchableOpacity onPress={handlePress} style={styles.statItem}>
             <Icon name="fingerprint" size={24} color="#9C27B0" />
             <Text style={styles.statValue}>0</Text>
@@ -73,7 +88,7 @@ export default function ChammCong({navigation, route}) {
       </ScrollView>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
