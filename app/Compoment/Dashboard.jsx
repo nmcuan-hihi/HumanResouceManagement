@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Import icon
+
 import { getPhongBanById } from "../services/InfoDataLogin";
 
-
 const Dashboard = ({ listEmployee, employee }) => {
-  const [phongBan, setPhongBan] = useState(null); // State để lưu thông tin phòng ban
+  const [phongBan, setPhongBan] = useState(null);
   const phongbanId = employee?.phongbanId;
 
-  
-  // Lấy thông tin phòng ban khi component được mount
   useEffect(() => {
     const fetchPhongBan = async () => {
       if (phongbanId) {
@@ -42,24 +41,28 @@ const Dashboard = ({ listEmployee, employee }) => {
           <View style={[styles.statBox, styles.statBoxYellow]}>
             <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Nhiệm vụ hôm nay</Text>
+            <Icon name="assignment" size={24} color="#000" style={styles.absoluteIcon} />
           </View>
 
           {/* Nhóm của bạn */}
           <View style={[styles.statBox, styles.statBoxGreen]}>
-            <Text style={styles.statNumber}>{listEmployee.length}</Text>
+            <Text style={styles.statNumber}>{listEmployee.length} <Text style={{ fontSize: 12 }}>Thành Viên</Text></Text>
             <Text style={styles.statLabel}>Nhóm của bạn</Text>
+            <Icon name="group" size={24} color="#000" style={styles.absoluteIcon} />
           </View>
 
           {/* Số giờ làm trong tháng */}
           <View style={[styles.statBox, styles.statBoxBlue]}>
             <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Số giờ làm trong tháng</Text>
+            <Icon name="access-time" size={24} color="#000" style={styles.absoluteIcon} />
           </View>
 
           {/* Số ngày làm trong tháng */}
           <View style={[styles.statBox, styles.statBoxCyan]}>
             <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Số ngày làm trong tháng</Text>
+            <Icon name="calendar-today" size={24} color="#000" style={styles.absoluteIcon} />
           </View>
         </View>
       </View>
@@ -111,6 +114,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     marginBottom: 15,
+    position: 'relative', // Để đặt icon absolute
+  },
+  absoluteIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    opacity: 0.5, // Có thể điều chỉnh độ trong suốt
   },
   statNumber: {
     fontSize: 20,
