@@ -54,7 +54,7 @@ export default function ChammCong({ navigation, route }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <Dashboard listEmployee={listEmployeeMyPB} />
+        <Dashboard listEmployee={listEmployeeMyPB} employee={employee} />
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
