@@ -13,6 +13,7 @@ import {
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
 import {
+  getEmployeeById,
   readEmployees,
   readPhongBan,
   updateEmployee,
@@ -31,22 +32,11 @@ export default function PhongBanScreen({ navigation }) {
   });
   const [maPhongBan, setMaPhongBan] = useState("");
   const [tenPhongBan, setTenPhongBan] = useState("");
-  //ham lấy thông tin nv
-
-  const getDataTruongPhong = async (maTP) => {
-    try {
-      const data = await getEmployeeById(maTP);
-      setTruongPhong(data);
-    } catch (e) {
-      console.log("Lỗi");
-    }
-  };
 
   // Fetch dữ liệu từ Firebase
   const fetchData = async () => {
     try {
       const data = await readPhongBan();
-      console.log("ádsadsa", data);
 
       const phongBanArray = Object.keys(data).map((key) => ({
         ...data[key],
@@ -58,9 +48,7 @@ export default function PhongBanScreen({ navigation }) {
       const dataEmpArray = Object.keys(dataEmp).map((key) => ({
         ...dataEmp[key],
         employeeID: key,
-      }
-    
-    ));
+      }));
 
       const dataNV = dataEmpArray.filter((nv) => {
         return nv.chucvuId != "TP" && nv.chucvuId != "GD";
@@ -95,14 +83,14 @@ export default function PhongBanScreen({ navigation }) {
         tenPhongBan,
         maQuanLy: selectedManager.employeeID,
       };
+      console.log(selectedManager.employeeID, "-----------------");
 
       await writePhongBan(phongban); // Ghi dữ liệu vào Firebase
 
-      const dataTP = getDataTruongPhong(selectedManager.employeeID);
+      // sửa chức vụ thành trưởng phòng cho nv
+      const dataTP = await getEmployeeById(selectedManager.employeeID);
       const updateTP = { ...dataTP, chucvuId: "TP" };
-
-      console.log(updateTP,'-----------------')
-      // await updateEmployee(selectedManager.employeeID, updateTP);
+      await updateEmployee(selectedManager.employeeID, updateTP);
 
       await fetchData(); // Làm mới dữ liệu sau khi thêm mới
 
