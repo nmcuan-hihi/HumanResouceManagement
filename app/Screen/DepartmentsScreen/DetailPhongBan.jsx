@@ -70,6 +70,10 @@ export default function DetailPB({ navigation, route }) {
         setCurrentMaTP(phongBan.maQuanLy); // Assuming `tenPhongBan` is a field in data
         setEditedMaTP(phongBan.maQuanLy);
         getDataTruongPhong(phongBan.maQuanLy);
+
+        const dataTP = getDataTruongPhong(phongBan.maQuanLy);
+
+        console.log(dataTP);
       }
     }
   };
@@ -99,13 +103,12 @@ export default function DetailPB({ navigation, route }) {
       await editPhongBan(maPhongBan, updatedData); // Call editPhongBan to update data
 
       //update thông tin nhân viên thành tp
-      const dataTP = getDataTruongPhong(editedMaTP);
-      const updateTP = { ...dataTP, chucvuId: "TP" };
+      
+      const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
       await updateEmployee(editedMaTP, updateTP);
 
       //update thông tin tp thành nv
-      const dataTPCu = getDataTruongPhong(currentMaTP);
-      const updateTPCu = { ...dataTPCu, chucvuId: "NV" };
+      const updateTPCu = { chucvuId: "NV" };
       await updateEmployee(currentMaTP, updateTPCu);
 
       console.log("Lưu", updatedData);
@@ -125,6 +128,11 @@ export default function DetailPB({ navigation, route }) {
     try {
       await removePhongBan(maPhongBan); // Gọi hàm xóa phòng ban
       setConfirmDelete(false);
+
+      const dataTP = getDataTruongPhong(editedMaTP);
+      const updateTP = { chucvuId: "NV" };
+      await updateEmployee(editedMaTP, updateTP);
+
       navigation.goBack(); // Quay lại màn hình trước đó sau khi xóa
     } catch (error) {
       console.error("Lỗi khi xóa phòng ban:", error);

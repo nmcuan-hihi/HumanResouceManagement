@@ -9,7 +9,12 @@ import {
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
 import { initializeApp } from "firebase/app";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 const database = getDatabase(app);
 const storage = getStorage(app); // Khởi tạo Firebase Storage
 export function writeUserData(employee) {
@@ -25,9 +30,12 @@ export function writeUserData(employee) {
 }
 export async function addEmployee(employeeData, profileImage) {
   try {
-    employeeData.matKhau = employeeData.employeeId
+    employeeData.matKhau = employeeData.employeeId;
     // Tạo tham chiếu tới nơi lưu trữ hình ảnh
-    const imageRef = storageRef(storage, `employee/${employeeData.employeeId}.jpg`);
+    const imageRef = storageRef(
+      storage,
+      `employee/${employeeData.employeeId}.jpg`
+    );
 
     // Tải lên hình ảnh
     const response = await fetch(profileImage);
@@ -55,7 +63,7 @@ export async function readEmployees() {
 
     if (snapshot.exists()) {
       const employees = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
-     
+
       return employees; // Trả về danh sách nhân viên
     } else {
       console.log("No data available");
@@ -100,13 +108,16 @@ export const toggleEmployeeStatus = async (employee_id, currentStatus) => {
       trangthai: newStatus,
     });
 
-    console.log(`Employee ${employee_id} status updated to ${newStatus ? 'active' : 'inactive'} successfully!`);
+    console.log(
+      `Employee ${employee_id} status updated to ${
+        newStatus ? "active" : "inactive"
+      } successfully!`
+    );
   } catch (error) {
     console.error(`Error updating employee ${employee_id} status:`, error);
     throw error; // Ném lỗi để xử lý ở component
   }
 };
-
 
 export function writeEmployeeData(employee) {
   console.log("Employee data:", employee); // In ra dữ liệu nhân viên để kiểm tra
@@ -167,7 +178,7 @@ export async function readPhongBan() {
 
     if (snapshot.exists()) {
       const phongBans = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
-     
+
       return phongBans; // Trả về danh sách phòng ban
     } else {
       console.log("No data available");
@@ -185,9 +196,10 @@ export async function readPhongBan1() {
     if (snapshot.exists()) {
       const phongBans = snapshot.val(); // Lấy dữ liệu
       // Chuyển đổi thành mảng
-      return Object.keys(phongBans).map(key => ({
+      return Object.keys(phongBans).map((key) => ({
         maPhongBan: key,
-        tenPhongBan: phongBans[key].tenPhongBan
+        maQuanLy: phongBans[key].maQuanLy,
+        tenPhongBan: phongBans[key].tenPhongBan,
       }));
     } else {
       console.log("No data available");
@@ -199,7 +211,6 @@ export async function readPhongBan1() {
   }
 }
 
-
 export async function readChucVu() {
   try {
     const dbRef = ref(database);
@@ -207,7 +218,7 @@ export async function readChucVu() {
 
     if (snapshot.exists()) {
       const ChucVus = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
-      console.log("Chuc Vu data:", ChucVus);
+      // console.log("Chuc Vu data:", ChucVus);
       return ChucVus; // Trả về danh sách phòng ban
     } else {
       console.log("No data available");
@@ -283,7 +294,7 @@ export function deleteBangCap(bangCapId) {
 
 // Hàm sửa dữ liệu bằng cấp
 export function updateBangCap(bangcap_id, tenBang) {
-  update(ref(database, `bangcap/${bangcap_id}`),{tenBang}) // Cập nhật dữ liệu vào node 'bangcap'
+  update(ref(database, `bangcap/${bangcap_id}`), { tenBang }) // Cập nhật dữ liệu vào node 'bangcap'
     .then(() => {
       console.log(`Bằng cấp ${bangcap_id} updated successfully!`);
     })
@@ -292,21 +303,20 @@ export function updateBangCap(bangcap_id, tenBang) {
     });
 }
 
-
 export const getEmployeeById = async (employeeId) => {
   try {
-      const dbRef = ref(database);
-      const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Lấy dữ liệu từ node 'employees/{employeeId}'
-  
-      if (snapshot.exists()) {
-        const employee = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng      
-        // console.log("Employee Data:", JSON.stringify(employee, null, 2));
-        return employee; // Trả về thông tin nhân viên
-      } else {
-        console.log("No employee found with ID:", employeeId);
-        return null; // Không tìm thấy nhân viên
-      }
-    } catch (error) {
-      console.error("Error reading employee:", error);
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Lấy dữ liệu từ node 'employees/{employeeId}'
+
+    if (snapshot.exists()) {
+      const employee = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
+      // console.log("Employee Data:", JSON.stringify(employee, null, 2));
+      return employee; // Trả về thông tin nhân viên
+    } else {
+      console.log("No employee found with ID:", employeeId);
+      return null; // Không tìm thấy nhân viên
     }
+  } catch (error) {
+    console.error("Error reading employee:", error);
+  }
 };

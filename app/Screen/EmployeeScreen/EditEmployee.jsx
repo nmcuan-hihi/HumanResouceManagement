@@ -17,6 +17,8 @@ import {
   toggleEmployeeStatus,
   readPhongBan1,
   readChucVu,
+  getEmployeeById,
+  editPhongBan,
 } from "../../services/database";
 import { Picker } from "@react-native-picker/picker";
 import RNPickerSelect from "react-native-picker-select";
@@ -29,12 +31,15 @@ export default function EmployeeEditScreen({ navigation, route }) {
   const [phongBans, setPhongBans] = useState([]);
   const [chucVus, setChucVus] = useState([]);
 
+  const [currentNV, setCurrentNV] = useState(null);
+
   useEffect(() => {
     const fetchEmployeeData = async () => {
       const data = await readEmployees();
       const employee = data[manv];
       if (employee) {
         setEmployeeData(employee);
+        setCurrentNV(employee);
       }
     };
 
@@ -68,15 +73,46 @@ export default function EmployeeEditScreen({ navigation, route }) {
 
   const handleUpdate = async () => {
     try {
-      const phongBan = phongBans.filter((pb) => {
-        pb.maPhongBan == employeeData.phonbanId;
+      // lấy phòng ban hiện tại
+      const currentPhongBan = phongBans.find((pb) => {
+        return pb.maPhongBan == currentNV.phongbanId;
       });
 
-      // if(employeeData.)
-      await updateEmployee(manv, employeeData);
-      Alert.alert("Thông báo", "Cập nhật thành công!", [
-        { text: "OK", onPress: () => navigation.goBack() },
-      ]);
+      // lấy phòng ban được chọn
+      const newPhongBan = phongBans.find((pb) => {
+        return pb.maPhongBan == employeeData.phongbanId;
+      });
+
+
+      if (currentNV.chucvuId != "TP") {
+        if (employeeData.chucvuId == "TP") {
+          await editPhongBan(employeeData.phongbanId, { maQuanLy: manv });
+
+          await updateEmployee(newPhongBan.maQuanLy, { chucvuId: "NV" });
+        }
+
+        await updateEmployee(manv, employeeData);
+
+        Alert.alert("Thông báo", `Cập nhật thành công!`, [
+          { text: "OK", onPress: () => navigation.goBack() },
+        ]);
+      } else {
+        if (currentNV.phongbanId == employeeData.phongbanId) {
+          if (employeeData.chucvuId != "TP") {
+            await editPhongBan(employeeData.phongbanId, { maQuanLy: "" });
+          }
+
+          await updateEmployee(manv, employeeData);
+          Alert.alert("Thông báo", `Cập nhật thành công!`, [
+            { text: "OK", onPress: () => navigation.goBack() },
+          ]);
+        } else {
+          Alert.alert(
+            "Thông báo",
+            `Không thể đổi sang phòng ${newPhongBan.tenPhongBan}, Bạn đang là trưởng phòng ${currentPhongBan.tenPhongBan}!`
+          );
+        }
+      }
     } catch (error) {
       console.error("Error updating employee:", error);
       Alert.alert("Thông báo", "Cập nhật không thành công!");
@@ -117,7 +153,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
           />
         </View>
         <RNPickerSelect
-          onValueChange={(itemValue) => updateField("phonbanId", itemValue)}
+          onValueChange={(itemValue) => updateField("phongbanId", itemValue)}
           items={phongBans.map((phong) => ({
             label: phong.tenPhongBan,
             value: phong.maPhongBan,

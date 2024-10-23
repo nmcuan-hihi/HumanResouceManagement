@@ -83,13 +83,12 @@ export default function PhongBanScreen({ navigation }) {
         tenPhongBan,
         maQuanLy: selectedManager.employeeID,
       };
-      console.log(selectedManager.employeeID, "-----------------");
 
       await writePhongBan(phongban); // Ghi dữ liệu vào Firebase
 
       // sửa chức vụ thành trưởng phòng cho nv
       const dataTP = await getEmployeeById(selectedManager.employeeID);
-      const updateTP = { ...dataTP, chucvuId: "TP" };
+      const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
       await updateEmployee(selectedManager.employeeID, updateTP);
 
       await fetchData(); // Làm mới dữ liệu sau khi thêm mới
