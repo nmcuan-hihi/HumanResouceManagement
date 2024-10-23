@@ -87,28 +87,29 @@ export default function EmployeeEditScreen({ navigation, route }) {
             style={styles.avatar}
           />
         </View>
-
         <RNPickerSelect
-          onValueChange={(itemValue) => updateField('room', itemValue)}
+          onValueChange={(itemValue) => updateField('phonbanId', itemValue)}
           items={phongBans.map((phong) => ({
             label: phong.tenPhongBan,
             value: phong.maPhongBan,
           }))}
-          value={employeeData?.room}
+          value={employeeData.phongbanId} // Giữ value để phản ánh đúng trạng thái phòng ban
           placeholder={{ label: "Chọn phòng", value: "" }}
           style={pickerSelectStyles}
         />
 
         <RNPickerSelect
-          onValueChange={(itemValue) => updateField('position', itemValue)}
+          onValueChange={(itemValue) => updateField('chucvuId', itemValue)}
           items={Object.entries(chucVus).map(([key, value]) => ({
             label: value.loaichucvu,
             value: key,
           }))}
-          value={employeeData?.position}
+          value={employeeData.chucvuId} // Sửa lại thành 'position' để phù hợp với dữ liệu
           placeholder={{ label: "Chọn chức vụ", value: "" }}
           style={pickerSelectStyles}
         />
+
+
 
         {/* Các trường dữ liệu khác */}
         <InputField label="Mã Nhân Viên" value={employeeData.employeeId} onChangeText={(value) => updateField('employeeId', value)} />
@@ -122,12 +123,14 @@ export default function EmployeeEditScreen({ navigation, route }) {
         </TouchableOpacity>
 
         <RNPickerSelect
+          value={employeeData.gioitinh} 
           onValueChange={(value) => updateField('gioitinh', value)}
           items={[
             { label: 'Nam', value: 'Nam' },
             { label: 'Nữ', value: 'Nữ' },
             { label: 'Khác', value: 'Khác' },
           ]}
+          placeholder={{ label: "Chọn giới tính", value: "" }}
           style={pickerSelectStyles}
         />
 
@@ -139,7 +142,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
         </TouchableOpacity>
 
         <InputField label="Số điện thoại" value={employeeData.sdt} onChangeText={(value) => updateField('phone', value)} keyboardType="phone-pad" />
-        <InputField label="Lương cơ bản" value={employeeData.luongcoban_id} onChangeText={(value) => updateField('salary', value)} keyboardType="numeric" />
+        <InputField label="Lương cơ bản" value={employeeData.luongcoban} onChangeText={(value) => updateField('luongcoban', value)} keyboardType="numeric" />
 
         {/* Nút chuyển đổi trạng thái */}
         <TouchableOpacity style={employeeData.trangthai ? styles.deleteButton : styles.updateButton} onPress={handleToggleStatus}>
@@ -248,20 +251,38 @@ const pickerSelectStyles = {
   inputIOS: {
     color: 'black',
     paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
+    borderColor: '#4CAF50', // Màu viền nổi bật hơn
+    borderRadius: 8, // Làm viền tròn hơn
+    backgroundColor: '#fff', // Màu nền trắng để nổi bật text
+    fontSize: 16,
     marginBottom: 16,
+    shadowColor: '#000', // Thêm shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2, // Shadow trên Android
   },
   inputAndroid: {
     color: 'black',
     paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
+    borderColor: '#4CAF50', // Màu viền nổi bật
+    borderRadius: 8, // Viền tròn
+    backgroundColor: '#fff', // Màu nền trắng
+    fontSize: 16,
     marginBottom: 16,
+    shadowColor: '#000', // Thêm shadow cho Android
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2, // Độ nổi cho Android
+  },
+  placeholder: {
+    color: '#a0a0a0', // Màu placeholder nhạt hơn
   },
 };
+
 
