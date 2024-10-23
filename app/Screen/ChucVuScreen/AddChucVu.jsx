@@ -3,24 +3,25 @@ import { View, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Text } fr
 import { createChucVu } from '../../services/database'; // Giả sử bạn có một hàm này để thêm chức vụ vào cơ sở dữ liệu
 
 export default function AddChucVu({ navigation }) {
-  const [maChucVu, setMaChucVu] = useState('');
+  const [chucvu_id
+    , setchucvu_id] = useState('');
   const [tenChucVu, setTenChucVu] = useState('');
   const [heSoChucVu, setHeSoChucVu] = useState('');
 
   const handleAddChucVu = async () => {
-    if (!maChucVu || !tenChucVu || !heSoChucVu) {
+    if (!chucvu_id || !tenChucVu || !heSoChucVu) {
       Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin!");
       return;
     }
   
     const chucVuData = {
+      chucvu_id: chucvu_id,
       hschucvu: heSoChucVu,
-      loaichucvu: tenChucVu,
-      maChucVu: maChucVu,
+      loaichucvu: tenChucVu
     };
   
     try {
-      await createChucVu(maChucVu, chucVuData);
+      await createChucVu(chucvu_id, chucVuData);
       Alert.alert("Thành công", "Thêm chức vụ thành công!");
       navigation.goBack();
     } catch (error) {
@@ -36,8 +37,8 @@ export default function AddChucVu({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Mã Chức Vụ"
-        value={maChucVu}
-        onChangeText={setMaChucVu}
+        value={chucvu_id}
+        onChangeText={setchucvu_id}
       />
       
       <TextInput

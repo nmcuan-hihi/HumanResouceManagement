@@ -160,13 +160,13 @@ export async function readPhongBan() {
   }
 }
 
-export const createChucVu = async (maChucVu, chucVu) => {
+export const createChucVu = async (chucvu_id, chucVu) => {
   try {
-    const chucVuRef = ref(database, `chucvu/${maChucVu}`); // Tham chiếu tới đường dẫn chức vụ
+    const chucVuRef = ref(database, `chucvu/${chucvu_id}`); // Tham chiếu tới đường dẫn chức vụ
     await set(chucVuRef, chucVu); // Sử dụng hàm set để thêm chức vụ
-    console.log(`Chức vụ ${maChucVu} đã được thêm thành công`);
+    console.log(`Chức vụ ${chucvu_id} đã được thêm thành công`);
   } catch (error) {
-    console.error(`Lỗi khi thêm chức vụ ${maChucVu}:`, error);
+    console.error(`Lỗi khi thêm chức vụ ${chucvu_id}:`, error);
   }
 };
 export const readChucVu = async () => {
@@ -194,13 +194,13 @@ export const updateChucVu = async (maChucVu, updatedData) => {
 };
 
 // Hàm xóa chức vụ
-export const deleteChucVu = async (maChucVu) => {
+export const deleteChucVu = async (chucvu_id) => {
   try {
-    const chucVuRef = ref(database, `chucvu/${maChucVu}`); // Tham chiếu tới chức vụ cần xóa
+    const chucVuRef = ref(database, `chucvu/${chucvu_id}`); // Tham chiếu tới chức vụ cần xóa
     await remove(chucVuRef); // Sử dụng hàm remove để xóa chức vụ
-    console.log(`Chức vụ ${maChucVu} đã được xóa thành công`);
+    console.log(`Chức vụ ${chucvu_id} đã được xóa thành công`);
   } catch (error) {
-    console.error(`Lỗi khi xóa chức vụ ${maChucVu}:`, error);
+    console.error(`Lỗi khi xóa chức vụ ${chucvu_id}:`, error);
   }
 };
 export const editPhongBan = async (maPhongBan, updatedData) => {
