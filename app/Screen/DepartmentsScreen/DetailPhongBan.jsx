@@ -10,15 +10,54 @@ import {
   Modal,
 } from "react-native";
 import BackNav from "../../Compoment/BackNav";
-import Feather from 'react-native-vector-icons/Feather';
-import { readPhongBan, editPhongBan , removePhongBan} from "../../services/database";
+import Feather from "react-native-vector-icons/Feather";
+import {
+  readPhongBan,
+  editPhongBan,
+  removePhongBan,
+} from "../../services/database";
 
+import {
+  getEmployeeById,
+  readEmployees,
+  updateEmployee,
+} from "../../services/database";
+import { SelectList } from "react-native-dropdown-select-list";
 export default function DetailPB({ navigation, route }) {
-  const { maPhongBan } = route.params; 
+  const { maPhongBan } = route.params;
   const [isEditing, setIsEditing] = useState(false);
   const [currentTenPB, setCurrentTenPB] = useState("");
   const [editedTenPB, setEditedTenPB] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(false); 
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [currentMaTP, setCurrentMaTP] = useState("");
+  const [editedMaTP, setEditedMaTP] = useState("");
+
+  const [truongPhong, setTruongPhong] = useState({ name: "" });
+
+  const [dataSelect, setDataSelect] = useState([]);
+
+  //Lấy danh sách nhân viên
+  const getListNV = async () => {
+    const data = await readEmployees();
+    const dataArr = Object.values(data);
+
+    const arrTP = dataArr.filter((nv) => {
+      return nv.chucvuId != "TP" && nv.chucvuId != "GD";
+    });
+
+    const dataDropDown = arrTP.map((nv) => {
+      return {
+        key: nv.employeeId,
+        value: nv.name,
+      };
+    });
+
+    setDataSelect(dataDropDown);
+  };
+
+  useEffect(() => {
+    getListNV();
+  }, [currentMaTP]);
 
   // Fetch phong ban details
   const fetchPhongBan = async () => {
@@ -28,7 +67,20 @@ export default function DetailPB({ navigation, route }) {
       if (phongBan) {
         setCurrentTenPB(phongBan.tenPhongBan); // Assuming `tenPhongBan` is a field in data
         setEditedTenPB(phongBan.tenPhongBan);
+        setCurrentMaTP(phongBan.maQuanLy); // Assuming `tenPhongBan` is a field in data
+        setEditedMaTP(phongBan.maQuanLy);
+        getDataTruongPhong(phongBan.maQuanLy);
       }
+    }
+  };
+
+  //lấy thông tin trưởng phòng
+  const getDataTruongPhong = async (maTP) => {
+    try {
+      const data = await getEmployeeById(maTP);
+      setTruongPhong(data);
+    } catch (e) {
+      console.log("Lỗi");
     }
   };
 
@@ -40,33 +92,46 @@ export default function DetailPB({ navigation, route }) {
     try {
       const updatedData = {
         tenPhongBan: editedTenPB,
+        maQuanLy: editedMaTP,
         // Add other fields if necessary
       };
-  
+
       await editPhongBan(maPhongBan, updatedData); // Call editPhongBan to update data
+
+      //update thông tin nhân viên thành tp
+      const dataTP = getDataTruongPhong(editedMaTP);
+      const updateTP = { ...dataTP, chucvuId: "TP" };
+      await updateEmployee(editedMaTP, updateTP);
+
+      //update thông tin tp thành nv
+      const dataTPCu = getDataTruongPhong(currentMaTP);
+      const updateTPCu = { ...dataTPCu, chucvuId: "NV" };
+      await updateEmployee(currentMaTP, updateTPCu);
+
+      console.log("Lưu", updatedData);
       setCurrentTenPB(editedTenPB);
       setIsEditing(false);
       await fetchPhongBan(); // Refresh data after editing
     } catch (error) {
-      console.error('Lỗi khi lưu thông tin phòng ban:', error);
+      console.error("Lỗi khi lưu thông tin phòng ban:", error);
     }
   };
 
   const handleDelete = () => {
     setConfirmDelete(true);
   };
-  
+
   const confirmDeleteYes = async () => {
     try {
       await removePhongBan(maPhongBan); // Gọi hàm xóa phòng ban
       setConfirmDelete(false);
       navigation.goBack(); // Quay lại màn hình trước đó sau khi xóa
     } catch (error) {
-      console.error('Lỗi khi xóa phòng ban:', error);
+      console.error("Lỗi khi xóa phòng ban:", error);
       setConfirmDelete(false); // Đảm bảo modal được đóng lại ngay cả khi có lỗi
     }
   };
-  
+
   const confirmDeleteNo = () => {
     setConfirmDelete(false); // Đóng modal nếu người dùng không muốn xóa
   };
@@ -74,19 +139,28 @@ export default function DetailPB({ navigation, route }) {
   return (
     <>
       <View style={styles.header}>
-        <BackNav
-          navigation={navigation}
-          name={"Chi tiết phòng ban"}
-        />
+        <BackNav navigation={navigation} name={"Chi tiết phòng ban"} />
       </View>
 
       <SafeAreaView style={styles.container}>
         <ScrollView>
+          <View style={{ height: 50 }}>
+            <TouchableOpacity
+              onPress={() => setIsEditing(true)}
+              style={styles.editBtn}
+            >
+              <Feather
+                name="edit-2"
+                size={20}
+                color="#FFFFFF"
+                style={styles.fea}
+              />
+            </TouchableOpacity>
+          </View>
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Mã phòng ban</Text>
             <Text style={styles.sectionTitle1}>{maPhongBan}</Text>
           </View>
-
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Tên phòng ban</Text>
             {isEditing ? (
@@ -99,13 +173,24 @@ export default function DetailPB({ navigation, route }) {
             ) : (
               <View style={styles.inlineEditContainer}>
                 <Text style={styles.sectionTitle22}>{currentTenPB}</Text>
-                <TouchableOpacity
-                  onPress={() => setIsEditing(true)}
-                  style={styles.editBtn}
-                >
-                  <Feather name="edit-2" size={20} color="#FFFFFF" style={styles.fea} />
-                </TouchableOpacity>
               </View>
+            )}
+          </View>
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Trưởng phòng</Text>
+
+            {isEditing ? (
+              <SelectList
+                setSelected={(val) => {
+                  setEditedMaTP(val);
+
+                  console.log(val, "dachon");
+                }}
+                data={dataSelect}
+                save="key"
+              />
+            ) : (
+              <Text style={styles.sectionTitle1}>{truongPhong.name}</Text>
             )}
           </View>
 
@@ -123,23 +208,28 @@ export default function DetailPB({ navigation, route }) {
         </ScrollView>
 
         <Modal visible={confirmDelete} transparent={true} animationType="slide">
-  <View style={styles.modalCtn}>
-    <View style={styles.bodyModal}>
-      <Text style={styles.confirmText}>
-        Bạn có chắc chắn muốn xóa phòng ban này không?
-      </Text>
-      <View style={styles.modalBtnContainer}>
-        <TouchableOpacity style={styles.modalBtn} onPress={confirmDeleteYes}>
-          <Text style={styles.modalBtnText}>Có</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.modalBtn} onPress={confirmDeleteNo}>
-          <Text style={styles.modalBtnText}>Không</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-</Modal>
-
+          <View style={styles.modalCtn}>
+            <View style={styles.bodyModal}>
+              <Text style={styles.confirmText}>
+                Bạn có chắc chắn muốn xóa phòng ban này không?
+              </Text>
+              <View style={styles.modalBtnContainer}>
+                <TouchableOpacity
+                  style={styles.modalBtn}
+                  onPress={confirmDeleteYes}
+                >
+                  <Text style={styles.modalBtnText}>Có</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalBtn}
+                  onPress={confirmDeleteNo}
+                >
+                  <Text style={styles.modalBtnText}>Không</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </>
   );
@@ -187,6 +277,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFA500",
     borderRadius: 5,
     marginBottom: 30,
+    right: 30,
+    position: "absolute",
   },
   buttonSection: {
     marginTop: 20,

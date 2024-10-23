@@ -291,3 +291,22 @@ export function updateBangCap(bangcap_id, tenBang) {
       console.error(`Error updating bằng cấp ${bangcap_id}:`, error);
     });
 }
+
+
+export const getEmployeeById = async (employeeId) => {
+  try {
+      const dbRef = ref(database);
+      const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Lấy dữ liệu từ node 'employees/{employeeId}'
+  
+      if (snapshot.exists()) {
+        const employee = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng      
+        // console.log("Employee Data:", JSON.stringify(employee, null, 2));
+        return employee; // Trả về thông tin nhân viên
+      } else {
+        console.log("No employee found with ID:", employeeId);
+        return null; // Không tìm thấy nhân viên
+      }
+    } catch (error) {
+      console.error("Error reading employee:", error);
+    }
+};

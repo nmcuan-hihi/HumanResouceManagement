@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,25 +9,45 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import BackNav from '../../Compoment/BackNav';
-import HeaderNav from '../../Compoment/HeaderNav';
-import { readEmployees, readPhongBan, writePhongBan } from '../../services/database';
-import ItemDepartment from '../../Compoment/ItemDepartment';
+} from "react-native";
+import BackNav from "../../Compoment/BackNav";
+import HeaderNav from "../../Compoment/HeaderNav";
+import {
+  readEmployees,
+  readPhongBan,
+  updateEmployee,
+  writePhongBan,
+} from "../../services/database";
+import ItemDepartment from "../../Compoment/ItemDepartment";
 
 export default function PhongBanScreen({ navigation }) {
   const [phongBanData, setPhongBanData] = useState([]);
   const [employeeData, setEmployeeData] = useState([]);
   const [visibleModal, setVisibleModal] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [selectedManager, setSelectedManager] = useState({ name: '', employeeID: '' });
-  const [maPhongBan, setMaPhongBan] = useState('');
-  const [tenPhongBan, setTenPhongBan] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [selectedManager, setSelectedManager] = useState({
+    name: "",
+    employeeID: "",
+  });
+  const [maPhongBan, setMaPhongBan] = useState("");
+  const [tenPhongBan, setTenPhongBan] = useState("");
+  //ham lấy thông tin nv
+
+  const getDataTruongPhong = async (maTP) => {
+    try {
+      const data = await getEmployeeById(maTP);
+      setTruongPhong(data);
+    } catch (e) {
+      console.log("Lỗi");
+    }
+  };
 
   // Fetch dữ liệu từ Firebase
   const fetchData = async () => {
     try {
       const data = await readPhongBan();
+      console.log("ádsadsa", data);
+
       const phongBanArray = Object.keys(data).map((key) => ({
         ...data[key],
         maPhongBan: key,
@@ -38,10 +58,16 @@ export default function PhongBanScreen({ navigation }) {
       const dataEmpArray = Object.keys(dataEmp).map((key) => ({
         ...dataEmp[key],
         employeeID: key,
-      }));
-      setEmployeeData(dataEmpArray);
+      }
+    
+    ));
+
+      const dataNV = dataEmpArray.filter((nv) => {
+        return nv.chucvuId != "TP" && nv.chucvuId != "GD";
+      });
+      setEmployeeData(dataNV);
     } catch (error) {
-      console.error('Lỗi khi đọc dữ liệu:', error);
+      console.error("Lỗi khi đọc dữ liệu:", error);
     }
   };
 
@@ -52,11 +78,14 @@ export default function PhongBanScreen({ navigation }) {
   const hienThiModal = () => setVisibleModal(true);
 
   const handleSelectEmployee = (employee) => {
-    setSelectedManager({ name: employee.name, employeeID: employee.employeeID });
+    setSelectedManager({
+      name: employee.name,
+      employeeID: employee.employeeID,
+    });
   };
 
   const handlePress = (item) => {
-    navigation.navigate('DetailPB', { maPhongBan: item.maPhongBan });
+    navigation.navigate("DetailPB", { maPhongBan: item.maPhongBan });
   };
 
   const handleAddPhongBan = async () => {
@@ -68,16 +97,23 @@ export default function PhongBanScreen({ navigation }) {
       };
 
       await writePhongBan(phongban); // Ghi dữ liệu vào Firebase
+
+      const dataTP = getDataTruongPhong(selectedManager.employeeID);
+      const updateTP = { ...dataTP, chucvuId: "TP" };
+
+      console.log(updateTP,'-----------------')
+      // await updateEmployee(selectedManager.employeeID, updateTP);
+
       await fetchData(); // Làm mới dữ liệu sau khi thêm mới
 
       // Reset các trường sau khi thêm
-      setMaPhongBan('');
-      setTenPhongBan('');
-      setSelectedManager({ name: '', employeeID: '' });
-      setSearchText('');
+      setMaPhongBan("");
+      setTenPhongBan("");
+      setSelectedManager({ name: "", employeeID: "" });
+      setSearchText("");
       setVisibleModal(false); // Đóng modal
     } catch (error) {
-      console.error('Lỗi khi thêm phòng ban:', error);
+      console.error("Lỗi khi thêm phòng ban:", error);
     }
   };
 
@@ -93,8 +129,10 @@ export default function PhongBanScreen({ navigation }) {
       <View style={styles.container}>
         <FlatList
           style={styles.list}
-          data={phongBanData.filter((item) =>
-            item.tenPhongBan && item.tenPhongBan.toLowerCase().includes(searchText.toLowerCase())
+          data={phongBanData.filter(
+            (item) =>
+              item.tenPhongBan &&
+              item.tenPhongBan.toLowerCase().includes(searchText.toLowerCase())
           )}
           renderItem={({ item }) => (
             <ItemDepartment item={item} onPress={() => handlePress(item)} />
@@ -104,7 +142,7 @@ export default function PhongBanScreen({ navigation }) {
 
         <Modal visible={visibleModal} transparent={true} animationType="slide">
           <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.modalCtn}
           >
             <View style={styles.bodyModal}>
@@ -144,8 +182,10 @@ export default function PhongBanScreen({ navigation }) {
 
                 <FlatList
                   style={styles.employeeList}
-                  data={employeeData.filter((item) =>
-                    item.name && item.name.toLowerCase().includes(searchText.toLowerCase())
+                  data={employeeData.filter(
+                    (item) =>
+                      item.name &&
+                      item.name.toLowerCase().includes(searchText.toLowerCase())
                   )}
                   renderItem={({ item }) => (
                     <TouchableOpacity
@@ -176,37 +216,37 @@ export default function PhongBanScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 9.5,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: "#f8f8f8",
   },
   list: {
     paddingHorizontal: 10,
   },
   modalCtn: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   bodyModal: {
-    width: '85%',
+    width: "85%",
     height: 600,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   body: {
     flex: 1,
     padding: 20,
   },
   TextInput: {
-    width: '100%',
+    width: "100%",
     height: 50,
     borderBottomWidth: 1,
     marginBottom: 10,
     fontSize: 18,
   },
   searchInput: {
-    width: '100%',
+    width: "100%",
     height: 40,
     borderWidth: 1,
     borderRadius: 10,
@@ -220,20 +260,20 @@ const styles = StyleSheet.create({
   employeeItem: {
     padding: 15,
     borderBottomWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
   },
   btnThem: {
-    width: '100%',
+    width: "100%",
     height: 50,
-    backgroundColor: '#FFA500',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#FFA500",
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 10,
     marginTop: 10,
   },
   nameBtn: {
     fontSize: 20,
-    
-    color: '#FFFFFF',
+
+    color: "#FFFFFF",
   },
 });
