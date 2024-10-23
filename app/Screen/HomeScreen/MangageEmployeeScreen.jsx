@@ -54,7 +54,7 @@ const EmployeeScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.wrapper}>
       <ScrollView>
-        <Dashboard listEmployee={listEmployeeMyPB} />
+        <Dashboard listEmployee={listEmployeeMyPB} employee={employee} />
 
         <View style={styles.container}>
           <Text style={styles.contentText}>Chức năng</Text>

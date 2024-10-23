@@ -1,18 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { getPhongBanById } from "../services/InfoDataLogin";
 
 
+const Dashboard = ({ listEmployee, employee }) => {
+  const [phongBan, setPhongBan] = useState(null); // State để lưu thông tin phòng ban
+  const phongbanId = employee?.phongbanId;
 
   
-
-const Dashboard = ({ listEmployee }) => {
+  // Lấy thông tin phòng ban khi component được mount
+  useEffect(() => {
+    const fetchPhongBan = async () => {
+      if (phongbanId) {
+        const data = await getPhongBanById(phongbanId);
+        if (data) {
+          setPhongBan(data);
+        }
+      }
+    };
+    fetchPhongBan();
+  }, [phongbanId]);
 
   return (
     <View style={styles.container}>
       {/* Phần chào hỏi */}
       <View style={styles.header}>
-        <Text style={styles.greeting}>Chào User</Text>
-        <Text style={styles.subText}>Phòng IT</Text>
+        <Text style={styles.greeting}>
+          Chào <Text style={{ color: "blue" }}>{employee?.name}</Text>
+        </Text>
+        <Text style={styles.subText}>
+          {phongBan ? `Phòng ${phongBan.tenPhongBan}` : "Đang tải..."}
+        </Text>
       </View>
 
       {/* Phần Tổng Quan */}
@@ -22,7 +40,7 @@ const Dashboard = ({ listEmployee }) => {
         <View style={styles.statsContainer}>
           {/* Nhiệm vụ hôm nay */}
           <View style={[styles.statBox, styles.statBoxYellow]}>
-            <Text style={styles.statNumber}>Chưa có </Text>
+            <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Nhiệm vụ hôm nay</Text>
           </View>
 
@@ -73,7 +91,7 @@ const styles = StyleSheet.create({
   },
   subText: {
     fontSize: 16,
-    color: "#888",
+    color: "red",
   },
   overview: {
     marginBottom: 20,

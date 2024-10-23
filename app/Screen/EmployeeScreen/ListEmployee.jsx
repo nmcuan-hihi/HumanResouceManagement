@@ -22,14 +22,14 @@ export default function EmployeeList({ navigation }) {
         if (data && typeof data === 'object') {
           const employeeArray = Object.keys(data).map((key) => ({
             ...data[key],
-            manv: data[key].employeeId, // Giả sử employeeId tồn tại trong data[key]
+            manv: data[key].employeeId,
           }));
           setEmployeeData(employeeArray);
-          setFilteredData(employeeArray); // Kiểm tra xem setFilteredData đã được định nghĩa
+          setFilteredData(employeeArray);
         } else {
           console.warn('Dữ liệu nhân viên không hợp lệ:', data);
         }
-    
+
         const phongBans = await readPhongBan1();
         if (phongBans) {
           setPhongBanList(phongBans);
@@ -40,7 +40,7 @@ export default function EmployeeList({ navigation }) {
         console.error('Lỗi khi fetching dữ liệu:', error);
       }
     };
-    
+
     fetchData();
   }, []);
 
@@ -57,7 +57,7 @@ export default function EmployeeList({ navigation }) {
       }
 
       if (selectedStatus) {
-        const statusToCompare = selectedStatus === "true" ? "true" : "false";
+        const statusToCompare = selectedStatus === 'true' ? 'true' : 'false';
         filteredResults = await filterEmployeesByStatus(statusToCompare);
       }
 
@@ -80,9 +80,9 @@ export default function EmployeeList({ navigation }) {
       setFilteredData(employeeData);
     } else {
       const searchResults = await searchEmployeesByNameOrId(searchTerm);
-      const employeeArray = Object.keys(searchResults).map(key => ({
+      const employeeArray = Object.keys(searchResults).map((key) => ({
         ...searchResults[key],
-        manv: key
+        manv: key,
       }));
       setFilteredData(employeeArray);
     }
@@ -92,10 +92,10 @@ export default function EmployeeList({ navigation }) {
     <>
       <BackNav
         navigation={navigation}
-        name={"Danh sách nhân viên"}
+        name="Danh sách nhân viên"
         soLuong={filteredData.length}
-        btn={"Add"}
-        onEditPress={handleAddEmployee} 
+        btn="Add"
+        onEditPress={handleAddEmployee}
       />
       <View style={styles.container}>
         {/* Search Section */}
@@ -112,39 +112,45 @@ export default function EmployeeList({ navigation }) {
         </View>
 
         {/* Filter Section */}
-        <View style={styles.filterSection}>
-          <RNPickerSelect
-            onValueChange={(itemValue) => setSelectedPhongBan(itemValue)}
-            items={phongBanList.map((phongBan) => ({
-              label: phongBan.tenPhongBan,
-              value: phongBan.maPhongBan,
-            }))}
-            value={selectedPhongBan}
-            placeholder={{ label: "Phòng ban", value: "" }}
-            style={pickerSelectStyles} 
-          />
+        <View style={styles.filterWrapper}>
+          <View style={styles.filterSection}>
+            <RNPickerSelect
+              onValueChange={(itemValue) => setSelectedPhongBan(itemValue)}
+              items={phongBanList.map((phongBan) => ({
+                label: phongBan.tenPhongBan,
+                value: phongBan.maPhongBan,
+              }))}
+              value={selectedPhongBan}
+              placeholder={{ label: 'Phòng ban', value: '' }}
+              style={pickerSelectStyles}
+            />
+          </View>
 
-          <RNPickerSelect
-            onValueChange={(itemValue) => setSelectedGender(itemValue)}
-            items={[
-              { label: "Nam", value: "Nam" },
-              { label: "Nữ", value: "Nữ" },
-            ]}
-            value={selectedGender}
-            placeholder={{ label: "Giới tính", value: "" }}
-            style={pickerSelectStyles} 
-          />
+          <View style={styles.filterSection}>
+            <RNPickerSelect
+              onValueChange={(itemValue) => setSelectedGender(itemValue)}
+              items={[
+                { label: 'Nam', value: 'Nam' },
+                { label: 'Nữ', value: 'Nữ' },
+              ]}
+              value={selectedGender}
+              placeholder={{ label: 'Giới tính', value: '' }}
+              style={pickerSelectStyles}
+            />
+          </View>
 
-          <RNPickerSelect
-            onValueChange={(itemValue) => setSelectedStatus(itemValue)}
-            items={[
-              { label: "Đang làm", value: "true" },
-              { label: "Đã nghỉ", value: "false" },
-            ]}
-            value={selectedStatus}
-            placeholder={{ label: "Trạng thái", value: "" }}
-            style={pickerSelectStyles} 
-          />
+          <View style={styles.filterSection}>
+            <RNPickerSelect
+              onValueChange={(itemValue) => setSelectedStatus(itemValue)}
+              items={[
+                { label: 'Đang làm', value: 'true' },
+                { label: 'Đã nghỉ', value: 'false' },
+              ]}
+              value={selectedStatus}
+              placeholder={{ label: 'Trạng thái', value: '' }}
+              style={pickerSelectStyles}
+            />
+          </View>
         </View>
 
         {/* Employee List */}
@@ -156,57 +162,39 @@ export default function EmployeeList({ navigation }) {
               <ItemListEmployee manv={item.manv} name={item.name} imageUrl={item.imageUrl} />
             </TouchableOpacity>
           )}
-          keyExtractor={(item) => item.manv} 
+          keyExtractor={(item) => item.manv}
         />
       </View>
     </>
   );
 }
 
-// Styles cho RNPickerSelect
 const pickerSelectStyles = {
   inputIOS: {
+    height: 27,
     color: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: '#4CAF50', // Màu viền nổi bật hơn
-    borderRadius: 8, // Làm viền tròn hơn
-    backgroundColor: '#fff', // Màu nền trắng để nổi bật text
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
     fontSize: 16,
-    marginBottom: 16,
-    shadowColor: '#000', // Thêm shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // Shadow trên Android
   },
   inputAndroid: {
+    height: 27,
     color: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: '#4CAF50', // Màu viền nổi bật
-    borderRadius: 8, // Viền tròn
-    backgroundColor: '#fff', // Màu nền trắng
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
     fontSize: 16,
-    marginBottom: 16,
-    shadowColor: '#000', // Thêm shadow cho Android
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // Độ nổi cho Android
   },
   placeholder: {
-    color: '#a0a0a0', // Màu placeholder nhạt hơn
+    color: '#a0a0a0',
   },
 };
 
-
 const styles = StyleSheet.create({
   container: {
-    flex: 14,
-    backgroundColor: '#ffff',
+    flex: 16,
+    backgroundColor: '#fff',
     paddingTop: 10,
     paddingHorizontal: 15,
   },
@@ -218,24 +206,13 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    borderColor: '#ccc',
+    borderColor: 'blue',
     borderWidth: 1,
     borderRadius: 3,
     paddingHorizontal: 15,
     height: 40,
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
     marginRight: 10,
-  },
-  filterSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
   },
   searchButton: {
     backgroundColor: '#007AFF',
@@ -247,5 +224,21 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
-
+  filterWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  filterSection: {
+    borderWidth: 1,
+    borderColor: "blue",
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  employeeList: {
+    marginTop: 10,
+  },
 });
