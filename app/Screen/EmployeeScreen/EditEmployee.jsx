@@ -85,8 +85,10 @@ export default function EmployeeEditScreen({ navigation, route }) {
 
       if (currentNV.chucvuId != "TP") {
         if (employeeData.chucvuId == "TP") {
+          
           await editPhongBan(employeeData.phongbanId, { maQuanLy: manv });
 
+          if(newPhongBan.maQuanLy!="")
           await updateEmployee(newPhongBan.maQuanLy, { chucvuId: "NV" });
         }
 
