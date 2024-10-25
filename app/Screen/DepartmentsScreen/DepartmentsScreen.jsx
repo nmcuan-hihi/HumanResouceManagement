@@ -42,7 +42,6 @@ export default function PhongBanScreen({ navigation }) {
         ...data[key],
         maPhongBan: key,
       }));
-      setPhongBanData(phongBanArray);
 
       const dataEmp = await readEmployees();
       const dataEmpArray = Object.keys(dataEmp).map((key) => ({
@@ -53,7 +52,28 @@ export default function PhongBanScreen({ navigation }) {
       const dataNV = dataEmpArray.filter((nv) => {
         return nv.chucvuId != "TP" && nv.chucvuId != "GD";
       });
+
       setEmployeeData(dataNV);
+      const newData = [];
+
+      for (let i = 0; i < phongBanArray.length; i++) {
+        const phongBan = {
+          tenPhongBan: phongBanArray[i].tenPhongBan,
+          maPhongBan: phongBanArray[i].maPhongBan,
+        };
+
+        const employee = dataEmpArray.find(
+          (emp) => emp.employeeId === phongBanArray[i].maQuanLy
+        );
+
+        if (employee) {
+          phongBan.tenTp = employee.name;
+        }
+
+        newData.push(phongBan);
+      }
+
+      setPhongBanData(newData);
     } catch (error) {
       console.error("Lỗi khi đọc dữ liệu:", error);
     }
@@ -166,7 +186,6 @@ export default function PhongBanScreen({ navigation }) {
                   value={searchText}
                   onChangeText={setSearchText}
                 />
-
                 <FlatList
                   style={styles.employeeList}
                   data={employeeData.filter(
@@ -184,7 +203,6 @@ export default function PhongBanScreen({ navigation }) {
                   )}
                   keyExtractor={(item) => item.employeeID}
                 />
-
                 <TouchableOpacity
                   style={styles.btnThem}
                   onPress={handleAddPhongBan}

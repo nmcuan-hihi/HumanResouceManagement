@@ -7,6 +7,7 @@ const ItemDepartment = ({ item, onPress }) => {
       <Text style={styles.maPB}>{item.maPhongBan}</Text>
 
       <Text style={styles.namePB}>{item.tenPhongBan}</Text>
+      <Text style={styles.nameTP}>{item.tenTp} </Text>
     </TouchableOpacity>
   );
 };
@@ -14,19 +15,13 @@ const styles = StyleSheet.create({
   container: {
     alignSelf: "center",
     width: "90%",
-    height: 70, 
-    borderRadius: 5, 
+    height: 70,
+    borderRadius: 5,
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1, // Thêm độ mờ cho bóng
-    shadowRadius: 4, // Thêm độ mềm cho bóng
+    elevation: 5,
   },
   maPB: {
     flex: 2,
@@ -37,9 +32,16 @@ const styles = StyleSheet.create({
   },
   namePB: {
     flex: 5,
-    fontSize: 20, 
-    color: "blue", 
-    marginStart: 20, 
+    fontSize: 20,
+    color: "blue",
+    marginStart: 20,
+  },
+
+  nameTP: {
+    flex: 5,
+    fontSize: 18,
+    color: "orange",
+    marginStart: 20,
   },
 });
 

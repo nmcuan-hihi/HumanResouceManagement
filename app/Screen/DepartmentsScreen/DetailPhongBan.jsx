@@ -103,7 +103,7 @@ export default function DetailPB({ navigation, route }) {
       await editPhongBan(maPhongBan, updatedData); // Call editPhongBan to update data
 
       //update thông tin nhân viên thành tp
-      
+
       const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
       await updateEmployee(editedMaTP, updateTP);
 
@@ -189,6 +189,7 @@ export default function DetailPB({ navigation, route }) {
 
             {isEditing ? (
               <SelectList
+                placeholder={truongPhong.name}
                 setSelected={(val) => {
                   setEditedMaTP(val);
 
