@@ -25,5 +25,5 @@ export default function HomeScreen({ navigation, route }) {
   useEffect(() => {
     getListNV();
   }, []);
-  return <Dashboard listEmployee={listEmployee} />;
+  return <Dashboard listEmployee={listEmployee} employee={employee}/>;
 }

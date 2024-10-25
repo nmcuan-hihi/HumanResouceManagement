@@ -32,4 +32,21 @@ export const getEmployeeById = async (employeeId) => {
         console.error("Error reading employee:", error);
       }
   };
-  
+  // Hàm lấy thông tin phòng ban theo ID
+export const getPhongBanById = async (phongBanId) => {
+  try {
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, `phongban/${phongBanId}`)); // Lấy dữ liệu từ node 'departments/{phongBanId}'
+
+    if (snapshot.exists()) {
+      const phongban = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng      
+     
+      return phongban; // Trả về thông tin nhân viên
+    } else {
+    
+      return null; // Không tìm thấy nhân viên
+    }
+  } catch (error) {
+    console.error("Error reading:", error);
+  }
+};

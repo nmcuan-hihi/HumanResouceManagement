@@ -16,8 +16,9 @@ import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigation({ route }) {
-  const { employee } = route.params || {}; // Lấy role từ params
-  const role = employee.chucvuId;
+  const { employee } = route.params || {};
+  const role = employee?.chucvuId; // Kiểm tra role từ params
+
   // Các tab dùng chung cho mọi role
   const CommonTabs = () => (
     <>
@@ -39,7 +40,6 @@ export default function TabNavigation({ route }) {
         name="Profile"
         component={UserProfileScreen}
         initialParams={{ employee }}
-
         options={{
           tabBarLabel: ({ color }) => (
             <Text style={{ color, fontSize: 15, marginTop: -7 }}>Profile</Text>
@@ -52,79 +52,94 @@ export default function TabNavigation({ route }) {
     </>
   );
 
-  // Cấu hình tab riêng dựa trên role
+  // Tab riêng theo vai trò
   const RoleSpecificTabs = () => {
-    switch (role) {
-      case "NV":
-        return (
-          <Tab.Screen
-            name="Home"
-            component={HomeScreen}
-            initialParams={{ employee }}
-            options={{
-              tabBarLabel: "Home",
-              tabBarIcon: ({ color }) => (
-                <FontAwesome name="home" size={24} color={color} />
-              ),
-            }}
-          />
-        );
-      case "GD":
-        return (
-          <Tab.Screen
-            name="Dashboard"
-            component={HomeScreenGD}
-            initialParams={{ employee }}
-            options={{
-              tabBarLabel: "Dashboard",
-              tabBarIcon: ({ color }) => (
-                <FontAwesome name="dashboard" size={24} color={color} />
-              ),
-            }}
-          />
-        );
-      case "KT":
-        return (
-          <Tab.Screen
-            name="SalaryManagement"
-            component={ChammCong}
-            initialParams={{ employee }}
-            options={{
-              tabBarLabel: "Salary",
-              tabBarIcon: ({ color }) => (
-                <FontAwesome name="money" size={24} color={color} />
-              ),
-            }}
-          />
-        );
-      case "NS":
-        return (
-          <Tab.Screen
-            name="Employees"
-            component={EmployeeScreen}
-            initialParams={{ employee }}
-            options={{
-              tabBarLabel: "Employees",
-              tabBarIcon: ({ color }) => (
-                <FontAwesome name="users" size={24} color={color} />
-              ),
-            }}
-          />
-        );
-      default:
-        return (
-          <Tab.Screen
-            name="Home"
-            component={HomeScreen}
-            initialParams={{ employee }}
-            options={{
-              tabBarLabel: "Home",
-              tabBarIcon: ({ color }) => (
-                <FontAwesome name="home" size={24} color={color} />
-              ),
-            }}
-          />
-        );
+    if (role === "TP" && employee?.phongbanId === "KT") {
+      return (
+        <Tab.Screen
+          name="SalaryManagement"
+          component={ChammCong}
+          initialParams={{ employee }}
+          options={{
+            tabBarLabel: "Salary",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome name="money" size={24} color={color} />
+            ),
+          }}
+        />
+      );
+    }
+    else if (role === "TP" && employee?.phongbanId === "NS") {
+      return (
+        <Tab.Screen
+          name="SalaryManagement"
+          component={EmployeeScreen}
+          initialParams={{ employee }}
+          options={{
+            tabBarLabel: "Nhân Sự",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome name="money" size={24} color={color} />
+            ),
+          }}
+        />
+      );
+    }
+    else if (role === "NV") {
+      return (
+        <Tab.Screen
+          name="Home"
+          component={HomeScreen}
+          initialParams={{ employee }}
+          options={{
+            tabBarLabel: "Home",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome name="home" size={24} color={color} />
+            ),
+          }}
+        />
+      );
+    } else if (role === "GD") {
+      return (
+        <Tab.Screen
+          name="Dashboard"
+          component={HomeScreenGD}
+          initialParams={{ employee }}
+          options={{
+            tabBarLabel: "Dashboard",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome name="dashboard" size={24} color={color} />
+            ),
+          }}
+        />
+      );
+    } else if (role === "NS") {
+      return (
+        <Tab.Screen
+          name="Employees"
+          component={EmployeeScreen}
+          initialParams={{ employee }}
+          options={{
+            tabBarLabel: "Employees",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome name="users" size={24} color={color} />
+            ),
+          }}
+        />
+      );
+    } else {
+      return (
+        <Tab.Screen
+          name="Home"
+          component={HomeScreen}
+          initialParams={{ employee }}
+          options={{
+            tabBarLabel: "Home",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome name="home" size={24} color={color} />
+            ),
+          }}
+        />
+      );
     }
   };
 
