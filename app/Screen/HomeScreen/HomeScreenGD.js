@@ -5,34 +5,56 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
 } from "react-native";
+import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DashboardGD from "../../Compoment/DashboardGD";
 import { readEmployees, readPhongBan } from "../../services/database";
-import Chart from "../../Compoment/Chart";
+import Chart from "../../Compoment/Chart"; // Import biểu đồ
+import { TouchableOpacity } from "react-native";
+
+const FirstRoute = ({ data }) => (
+  <View style={[styles.scene]}>
+    <Chart data={data} title="Biểu đồ 1" />
+  </View>
+);
+
+const SecondRoute = ({ data }) => (
+  <View style={[styles.scene]}>
+    <Chart data={data} title="Biểu đồ 2" />
+  </View>
+);
+
+const ThirdRoute = ({ data }) => (
+  <View style={[styles.scene]}>
+    <Chart data={data} title="Biểu đồ 3" />
+  </View>
+);
+
+const FourthRoute = ({ data }) => (
+  <View style={[styles.scene]}>
+    <Chart data={data} title="Biểu đồ 4" />
+  </View>
+);
+
 export default function HomeScreenGD({ navigation, route }) {
   const { employee } = route.params;
   const [listEmployee, setListEmployee] = useState([]);
   const [listPhongBan, setListPhongBan] = useState([]);
 
   const date = new Date();
-  // lấy danh sách nv
 
+  // Lấy danh sách nhân viên
   const getListNV = async () => {
     const data = await readEmployees();
-
     setListEmployee(Object.values(data));
     console.log(listEmployee);
   };
 
-  // lấy danh sách pb
-
+  // Lấy danh sách phòng ban
   const getListPB = async () => {
     const data = await readPhongBan();
-
     setListPhongBan(Object.values(data));
-
     console.log(listPhongBan, "pb");
   };
 
@@ -40,33 +62,47 @@ export default function HomeScreenGD({ navigation, route }) {
     getListNV();
     getListPB();
   }, []);
+
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'first', title: 'Tab 1' },
+    { key: 'second', title: 'Tab 2' },
+    { key: 'third', title: 'Tab 3' },
+    { key: 'fourth', title: 'Tab 4' },
+  ]);
+
+  const renderScene = SceneMap({
+    first: () => <FirstRoute data={listEmployee} />,
+    second: () => <SecondRoute data={listPhongBan} />,
+    third: () => <ThirdRoute data={listEmployee} />,
+    fourth: () => <FourthRoute data={listPhongBan} />,
+  });
+
+  const renderTabBar = props => (
+    <TabBar
+      {...props}
+      style={styles.tabBar}
+      labelStyle={styles.tabLabel}
+      indicatorStyle={styles.tabIndicator}
+    />
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView
+       showsVerticalScrollIndicator={false}
+
+      >
         <DashboardGD listEmployee={listEmployee} listPhongBan={listPhongBan} />
-
-
-        <Chart/>
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryRow}>
-            <Text>Tổng nhân viên</Text>
-            <Text style={styles.summaryValue}>{listEmployee.length}</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text>Tổng lương</Text>
-            <Text style={styles.summaryValue}>Chưa có</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text>Tổng phòng ban</Text>
-            <Text style={styles.summaryValue}>{listPhongBan.length}</Text>
-          </View>
-          <View style={styles.chartPlaceholder} />
-        </View>
-
         <Text style={styles.dateText}>
           Hôm nay, {date.toLocaleDateString("vi-VN")}
         </Text>
-
+        <View style={styles.summaryCard}>
+          <View>
+            <Chart />
+          </View>
+        </View>
+      
         <View style={styles.statsContainer}>
           <TouchableOpacity
             style={styles.statItem}
@@ -93,7 +129,7 @@ export default function HomeScreenGD({ navigation, route }) {
             <Icon name="house" size={24} color="#FFC107" />
             <Text style={styles.statValue}>Phòng ban</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statItem} onPress={() => {}}>
+          <TouchableOpacity style={styles.statItem} onPress={() => { }}>
             <Icon name="badge" size={24} color="#F44336" />
             <Text style={styles.statValue}>Chức Vụ</Text>
           </TouchableOpacity>
@@ -133,7 +169,8 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: "#FFF9C4",
-    margin: 16,
+    marginTop: 16,
+    marginHorizontal: 16,
     padding: 16,
     borderRadius: 8,
   },
@@ -149,12 +186,18 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontWeight: "bold",
   },
-  chartPlaceholder: {
-    height: 100,
-    width: 100,
-    backgroundColor: "#FFD54F",
-    borderRadius: 500,
-    marginTop: 16,
+  scene: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  tabBar: {
+    backgroundColor: "#E3F2FD",
+  },
+  tabLabel: {
+    color: "#000",
+  },
+  tabIndicator: {
+    backgroundColor: "#2196F3",
   },
   dateText: {
     textAlign: "center",

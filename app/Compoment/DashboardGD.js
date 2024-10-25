@@ -2,14 +2,6 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-// Hàm định dạng ngày hiện tại thành chuỗi "dd/mm/yyyy"
-const getCurrentDate = () => {
-  const today = new Date();
-  const day = String(today.getDate()).padStart(2, "0");
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const year = today.getFullYear();
-  return `${day}/${month}/${year}`;
-};
 
 const DashboardGD = ({ listEmployee, listPhongBan }) => {
   return (
@@ -22,11 +14,10 @@ const DashboardGD = ({ listEmployee, listPhongBan }) => {
       <View style={styles.overview}>
         <View style={styles.overviewHeader}>
           <Text style={styles.overviewTitle}>Tổng Quan</Text>
-          <Text style={styles.date}>{getCurrentDate()}</Text>
         </View>
 
         <View style={styles.statsContainer}>
-          <View style={[styles.statBox, styles.statBoxYellow]}>
+        <View style={[styles.statBox, styles.statBoxYellow, { marginBottom: 20 }]}>
             <Icon
               name="meeting-room"
               size={30}
@@ -43,7 +34,7 @@ const DashboardGD = ({ listEmployee, listPhongBan }) => {
             <Text style={styles.statLabel}>Nhân viên</Text>
           </View>
 
-          <View style={[styles.statBox, styles.statBoxYellow]}>
+          <View style={[styles.statBox, styles.statBoxRed]}>
             <Icon name="attach-money" size={24} color="#000" style={styles.icon} />
             <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Lương nhân viên</Text>
@@ -76,9 +67,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     flex: 1,
   },
-  overview: {
-    marginBottom: 20,
-  },
   overviewHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -88,6 +76,7 @@ const styles = StyleSheet.create({
   overviewTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    marginBottom:10,
   },
   date: {
     fontSize: 14,
@@ -102,7 +91,7 @@ const styles = StyleSheet.create({
     width: "48%",
     borderRadius: 10,
     padding: 20,
-    marginBottom: 15,
+
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOpacity: 0.2,
@@ -129,10 +118,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFEB3B",
   },
   statBoxGreen: {
+    marginBottom: 20,
     backgroundColor: "#4CAF50",
   },
   statBoxCyan: {
     backgroundColor: "#00BCD4",
+  },
+  statBoxRed: { 
+    backgroundColor: "#E1F9FD",
   },
 });
 
