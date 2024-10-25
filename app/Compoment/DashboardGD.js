@@ -1,63 +1,61 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+
+// Hàm định dạng ngày hiện tại thành chuỗi "dd/mm/yyyy"
+const getCurrentDate = () => {
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, "0");
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const year = today.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 const DashboardGD = ({ listEmployee, listPhongBan }) => {
   return (
     <View style={styles.container}>
-      {/* Phần chào hỏi */}
       <View style={styles.header}>
         <Text style={styles.greeting}>Giám đốc</Text>
         <Icon name="waving-hand" size={24} color="#FFA000" />
       </View>
 
-      {/* Phần Tổng Quan */}
       <View style={styles.overview}>
-        <Text style={styles.overviewTitle}>Tổng Quan</Text>
+        <View style={styles.overviewHeader}>
+          <Text style={styles.overviewTitle}>Tổng Quan</Text>
+          <Text style={styles.date}>{getCurrentDate()}</Text>
+        </View>
+
         <View style={styles.statsContainer}>
-          {/* Nhiệm vụ hôm nay */}
           <View style={[styles.statBox, styles.statBoxYellow]}>
-            <Image
-              style={styles.iconImage}
-              source={require("../../assets/images/meeting.png")}
+            <Icon
+              name="meeting-room"
+              size={30}
+              color="blue"
+              style={styles.icon}
             />
             <Text style={styles.statNumber}>{listPhongBan.length}</Text>
             <Text style={styles.statLabel}>Phòng ban</Text>
           </View>
 
-          {/* Nhóm của bạn */}
           <View style={[styles.statBox, styles.statBoxGreen]}>
-            <Image
-              style={styles.iconImage}
-              source={require("../../assets/images/user.png")}
-            />
+            <Icon name="group" size={26} color="yellow" style={styles.icon} />
             <Text style={styles.statNumber}>{listEmployee.length}</Text>
             <Text style={styles.statLabel}>Nhân viên</Text>
           </View>
 
-          {/* Lương nhân viên */}
           <View style={[styles.statBox, styles.statBoxYellow]}>
-            <Image
-              style={styles.iconImage}
-              source={require("../../assets/images/money-bag.png")}
-            />
-            <Text style={styles.statNumber}>Chưa có </Text>
+            <Icon name="attach-money" size={24} color="#000" style={styles.icon} />
+            <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Lương nhân viên</Text>
           </View>
 
-          {/* Khen thưởng */}
           <View style={[styles.statBox, styles.statBoxCyan]}>
-            <Image
-              style={styles.iconImage}
-              source={require("../../assets/images/badge.png")}
-            />
-            <Text style={styles.statNumber}>chưa có</Text>
+            <Icon name="star" size={30} color="orange" style={styles.icon} />
+            <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Khen thưởng</Text>
           </View>
         </View>
       </View>
-
-    
     </View>
   );
 };
@@ -65,24 +63,35 @@ const DashboardGD = ({ listEmployee, listPhongBan }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#ffff", // Thêm màu nền để làm nổi bật
+    backgroundColor: "#fff",
     flex: 1,
   },
   header: {
     marginBottom: 20,
-   
     flexDirection: "row",
-    alignItems: "center", // Canh giữa icon và chữ
+    alignItems: "center",
   },
   greeting: {
     fontSize: 20,
     fontWeight: "bold",
-    flex: 1, // Cho phép chữ chiếm không gian còn lại
-  },  
+    flex: 1,
+  },
+  overview: {
+    marginBottom: 20,
+  },
+  overviewHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
   overviewTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+  },
+  date: {
+    fontSize: 14,
+    color: "#777",
   },
   statsContainer: {
     flexDirection: "row",
@@ -94,12 +103,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     marginBottom: 15,
-    backgroundColor: "#fff", // Thêm màu nền cho ô thống kê
+    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
+    position: "relative",
+  },
+  icon: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
   statNumber: {
     fontSize: 20,
@@ -118,13 +133,6 @@ const styles = StyleSheet.create({
   },
   statBoxCyan: {
     backgroundColor: "#00BCD4",
-  },
-  iconImage: {
-    width: 30,
-    height: 30,
-    position: "absolute",
-    top: 15, // Điều chỉnh vị trí biểu tượng
-    right: 15,
   },
 });
 
