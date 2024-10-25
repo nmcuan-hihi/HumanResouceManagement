@@ -10,6 +10,7 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DashboardGD from "../../Compoment/DashboardGD";
 import { readEmployees, readPhongBan } from "../../services/database";
+import Chart from "../../Compoment/Chart";
 export default function HomeScreenGD({ navigation, route }) {
   const { employee } = route.params;
   const [listEmployee, setListEmployee] = useState([]);
@@ -44,6 +45,8 @@ export default function HomeScreenGD({ navigation, route }) {
       <ScrollView>
         <DashboardGD listEmployee={listEmployee} listPhongBan={listPhongBan} />
 
+
+        <Chart/>
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <Text>Tổng nhân viên</Text>
