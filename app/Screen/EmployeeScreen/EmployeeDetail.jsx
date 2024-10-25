@@ -12,20 +12,16 @@ import {
 import BackNav from "../../Compoment/BackNav";
 import { getDatabase, ref, get, child } from "firebase/database";
 import { readBangCapNhanVien } from "../../services/bangcapdb";
-import { readBangCap } from "../../services/database";
-
-import Icon from "react-native-vector-icons/MaterialIcons";
+import IconIonicons from 'react-native-vector-icons/Ionicons'; // Đổi tên biến Icon thành IconIonicons
+import IconMaterial from "react-native-vector-icons/MaterialIcons"; // Đổi tên biến Icon thành IconMaterial
 import ItemListEmployee from "../../Compoment/ItemEmployee";
-
+import { readBangCap } from "../../services/database";
 const database = getDatabase();
 
 export default function EmployeeDetailScreen({ route, navigation }) {
   const { manv } = route.params; // Lấy mã nhân viên từ tham số điều hướng
   const [employeeData, setEmployeeData] = useState(null); // State để lưu dữ liệu nhân viên
-
   const [bangCapNV, setBangCapNV] = useState([]);
-
-  const [bangCa, setBangCap] = useState([]);
 
   // Hàm đọc dữ liệu nhân viên từ Firebase
   const fetchEmployeeData = async () => {
@@ -44,7 +40,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
     }
   };
 
-  //hàm đọc danh sách bằng cấp nhân viên và ds bằng cấp
+  // hàm đọc danh sách bằng cấp nhân viên
   const getDataBCNV = async () => {
     try {
       const databcnv = await readBangCapNhanVien();
@@ -62,30 +58,20 @@ export default function EmployeeDetailScreen({ route, navigation }) {
       // Sử dụng đúng chỉ số và tên biến trong vòng lặp
       for (let i = 0; i < dataByNvId.length; i++) {
         for (let j = 0; j < arrDatabc.length; j++) {
-          // Sửa i thành j ở đây
           if (arrDatabc[j].bangcap_id === arrDatabcnv[i].bangcap_id) {
             newData.push({
               bangcap_id: arrDatabcnv[i].bangcap_id,
               tenBang: arrDatabc[j].tenBang,
-              xacthuc: "0" ? "chưa xác thực" : "đã xác thực", // Đây là một điều kiện luôn trả về "chưa xác thực"
+              xacthuc: arrDatabcnv[i].xacthuc, // Sửa điều kiện để lấy giá trị đúng
             });
           }
         }
       }
 
       setBangCapNV(newData);
-
       console.log(newData, "-----------");
     } catch (error) {
       console.error("Lỗi lấy data bc:", error);
-    }
-  };
-
-  //hàm đọc danh sách bằng cấp
-  const getDataBangCap = async () => {
-    try {
-    } catch (error) {
-      console.error("Lỗi khi fetching dữ liệu:", error);
     }
   };
 
@@ -102,7 +88,6 @@ export default function EmployeeDetailScreen({ route, navigation }) {
   return (
     <>
       <View style={styles.header}>
-        {/* Sử dụng BackNav với onEditPress */}
         <BackNav
           navigation={navigation}
           name={"Chi tiết nhân viên"}
@@ -128,73 +113,59 @@ export default function EmployeeDetailScreen({ route, navigation }) {
               <View style={styles.infoSection}>
                 <Text style={styles.sectionTitle}>Thông tin tài khoản</Text>
                 <InfoItem label="Tên" value={employeeData.name || "N/A"} />
-                <InfoItem
-                  label="Ngày sinh"
-                  value={employeeData.ngaysinh || "N/A"}
-                />
-                <InfoItem
-                  label="Số điện thoại"
-                  value={employeeData.sdt || "N/A"}
-                />
+                <InfoItem label="Ngày sinh" value={employeeData.ngaysinh || "N/A"} />
+                <InfoItem label="Số điện thoại" value={employeeData.sdt || "N/A"} />
                 <InfoItem label="CCCD" value={employeeData.cccd || "N/A"} />
-                <InfoItem
-                  label="Giới tính"
-                  value={employeeData.gioitinh || "N/A"}
-                />
-                <InfoItem
-                  label="Mật khẩu"
-                  value={employeeData.matKhau || "N/A"}
-                />
-                <InfoItem
-                  label="Thời gian đăng ký"
-                  value={employeeData.ngaybatdau || "N/A"}
-                />
+                <InfoItem label="Giới tính" value={employeeData.gioitinh || "N/A"} />
+                <InfoItem label="Mật khẩu" value={employeeData.matKhau || "N/A"} />
+                <InfoItem label="Thời gian đăng ký" value={employeeData.ngaybatdau || "N/A"} />
               </View>
 
               <View style={styles.infoSection}>
                 <Text style={styles.sectionTitle}>Thông tin thành viên</Text>
                 <InfoItem
                   label="Trạng thái"
-                  value={
-                    employeeData.trangthai
-                      ? "Đang hoạt động"
-                      : "Ngưng hoạt động"
-                  }
+                  value={employeeData.trangthai ? "Đang hoạt động" : "Ngưng hoạt động"}
                 />
-                <InfoItem
-                  label="Ngày hết hạn"
-                  value={employeeData.expiryDate || "N/A"}
-                />
+                <InfoItem label="Ngày hết hạn" value={employeeData.expiryDate || "N/A"} />
               </View>
 
               <View style={styles.infoSection}>
-                <View style={styles.headerBc}>
-                  <Text style={styles.sectionTitle}>Bằng cấp</Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate("ThemBangCapNV", {
-                        employeeId: manv,
-                      });
-                    }}
-                  >
-                    <Icon name={"add"} size={30} color="orange" />
-                  </TouchableOpacity>
-                </View>
+                <View style={styles.headerBC}>
+                <Text style={styles.sectionTitle}>Bằng cấp</Text>
 
-                <FlatList
-                  scrollEnabled={false}
-                  style={{ marginTop: 20 }}
-                  data={bangCapNV}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => {}}>
-                      <ItemListEmployee
-                        manv={item.tenBang}
-                        name={item.xacthuc}
-                      />
+                  {/* Nút điều hướng để thêm bằng cấp mới */}
+                  <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={() => {
+                    navigation.navigate("ThemBangCapNV", { employeeId: manv });
+                  }}
+                >
+                  <IconMaterial name={"add"} size={30} color="orange" />
+                </TouchableOpacity>
+                </View>
+                {bangCapNV && bangCapNV.length > 0 ? (
+                  bangCapNV.map((item, index) => (
+                    <TouchableOpacity >
+                      <View key={index} style={styles.infoItem}>
+                      <Text style={styles.infoValue}>{item.tenBang || "N/A"}</Text>
+
+                      <View style={styles.iconContainer}>
+                        <IconIonicons
+                          name="checkmark-circle"
+                          size={20}
+                          color={item.xacthuc === "1" ? "green" : "black"} // Kiểm tra điều kiện xác thực
+                        />
+                       
+                      </View>
+                    </View>
                     </TouchableOpacity>
-                  )}
-                  keyExtractor={(item, index) => index.toString()}
-                />
+                  ))
+                ) : (
+                  <Text>Không có bằng cấp</Text>
+                )}
+
+              
               </View>
             </>
           ) : (
@@ -234,6 +205,8 @@ const styles = StyleSheet.create({
     marginLeft: 60,
   },
   infoSection: {
+    marginVertical: 20,
+    paddingHorizontal: 10,
     backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
@@ -243,7 +216,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   infoItem: {
     flexDirection: "row",
@@ -251,14 +224,27 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   infoLabel: {
+    fontSize: 16,
+    fontWeight: '600',
     color: "#666",
   },
   infoValue: {
+    fontSize: 16,
     fontWeight: "500",
+    color: "#555",
+    marginBottom: 5,
+  },
+  iconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 5,
+  },
+  addButton: {
+    alignItems: "center",
   },
 
-  headerBc: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
+  headerBC:{
+    flexDirection:'row',
+    justifyContent:'space-between'
+  }
 });

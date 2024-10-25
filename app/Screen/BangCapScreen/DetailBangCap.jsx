@@ -11,7 +11,6 @@ import {
   Alert,
 } from "react-native";
 import BackNav from "../../Compoment/BackNav";
-import HeaderNav from "../../Compoment/HeaderNav";
 import Feather from "react-native-vector-icons/Feather";
 import { deleteBangCap, updateBangCap } from "../../services/database";
 
@@ -21,13 +20,22 @@ export default function DetailBangCap({ navigation, route }) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentTenBC, setCurrentTenBC] = useState(tenBang);
   const [editedTenBC, setEditedTenBC] = useState(tenBang);
-  const [visibleModal, setVisibleModal] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false); // State to show confirmation modal for delete
+  const [confirmDelete, setConfirmDelete] = useState(false); // State để hiển thị modal xác nhận xóa
 
   // Handle save
   const handleSave = async () => {
-    setCurrentTenBC(editedTenBC);
-    await updateBangCap(bangcap_id, editedTenBC);
+    try {
+      await updateBangCap(bangcap_id, editedTenBC);
+      setCurrentTenBC(editedTenBC);
+      setIsEditing(false);
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể lưu thông tin. Vui lòng thử lại.");
+    }
+  };
+
+  // Handle cancel
+  const handleCancel = () => {
+    setEditedTenBC(currentTenBC);
     setIsEditing(false);
   };
 
@@ -37,10 +45,12 @@ export default function DetailBangCap({ navigation, route }) {
   };
 
   const confirmDeleteYes = async () => {
-    await deleteBangCap(bangcap_id);
-    navigation.goBack();
-    setConfirmDelete(false);
-    // Possibly navigate back or reset form
+    try {
+      await deleteBangCap(bangcap_id);
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể xóa bằng cấp. Vui lòng thử lại.");
+    }
   };
 
   const confirmDeleteNo = () => {
@@ -48,11 +58,8 @@ export default function DetailBangCap({ navigation, route }) {
   };
 
   return (
-    <>
-      <View style={styles.header}>
-        {/* Sử dụng BackNav với onEditPress */}
-        <BackNav navigation={navigation} name={"Chi tiết bằng cấp"} />
-      </View>
+    <><BackNav navigation={navigation} name={"Chi tiết bằng cấp"} /><>
+     
 
       <SafeAreaView style={styles.container}>
         <ScrollView>
@@ -69,8 +76,7 @@ export default function DetailBangCap({ navigation, route }) {
                 style={styles.TextInput}
                 placeholder="Tên bằng cấp"
                 value={editedTenBC}
-                onChangeText={(text) => setEditedTenBC(text)}
-              />
+                onChangeText={(text) => setEditedTenBC(text)} />
             ) : (
               <View style={styles.inlineEditContainer}>
                 <Text style={styles.sectionTitle22}>{currentTenBC}</Text>
@@ -82,19 +88,23 @@ export default function DetailBangCap({ navigation, route }) {
                     name="edit-2"
                     size={20}
                     color="#FFFFFF"
-                    style={styles.fea}
-                  />
+                    style={styles.fea} />
                 </TouchableOpacity>
               </View>
             )}
           </View>
 
-          {/* Ensure some spacing between info section and buttons */}
+          {/* Nút lưu hoặc xóa */}
           <View style={styles.buttonSection}>
             {isEditing ? (
-              <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
-                <Text style={styles.nameBtn}>Lưu</Text>
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
+                  <Text style={styles.nameBtn}>Lưu</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.btnCancel} onPress={handleCancel}>
+                  <Text style={styles.nameBtn}>Hủy</Text>
+                </TouchableOpacity>
+              </>
             ) : (
               <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
                 <Text style={styles.nameBtn}>Xóa</Text>
@@ -103,7 +113,7 @@ export default function DetailBangCap({ navigation, route }) {
           </View>
         </ScrollView>
 
-        {/* Delete Confirmation Modal */}
+        {/* Modal xác nhận xóa */}
         <Modal visible={confirmDelete} transparent={true} animationType="slide">
           <View style={styles.modalCtn}>
             <View style={styles.bodyModal}>
@@ -128,13 +138,13 @@ export default function DetailBangCap({ navigation, route }) {
           </View>
         </Modal>
       </SafeAreaView>
-    </>
+    </></>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 9,
     backgroundColor: "#F2F2F7",
     margin: 10,
   },
@@ -175,21 +185,31 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 30,
   },
-  editText: {
-    color: "#FFFFFF",
-    fontSize: 20,
-    marginBottom: 20,
+  TextInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 10,
   },
-  // Updated the button section layout
   buttonSection: {
-    marginTop: 20, // Adds space between the info section and buttons
-    alignItems: "center", // Centers the buttons horizontally
+    marginTop: 20,
+    alignItems: "center",
   },
   btnSave: {
     width: "90%",
     height: 50,
     borderRadius: 20,
     backgroundColor: "#FFA500",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  btnCancel: {
+    width: "90%",
+    height: 50,
+    borderRadius: 20,
+    backgroundColor: "grey",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -200,43 +220,11 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20, // Added margin to separate from other content
   },
   nameBtn: {
     fontSize: 22,
     color: "#FFFFFF",
   },
-
-  // Button styles
-  bodyBtn: {
-    width: "100%",
-    alignItems: "center",
-    position: "absolute",
-    bottom: 20,
-  },
-  btnSave: {
-    width: "90%",
-    height: 50,
-    borderRadius: 20,
-    backgroundColor: "#FFA500",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  btnXoa: {
-    width: "90%",
-    height: 50,
-    borderRadius: 20,
-    backgroundColor: "red",
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  nameBtn: {
-    fontSize: 22,
-    color: "#FFFFFF",
-  },
-
-  // Modal styles
   modalCtn: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     flex: 1,

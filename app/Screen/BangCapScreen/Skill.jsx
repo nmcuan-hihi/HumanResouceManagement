@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -13,54 +12,59 @@ import {
 import ItemListEmployee from "../../Compoment/ItemEmployee";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
-import { readBangCap, writeBangCap } from "../../services/database";
+import { readSkills, addSkill } from "../../services/skill";
 
 export default function DanhSachSkill({ navigation }) {
-  const [data, setData] = useState([]); // Lưu danh sách bằng cấp
+  const [data, setData] = useState([]); // Lưu danh sách kỹ năng
   const [visibleModal, setVisibleModal] = useState(false);
-  const [maSKill, setMaSkill ] = useState(""); // Mã bằng cấp
-  const [tenSkill, setTenSkill] = useState(""); // Tên bằng cấp
+  const [maSKill, setMaSkill] = useState(""); // Mã kỹ năng
+  const [tenSkill, setTenSkill] = useState(""); // Tên kỹ năng
 
-  const skills = [
-    { maSkill: "SK01", tenSkill: "JavaScript" },
-    { maSkill: "SK02", tenSkill: "React Native" },
-    { maSkill: "SK03", tenSkill: "Node.js" }
-  ];
-  
+  // Đọc dữ liệu kỹ năng khi màn hình được load
+  useEffect(() => {
+    const fetchData = async () => {
+      const skillsData = await readSkills();
+      setData(skillsData); // Cập nhật dữ liệu từ Firebase
+    };
+    fetchData();
+  }, []);
 
-
-//   set
-  // Đọc dữ liệu bằng cấp khi màn hình được load
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       const bangCapData = await readBangCap();
-//       setData(Object.values(bangCapData || {})); // Cập nhật dữ liệu nếu có
-//     };
-//     fetchData();
-//   }, []);
-
-  const handlePress = (item) => {
-    navigation.navigate("SkillDetail", { item });
+  const handlePress = (mask) => {
+    navigation.navigate("SkillDetail", { item: { maSK: mask } });
+    console.log(mask);
   };
 
-  // Thêm bằng cấp và cập nhật danh sách
-  const handleAddSkill = async () => {
-    if (!maSKill || !tenSkill) {
-      Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
-      return;
-    }
+// Thêm kỹ năng và cập nhật danh sách
+const handleAddSkill = async () => {
+  if (!maSKill || !tenSkill) {
+    Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
+    return;
+  }
 
-    // const newBangCap = { bangcap_id: maBC, tenBang: tenBC };
-    // await writeBangCap(newBangCap); // Ghi dữ liệu vào Firebase
+  const newSkill = { mask: maSKill, tensk: tenSkill };
 
-    // // Cập nhật danh sách bằng cấp sau khi thêm
-    // setData((prevData) => [...prevData, newBangCap]);
+  // Kiểm tra nếu mã kỹ năng đã tồn tại
+  const skillExists = data.some(skill => skill.mask === maSKill);
+  if (skillExists) {
+    Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
+    return;
+  }
+
+  try {
+    await addSkill(newSkill); // Ghi dữ liệu vào Firebase
+
+    // Cập nhật danh sách kỹ năng sau khi thêm
+    setData((prevData) => [...prevData, newSkill]);
 
     // Reset form và đóng modal
     setMaSkill("");
     setTenSkill("");
     setVisibleModal(false);
-  };
+  } catch (error) {
+    Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
+  }
+};
+
 
   return (
     <View style={styles.container}>
@@ -76,13 +80,13 @@ export default function DanhSachSkill({ navigation }) {
 
       <FlatList
         style={{ marginTop: 20 }}
-        data={skills}
+        data={data}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handlePress(item)}>
-            <ItemListEmployee manv={item.maSkill} name={item.tenSkill} />
+          <TouchableOpacity onPress={() => handlePress(item.mask)}>
+            <ItemListEmployee manv={item.mask} name={item.tensk} />
           </TouchableOpacity>
         )}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.mask}
       />
 
       <Modal visible={visibleModal} transparent={true} animationType="slide">

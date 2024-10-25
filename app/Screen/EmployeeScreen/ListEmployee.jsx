@@ -193,7 +193,7 @@ const pickerSelectStyles = {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 16,
+    flex: 13,
     backgroundColor: '#fff',
     paddingTop: 10,
     paddingHorizontal: 15,
