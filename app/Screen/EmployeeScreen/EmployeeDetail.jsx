@@ -117,7 +117,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 <InfoItem label="Tên" value={employeeData.name || "N/A"} />
                 <InfoItem label="Ngày sinh" value={employeeData.ngaysinh || "N/A"} />
                 <InfoItem label="Số điện thoại" value={employeeData.sdt || "N/A"} />
-                <InfoItem label="CCCD" value={employeeData.cccd || "N/A"} onPress={() => { navigation.navigate("cccd") }} />
+                <InfoItem label="CCCD" value={employeeData.cccd || "N/A"} onPress={() => { navigation.navigate("cccd", { cccdNumber: employeeData.cccd }) }} />
                 <InfoItem label="Giới tính" value={employeeData.gioitinh || "N/A"} />
                 <InfoItem label="Mật khẩu" value={employeeData.matKhau || "N/A"} />
                 <InfoItem label="Thời gian đăng ký" value={employeeData.ngaybatdau || "N/A"} />

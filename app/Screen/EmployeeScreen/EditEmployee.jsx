@@ -189,6 +189,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
         {/* Các trường dữ liệu khác */}
         <InputField
           label="Mã Nhân Viên"
+          editable={false}
           value={employeeData.employeeId}
           onChangeText={(value) => updateField("employeeId", value)}
         />
@@ -281,6 +282,7 @@ const InputField = ({ label, value, onChangeText }) => (
     <TextInput
       style={styles.input}
       value={value}
+      editable={false}
       onChangeText={onChangeText}
       placeholder={`Nhập ${label}`}
     />
