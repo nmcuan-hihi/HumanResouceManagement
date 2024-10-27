@@ -22,6 +22,7 @@ import {
 } from "../../services/database";
 import { Picker } from "@react-native-picker/picker";
 import RNPickerSelect from "react-native-picker-select";
+import BackNav from "../../Compoment/BackNav";
 
 export default function EmployeeEditScreen({ navigation, route }) {
   const { manv } = route.params;
@@ -144,12 +145,20 @@ export default function EmployeeEditScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
+ <View style={styles.header}>
+        <BackNav
+          navigation={navigation}
+          name={"Chi tiết nhân viên"}
+          btn={"Lưu"}
+          onEditPress={handleUpdate}
+        />
+      </View>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.avatarContainer}>
           <Image
             source={
-              employeeData.imageURL
-                ? { uri: employeeData.imageURL }
+              employeeData.imageUrl
+                ? { uri: employeeData.imageUrl }
                 : require("../../../assets/image/images.png")
             }
             style={styles.avatar}
@@ -249,9 +258,9 @@ export default function EmployeeEditScreen({ navigation, route }) {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
+        {/* <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
           <Text style={styles.updateButtonText}>Cập Nhật</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {showDatePicker && (
           <DateTimePicker
@@ -281,11 +290,17 @@ const InputField = ({ label, value, onChangeText }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
-    margin: 10,
+    backgroundColor: "#Fff",
+
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+
   },
   scrollView: {
-    padding: 10,
+    padding: 20,
     paddingBottom: 20,
   },
   avatarContainer: {

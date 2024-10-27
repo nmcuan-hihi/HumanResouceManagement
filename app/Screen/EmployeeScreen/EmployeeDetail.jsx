@@ -93,7 +93,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
         <BackNav
           navigation={navigation}
           name={"Chi tiết nhân viên"}
-          
+
           {...(key == "inf" ? { btn: "Chỉnh sửa", onEditPress: handlePress } : {})}
         />
       </View>
@@ -117,57 +117,77 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 <InfoItem label="Tên" value={employeeData.name || "N/A"} />
                 <InfoItem label="Ngày sinh" value={employeeData.ngaysinh || "N/A"} />
                 <InfoItem label="Số điện thoại" value={employeeData.sdt || "N/A"} />
-                <InfoItem label="CCCD" value={employeeData.cccd || "N/A"} />
+                <InfoItem label="CCCD" value={employeeData.cccd || "N/A"} onPress={() => { navigation.navigate("cccd") }} />
                 <InfoItem label="Giới tính" value={employeeData.gioitinh || "N/A"} />
                 <InfoItem label="Mật khẩu" value={employeeData.matKhau || "N/A"} />
                 <InfoItem label="Thời gian đăng ký" value={employeeData.ngaybatdau || "N/A"} />
               </View>
 
-              <View style={styles.infoSection}>
-                <Text style={styles.sectionTitle}>Thông tin thành viên</Text>
-                <InfoItem
-                  label="Trạng thái"
-                  value={employeeData.trangthai ? "Đang hoạt động" : "Ngưng hoạt động"}
-                />
-                <InfoItem label="Ngày hết hạn" value={employeeData.expiryDate || "N/A"} />
-              </View>
 
               <View style={styles.infoSection}>
                 <View style={styles.headerBC}>
-                <Text style={styles.sectionTitle}>Bằng cấp</Text>
+                  <Text style={styles.sectionTitle}>Bằng cấp</Text>
 
                   {/* Nút điều hướng để thêm bằng cấp mới */}
                   <TouchableOpacity
-                  style={styles.addButton}
-                  onPress={() => {
-                    navigation.navigate("ThemBangCapNV", { employeeId: manv });
-                  }}
-                >
-                  <IconMaterial name={"add"} size={30} color="orange" />
-                </TouchableOpacity>
+                    style={styles.addButton}
+                    onPress={() => {
+                      navigation.navigate("ThemBangCapNV", { employeeId: manv });
+                    }}
+                  >
+                    <IconMaterial name={"add"} size={30} color="orange" />
+                  </TouchableOpacity>
                 </View>
                 {bangCapNV && bangCapNV.length > 0 ? (
                   bangCapNV.map((item, index) => (
                     <TouchableOpacity >
                       <View key={index} style={styles.infoItem}>
-                      <Text style={styles.infoValue}>{item.tenBang || "N/A"}</Text>
+                        <Text style={styles.infoValue}>{item.tenBang || "N/A"}</Text>
 
-                      <View style={styles.iconContainer}>
-                        <IconIonicons
-                          name="checkmark-circle"
-                          size={20}
-                          color={item.xacthuc === "1" ? "green" : "black"} // Kiểm tra điều kiện xác thực
-                        />
-                       
+                        <View style={styles.iconContainer}>
+                          <IconIonicons
+                            name="checkmark-circle"
+                            size={20}
+                            color={item.xacthuc === "1" ? "green" : "black"} // Kiểm tra điều kiện xác thực
+                          />
+
+                        </View>
                       </View>
-                    </View>
                     </TouchableOpacity>
                   ))
                 ) : (
                   <Text>Không có bằng cấp</Text>
                 )}
 
-              
+
+              </View>
+              <View style={styles.infoSection}>
+                <View style={styles.headerBC}>
+                  <Text style={styles.sectionTitle}>Kĩ Năng</Text>
+
+                  {/* Nút điều hướng để thêm bằng cấp mới */}
+                  <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={() => {
+                      navigation.navigate("ThemBangCapNV", { employeeId: manv });
+                    }}
+                  >
+                    <IconMaterial name={"add"} size={30} color="orange" />
+                  </TouchableOpacity>
+                </View>
+               
+                  <Text>Không có kĩ năng</Text>
+           
+
+
+              </View>
+              <View style={styles.infoSection}>
+                <Text style={styles.sectionTitle}>Trạng Thái</Text>
+                <InfoItem
+                  label="Trạng thái"
+                  value={employeeData.trangthai ? "Đang hoạt động" : "Đã Nghỉ Việc"}
+                />
+
               </View>
             </>
           ) : (
@@ -179,20 +199,30 @@ export default function EmployeeDetailScreen({ route, navigation }) {
   );
 }
 
-const InfoItem = ({ label, value }) => (
-  <View style={styles.infoItem}>
-    <Text style={styles.infoLabel}>{label}</Text>
-    <Text style={styles.infoValue}>{value}</Text>
-  </View>
+const InfoItem = ({ label, value, onPress }) => (
+  <TouchableOpacity
+    onPress={onPress}
+  ><View style={styles.infoItem}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View></TouchableOpacity>
+
 );
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
-    margin: 10,
+    backgroundColor: "#FFF",
+    padding: 10,
+  },
+  line: {
+    borderBottomWidth: 1,
+    marginHorizontal: 40,
+    borderBottomColor: 'black',
+
   },
   header: {
+    backgroundColor: "#FFF",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -207,7 +237,7 @@ const styles = StyleSheet.create({
     marginLeft: 60,
   },
   infoSection: {
-    marginVertical: 20,
+    marginVertical: 10,
     paddingHorizontal: 10,
     backgroundColor: "white",
     borderRadius: 10,
@@ -217,6 +247,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
+    color: "blue",
     fontWeight: "bold",
     marginBottom: 10,
   },
@@ -245,8 +276,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  headerBC:{
-    flexDirection:'row',
-    justifyContent:'space-between'
+  headerBC: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   }
 });

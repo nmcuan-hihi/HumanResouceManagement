@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, StyleSheet, SafeAreaView,
-  ScrollView, TouchableOpacity, Image, Alert
+  ScrollView, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker'; // Thư viện chọn ảnh từ thiết bị
 import BackNav from '../../Compoment/BackNav'; // Điều hướng quay lại
 import RNPickerSelect from 'react-native-picker-select'; // Component chọn dữ liệu từ danh sách
 import { addEmployee, readChucVu, readPhongBan } from '../../services/database'; // Hàm tương tác với DB
+import ViewLoading, { openModal } from '../../Compoment/ViewLoading';
 
 // Component chính để thêm nhân viên
 export default function AddMember({ navigation }) {
@@ -63,12 +64,15 @@ export default function AddMember({ navigation }) {
     }
 
     try {
+      openModal()
       await addEmployee(employeeData, profileImage); // Thêm nhân viên vào DB
       Alert.alert('Thành công!', 'Nhân viên đã được thêm thành công.');
       navigation.goBack(); // Quay lại màn hình trước
     } catch (error) {
       Alert.alert('Lỗi!', 'Có lỗi xảy ra khi thêm nhân viên.');
       console.error(error);
+    }finally {
+      closeModal(); // Đóng modal loading
     }
   };
 
@@ -117,105 +121,111 @@ export default function AddMember({ navigation }) {
         btn={"Lưu"}
         onEditPress={handleAddEmployee} // Gọi hàm thêm nhân viên
       />
-      <SafeAreaView style={styles.container}>
-        <ScrollView style={{ paddingHorizontal: 15 }}>
-          <View style={styles.avatarContainer}>
-            <TouchableOpacity onPress={pickImage}>
-              <Image
-                source={profileImage
-                  ? { uri: profileImage }
-                  : require("../../../assets/image/images.png")} // Ảnh mặc định nếu chưa chọn
-                style={styles.avatar}
-              />
-            </TouchableOpacity>
-          </View>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+        style={styles.container}
+      >
+        <SafeAreaView>
+          <ScrollView style={{ paddingHorizontal: 15 }}>
+            <View style={styles.avatarContainer}>
+              <TouchableOpacity onPress={pickImage}>
+                <Image
+                  source={profileImage
+                    ? { uri: profileImage }
+                    : require("../../../assets/image/images.png")} // Ảnh mặc định nếu chưa chọn
+                  style={styles.avatar}
+                />
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styles.label}>Mã số CCCD</Text>
-          <TextInput
-            style={styles.input}
-            value={employeeData.cccd}
-            onChangeText={(value) => updateField('cccd', value)}
-          />
+            <Text style={styles.label}>Mã số CCCD</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.cccd}
+              onChangeText={(value) => updateField('cccd', value)}
+            />
 
-          <Text style={styles.label}>Mã Nhân Viên</Text>
-          <TextInput
-            style={styles.input}
-            value={employeeData.employeeId}
-            onChangeText={(value) => updateField('employeeId', value)}
-          />
+            <Text style={styles.label}>Mã Nhân Viên</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.employeeId}
+              onChangeText={(value) => updateField('employeeId', value)}
+            />
 
-          <Text style={styles.label}>Họ Tên</Text>
-          <TextInput
-            style={styles.input}
-            value={employeeData.name}
-            onChangeText={(value) => updateField('name', value)}
-          />
+            <Text style={styles.label}>Họ Tên</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.name}
+              onChangeText={(value) => updateField('name', value)}
+            />
 
-          <Text style={styles.label}>Địa chỉ</Text>
-          <TextInput
-            style={styles.input}
-            value={employeeData.diachi}
-            onChangeText={(value) => updateField('diachi', value)}
-          />
+            <Text style={styles.label}>Địa chỉ</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.diachi}
+              onChangeText={(value) => updateField('diachi', value)}
+            />
 
-          <Text style={styles.label}>Số điện thoại</Text>
-          <TextInput
-            style={styles.input}
-            value={employeeData.sdt}
-            onChangeText={(value) => updateField('sdt', value)}
-            keyboardType="phone-pad"
-          />
+            <Text style={styles.label}>Số điện thoại</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.sdt}
+              onChangeText={(value) => updateField('sdt', value)}
+              keyboardType="phone-pad"
+            />
 
-          <Text style={styles.label}>Giới tính</Text>
-          <RNPickerSelect
-            onValueChange={(value) => updateField('gioitinh', value)}
-            items={[
-              { label: 'Nam', value: 'Nam' },
-              { label: 'Nữ', value: 'Nữ' },
-              { label: 'Khác', value: 'Khác' },
-            ]}
-            style={pickerSelectStyles}
-          />
+            <Text style={styles.label}>Giới tính</Text>
+            <RNPickerSelect
+              onValueChange={(value) => updateField('gioitinh', value)}
+              items={[
+                { label: 'Nam', value: 'Nam' },
+                { label: 'Nữ', value: 'Nữ' },
+                { label: 'Khác', value: 'Khác' },
+              ]}
+              style={pickerSelectStyles}
+            />
 
-          <Text style={styles.label}>Phòng ban</Text>
-          <RNPickerSelect
-            onValueChange={(value) => updateField('phongbanId', value)}
-            value={employeeData.phongbanId}
-            items={phongBans}
-            style={pickerSelectStyles}
-          />
+            <Text style={styles.label}>Phòng ban</Text>
+            <RNPickerSelect
+              onValueChange={(value) => updateField('phongbanId', value)}
+              value={employeeData.phongbanId}
+              items={phongBans}
+              style={pickerSelectStyles}
+            />
 
-          <Text style={styles.label}>Chức vụ</Text>
-          <RNPickerSelect
-            onValueChange={(value) => updateField('chucvuId', value)}
-            value={employeeData.chucvuId}
-            items={chucVus}
-            style={pickerSelectStyles}
-          />
+            <Text style={styles.label}>Chức vụ</Text>
+            <RNPickerSelect
+              onValueChange={(value) => updateField('chucvuId', value)}
+              value={employeeData.chucvuId}
+              items={chucVus}
+              style={pickerSelectStyles}
+            />
 
-          <Text style={styles.label}>Ngày sinh</Text>
-          <TextInput
-            style={styles.input}
-            value={employeeData.ngaysinh}
-            onChangeText={(value) => updateField('ngaysinh', value)}
-          />
+            <Text style={styles.label}>Ngày sinh</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.ngaysinh}
+              onChangeText={(value) => updateField('ngaysinh', value)}
+            />
 
-          <Text style={styles.label}>Ngày bắt đầu</Text>
-          <TextInput
-            style={styles.input}
-            value={employeeData.ngaybatdau}
-            onChangeText={(value) => updateField('ngaybatdau', value)}
-          />
+            <Text style={styles.label}>Ngày bắt đầu</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.ngaybatdau}
+              onChangeText={(value) => updateField('ngaybatdau', value)}
+            />
 
-          <Text style={styles.label}>Mức lương cơ bản</Text>
-          <TextInput
-            style={styles.input}
-            value={employeeData.luongcoban}
-            onChangeText={(value) => updateField('luongcoban', value)}
-            keyboardType="numeric"
-          />
-        </ScrollView>
-      </SafeAreaView>
+            <Text style={styles.label}>Mức lương cơ bản</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.luongcoban}
+              onChangeText={(value) => updateField('luongcoban', value)}
+              keyboardType="numeric"
+            />
+          </ScrollView>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+      <ViewLoading/>
     </>
   );
 }
@@ -223,7 +233,7 @@ export default function AddMember({ navigation }) {
 // Các style cho giao diện
 const styles = StyleSheet.create({
   container: {
-    flex: 14,
+    flex: 16,
     backgroundColor: '#fff',
     padding: 16,
   },
@@ -242,35 +252,34 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   input: {
-    height: 40,
-    borderColor: '#ddd',
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 16,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
   },
 });
-
-
 
 // Styles cho RNPickerSelect
 const pickerSelectStyles = {
   inputIOS: {
-    height: 40,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
+    fontSize: 16,
+    paddingVertical: 12,
     paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    color: 'black',
     marginBottom: 15,
-    backgroundColor: '#f9f9f9',
   },
   inputAndroid: {
-    height: 40,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
+    fontSize: 16,
+    paddingVertical: 8,
     paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    color: 'black',
     marginBottom: 15,
-    backgroundColor: '#f9f9f9',
   },
 };
