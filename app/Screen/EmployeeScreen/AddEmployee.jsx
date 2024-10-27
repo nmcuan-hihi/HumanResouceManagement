@@ -3,19 +3,21 @@ import {
   View, Text, TextInput, StyleSheet, SafeAreaView,
   ScrollView, TouchableOpacity, Image, Alert
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import BackNav from '../../Compoment/BackNav';
-import RNPickerSelect from 'react-native-picker-select';
-import { addEmployee, readChucVu, readPhongBan } from '../../services/database'; // Import hàm thêm nhân viên và đọc phòng ban
+import * as ImagePicker from 'expo-image-picker'; // Thư viện chọn ảnh từ thiết bị
+import BackNav from '../../Compoment/BackNav'; // Điều hướng quay lại
+import RNPickerSelect from 'react-native-picker-select'; // Component chọn dữ liệu từ danh sách
+import { addEmployee, readChucVu, readPhongBan } from '../../services/database'; // Hàm tương tác với DB
 
+// Component chính để thêm nhân viên
 export default function AddMember({ navigation }) {
+  // State lưu thông tin nhân viên
   const [employeeData, setEmployeeData] = useState({
     cccd: '',
     employeeId: '',
     name: '',
     diachi: '',
     sdt: '',
-    gioitinh: 'Nam',
+    gioitinh: 'Nam', // Giá trị mặc định là "Nam"
     phongbanId: '',
     chucvuId: '',
     luongcoban: '',
@@ -24,10 +26,11 @@ export default function AddMember({ navigation }) {
     matKhau: '',
   });
 
-  const [profileImage, setProfileImage] = useState(null);
-  const [phongBans, setPhongBans] = useState([]);
-  const [chucVus, setChucVus] = useState([]);
+  const [profileImage, setProfileImage] = useState(null); // Lưu ảnh đại diện
+  const [phongBans, setPhongBans] = useState([]); // Danh sách phòng ban
+  const [chucVus, setChucVus] = useState([]); // Danh sách chức vụ
 
+  // Hàm chọn ảnh từ thư viện
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -38,19 +41,21 @@ export default function AddMember({ navigation }) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
+      aspect: [1, 1], // Ảnh vuông
+      quality: 1, // Chất lượng ảnh cao
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+      setProfileImage(result.assets[0].uri); // Lưu ảnh đã chọn
     }
   };
 
+  // Hàm cập nhật giá trị từng trường trong state employeeData
   const updateField = (field, value) => {
     setEmployeeData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Hàm thêm nhân viên
   const handleAddEmployee = async () => {
     if (!profileImage) {
       Alert.alert('Chưa chọn hình ảnh!', 'Vui lòng chọn hình ảnh cho nhân viên.');
@@ -58,7 +63,7 @@ export default function AddMember({ navigation }) {
     }
 
     try {
-      await addEmployee(employeeData, profileImage);
+      await addEmployee(employeeData, profileImage); // Thêm nhân viên vào DB
       Alert.alert('Thành công!', 'Nhân viên đã được thêm thành công.');
       navigation.goBack(); // Quay lại màn hình trước
     } catch (error) {
@@ -67,10 +72,11 @@ export default function AddMember({ navigation }) {
     }
   };
 
+  // useEffect để lấy dữ liệu phòng ban và chức vụ khi màn hình tải
   useEffect(() => {
     const fetchPhongBan = async () => {
       try {
-        const data = await readPhongBan();
+        const data = await readPhongBan(); // Lấy dữ liệu phòng ban từ DB
         if (data) {
           const phongBanArray = Object.values(data).map(p => ({
             label: p.tenPhongBan,
@@ -85,24 +91,24 @@ export default function AddMember({ navigation }) {
 
     const fetchChucVu = async () => {
       try {
-        const data = await readChucVu();
+        const data = await readChucVu(); // Lấy dữ liệu chức vụ từ DB
         if (data) {
           const chucVuArr = Object.values(data).map(p => ({
             label: p.loaichucvu,
             value: p.chucvu_id,
           }));
           setChucVus(chucVuArr);
-          console.log(chucVus)
         }
       } catch (error) {
         console.error("Lỗi khi lấy chức vụ:", error);
       }
     };
 
-    fetchPhongBan();
-    fetchChucVu();
+    fetchPhongBan(); // Gọi hàm lấy phòng ban
+    fetchChucVu(); // Gọi hàm lấy chức vụ
   }, []);
 
+  // Giao diện người dùng
   return (
     <>
       <BackNav
@@ -118,7 +124,7 @@ export default function AddMember({ navigation }) {
               <Image
                 source={profileImage
                   ? { uri: profileImage }
-                  : require("../../../assets/image/images.png")}
+                  : require("../../../assets/image/images.png")} // Ảnh mặc định nếu chưa chọn
                 style={styles.avatar}
               />
             </TouchableOpacity>
@@ -151,7 +157,7 @@ export default function AddMember({ navigation }) {
             value={employeeData.diachi}
             onChangeText={(value) => updateField('diachi', value)}
           />
-          
+
           <Text style={styles.label}>Số điện thoại</Text>
           <TextInput
             style={styles.input}
@@ -181,7 +187,7 @@ export default function AddMember({ navigation }) {
 
           <Text style={styles.label}>Chức vụ</Text>
           <RNPickerSelect
-            onValueChange={(value) => updateField('chucvuId', value)} 
+            onValueChange={(value) => updateField('chucvuId', value)}
             value={employeeData.chucvuId}
             items={chucVus}
             style={pickerSelectStyles}
@@ -214,11 +220,11 @@ export default function AddMember({ navigation }) {
   );
 }
 
+// Các style cho giao diện
 const styles = StyleSheet.create({
   container: {
-    flex: 10,
+    flex: 14,
     backgroundColor: '#fff',
-    marginTop: -20,
     padding: 16,
   },
   avatarContainer: {
@@ -236,51 +242,35 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   input: {
-    color: "blue",
     height: 40,
-    borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 4,
+    borderWidth: 1,
+    borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 16,
   },
 });
 
+
+
 // Styles cho RNPickerSelect
 const pickerSelectStyles = {
   inputIOS: {
-    color: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
+    height: 40,
+    borderColor: '#ddd',
     borderWidth: 1,
-    borderColor: '#4CAF50', // Màu viền nổi bật hơn
-    borderRadius: 8, // Làm viền tròn hơn
-    backgroundColor: '#fff', // Màu nền trắng để nổi bật text
-    fontSize: 16,
-    marginBottom: 16,
-    shadowColor: '#000', // Thêm shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // Shadow trên Android
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    backgroundColor: '#f9f9f9',
   },
   inputAndroid: {
-    color: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
+    height: 40,
+    borderColor: '#ddd',
     borderWidth: 1,
-    borderColor: '#4CAF50', // Màu viền nổi bật
-    borderRadius: 8, // Viền tròn
-    backgroundColor: '#fff', // Màu nền trắng
-    fontSize: 16,
-    marginBottom: 16,
-    shadowColor: '#000', // Thêm shadow cho Android
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // Độ nổi cho Android
-  },
-  placeholder: {
-    color: '#a0a0a0', // Màu placeholder nhạt hơn
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    backgroundColor: '#f9f9f9',
   },
 };

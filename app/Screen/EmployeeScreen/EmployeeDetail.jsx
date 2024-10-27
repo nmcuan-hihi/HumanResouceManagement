@@ -20,6 +20,8 @@ const database = getDatabase();
 
 export default function EmployeeDetailScreen({ route, navigation }) {
   const { manv } = route.params; // Lấy mã nhân viên từ tham số điều hướng
+  const { key } = route.params; // Lấy mã nhân viên từ tham số điều hướng
+  console.log("key " + key)
   const [employeeData, setEmployeeData] = useState(null); // State để lưu dữ liệu nhân viên
   const [bangCapNV, setBangCapNV] = useState([]);
 
@@ -91,8 +93,8 @@ export default function EmployeeDetailScreen({ route, navigation }) {
         <BackNav
           navigation={navigation}
           name={"Chi tiết nhân viên"}
-          btn={"Chỉnh sửa"}
-          onEditPress={handlePress}
+          
+          {...(key == "inf" ? { btn: "Chỉnh sửa", onEditPress: handlePress } : {})}
         />
       </View>
 

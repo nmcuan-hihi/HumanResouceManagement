@@ -68,7 +68,7 @@ export default function EmployeeList({ navigation }) {
   }, [selectedPhongBan, selectedGender, selectedStatus, employeeData]);
 
   const handlePress = (item) => {
-    navigation.navigate('EmployeeDetail', { manv: item.manv });
+    navigation.navigate('EmployeeDetail', { manv: item.manv, key : "inf" });
   };
 
   const handleAddEmployee = () => {
