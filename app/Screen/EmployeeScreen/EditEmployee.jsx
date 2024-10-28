@@ -10,7 +10,6 @@ import {
   Image,
   Alert,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import {
   readEmployees,
   updateEmployee,
@@ -22,16 +21,15 @@ import {
 } from "../../services/database";
 import { Picker } from "@react-native-picker/picker";
 import RNPickerSelect from "react-native-picker-select";
-import BackNav from "../../Compoment/BackNav";
+import { Calendar } from "react-native-calendars";
 
 export default function EmployeeEditScreen({ navigation, route }) {
   const { manv } = route.params;
   const [employeeData, setEmployeeData] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [dateField, setDateField] = useState("");
   const [phongBans, setPhongBans] = useState([]);
   const [chucVus, setChucVus] = useState([]);
-
   const [currentNV, setCurrentNV] = useState(null);
 
   useEffect(() => {
@@ -59,38 +57,27 @@ export default function EmployeeEditScreen({ navigation, route }) {
     setEmployeeData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || employeeData[dateField];
-    setShowDatePicker(false);
-    if (currentDate) {
-      updateField(dateField, currentDate.toISOString().split("T")[0]);
-    }
+  const handleDateSelect = (day) => {
+    updateField(dateField, day.dateString);
+    setShowCalendar(false);
   };
 
-  const showDatePickerModal = (field) => {
+  const showCalendarModal = (field) => {
     setDateField(field);
-    setShowDatePicker(true);
+    setShowCalendar(true);
   };
 
   const handleUpdate = async () => {
     try {
-      // lấy phòng ban hiện tại
-      const currentPhongBan = phongBans.find((pb) => {
-        return pb.maPhongBan == currentNV.phongbanId;
-      });
-
-      // lấy phòng ban được chọn
-      const newPhongBan = phongBans.find((pb) => {
-        return pb.maPhongBan == employeeData.phongbanId;
-      });
+      const currentPhongBan = phongBans.find((pb) => pb.maPhongBan == currentNV.phongbanId);
+      const newPhongBan = phongBans.find((pb) => pb.maPhongBan == employeeData.phongbanId);
 
       if (currentNV.chucvuId != "TP") {
         if (employeeData.chucvuId == "TP") {
-          
           await editPhongBan(employeeData.phongbanId, { maQuanLy: manv });
 
-          if(newPhongBan.maQuanLy!="")
-          await updateEmployee(newPhongBan.maQuanLy, { chucvuId: "NV" });
+          if (newPhongBan.maQuanLy != "")
+            await updateEmployee(newPhongBan.maQuanLy, { chucvuId: "NV" });
         }
 
         await updateEmployee(manv, employeeData);
@@ -128,9 +115,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
       await toggleEmployeeStatus(manv, employeeData.trangthai);
       Alert.alert(
         "Thông báo",
-        `Trạng thái đã được ${
-          employeeData.trangthai ? "ngưng hoạt động" : "hoạt động lại"
-        }!`,
+        `Trạng thái đã được ${employeeData.trangthai ? "ngưng hoạt động" : "hoạt động lại"}!`,
         [{ text: "OK", onPress: () => navigation.goBack() }]
       );
     } catch (error) {
@@ -145,20 +130,12 @@ export default function EmployeeEditScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
- <View style={styles.header}>
-        <BackNav
-          navigation={navigation}
-          name={"Chi tiết nhân viên"}
-          btn={"Lưu"}
-          onEditPress={handleUpdate}
-        />
-      </View>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.avatarContainer}>
           <Image
             source={
-              employeeData.imageUrl
-                ? { uri: employeeData.imageUrl }
+              employeeData.imageURL
+                ? { uri: employeeData.imageURL }
                 : require("../../../assets/image/images.png")
             }
             style={styles.avatar}
@@ -170,7 +147,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
             label: phong.tenPhongBan,
             value: phong.maPhongBan,
           }))}
-          value={employeeData.phongbanId} // Giữ value để phản ánh đúng trạng thái phòng ban
+          value={employeeData.phongbanId}
           placeholder={{ label: "Chọn phòng", value: "" }}
           style={pickerSelectStyles}
         />
@@ -181,15 +158,13 @@ export default function EmployeeEditScreen({ navigation, route }) {
             label: value.loaichucvu,
             value: key,
           }))}
-          value={employeeData.chucvuId} // Sửa lại thành 'position' để phù hợp với dữ liệu
+          value={employeeData.chucvuId}
           placeholder={{ label: "Chọn chức vụ", value: "" }}
           style={pickerSelectStyles}
         />
 
-        {/* Các trường dữ liệu khác */}
         <InputField
           label="Mã Nhân Viên"
-          editable={false}
           value={employeeData.employeeId}
           onChangeText={(value) => updateField("employeeId", value)}
         />
@@ -204,11 +179,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
           onChangeText={(value) => updateField("matKhau", value)}
         />
 
-        {/* Trường Ngày sinh */}
-        <TouchableOpacity
-          onPress={() => showDatePickerModal("ngaysinh")}
-          style={styles.datePicker}
-        >
+        <TouchableOpacity onPress={() => showCalendarModal("ngaysinh")} style={styles.datePicker}>
           <Text style={styles.label}>Ngày sinh</Text>
           <Text>{employeeData.ngaysinh || "Chọn ngày"}</Text>
         </TouchableOpacity>
@@ -225,11 +196,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
           style={pickerSelectStyles}
         />
 
-        {/* Trường Ngày vào */}
-        <TouchableOpacity
-          onPress={() => showDatePickerModal("ngaybatdau")}
-          style={styles.datePicker}
-        >
+        <TouchableOpacity onPress={() => showCalendarModal("ngaybatdau")} style={styles.datePicker}>
           <Text style={styles.label}>Ngày vào</Text>
           <Text>{employeeData.ngaybatdau || "Chọn ngày"}</Text>
         </TouchableOpacity>
@@ -247,11 +214,8 @@ export default function EmployeeEditScreen({ navigation, route }) {
           keyboardType="numeric"
         />
 
-        {/* Nút chuyển đổi trạng thái */}
         <TouchableOpacity
-          style={
-            employeeData.trangthai ? styles.deleteButton : styles.updateButton
-          }
+          style={employeeData.trangthai ? styles.deleteButton : styles.updateButton}
           onPress={handleToggleStatus}
         >
           <Text style={styles.deleteButtonText}>
@@ -259,16 +223,14 @@ export default function EmployeeEditScreen({ navigation, route }) {
           </Text>
         </TouchableOpacity>
 
-        {/* <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
+        <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
           <Text style={styles.updateButtonText}>Cập Nhật</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
 
-        {showDatePicker && (
-          <DateTimePicker
-            value={new Date(employeeData[dateField])}
-            mode="date"
-            display="default"
-            onChange={handleDateChange}
+        {showCalendar && (
+          <Calendar
+            onDayPress={handleDateSelect}
+            markedDates={{ [employeeData[dateField]]: { selected: true } }}
           />
         )}
       </ScrollView>
@@ -282,7 +244,6 @@ const InputField = ({ label, value, onChangeText }) => (
     <TextInput
       style={styles.input}
       value={value}
-      editable={false}
       onChangeText={onChangeText}
       placeholder={`Nhập ${label}`}
     />
@@ -292,111 +253,103 @@ const InputField = ({ label, value, onChangeText }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#Fff",
-
+    backgroundColor: "#F2F2F7",
+    margin: 10,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-
-  },
-  scrollView: {
-    padding: 20,
-    paddingBottom: 20,
+  scrollView  : {
+    paddingVertical: 20,
   },
   avatarContainer: {
     alignItems: "center",
-    marginVertical: 20,
+    marginBottom: 20,
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    backgroundColor: "#E3E3E3",
   },
   inputContainer: {
-    marginVertical: 10,
+    marginBottom: 15,
   },
   label: {
     fontSize: 16,
+    color: "#333",
     marginBottom: 5,
   },
   input: {
-    height: 40,
-    borderColor: "gray",
     borderWidth: 1,
+    borderColor: "#DADADA",
+    padding: 10,
     borderRadius: 5,
-    paddingLeft: 10,
-    backgroundColor: "white",
-    justifyContent: "center",
+    backgroundColor: "#FFF",
   },
   datePicker: {
-    marginVertical: 10,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
     padding: 10,
-    backgroundColor: "white",
-    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#DADADA",
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: "#FFF",
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: "#DADADA",
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "#FFF",
+    marginBottom: 15,
   },
   updateButton: {
     backgroundColor: "#4CAF50",
-    padding: 10,
-    alignItems: "center",
+    paddingVertical: 15,
     borderRadius: 5,
-    marginVertical: 10,
+    alignItems: "center",
+    marginBottom: 10,
   },
   updateButtonText: {
-    color: "white",
+    color: "#FFF",
     fontSize: 16,
+    fontWeight: "bold",
   },
   deleteButton: {
-    backgroundColor: "red",
-    padding: 10,
-    alignItems: "center",
+    backgroundColor: "#F44336",
+    paddingVertical: 15,
     borderRadius: 5,
-    marginVertical: 10,
+    alignItems: "center",
+    marginBottom: 10,
   },
   deleteButtonText: {
-    color: "white",
+    color: "#FFF",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });
-// Styles cho RNPickerSelect
-const pickerSelectStyles = {
+
+const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
-    color: "black",
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: "#4CAF50", // Màu viền nổi bật hơn
-    borderRadius: 8, // Làm viền tròn hơn
-    backgroundColor: "#fff", // Màu nền trắng để nổi bật text
     fontSize: 16,
-    marginBottom: 16,
-    shadowColor: "#000", // Thêm shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // Shadow trên Android
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30,
+    backgroundColor: "#FFF",
+    marginBottom: 15,
   },
   inputAndroid: {
-    color: "black",
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: "#4CAF50", // Màu viền nổi bật
-    borderRadius: 8, // Viền tròn
-    backgroundColor: "#fff", // Màu nền trắng
     fontSize: 16,
-    marginBottom: 16,
-    shadowColor: "#000", // Thêm shadow cho Android
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // Độ nổi cho Android
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: "gray",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 30,
+    backgroundColor: "#FFF",
+    marginBottom: 15,
   },
-  placeholder: {
-    color: "#a0a0a0", // Màu placeholder nhạt hơn
-  },
-};
+});
+
