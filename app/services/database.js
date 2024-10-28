@@ -8,6 +8,8 @@ import {
   remove,
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
+import { firestore } from '../config/firebaseconfig';
+
 import { initializeApp } from "firebase/app";
 import {
   getStorage,
@@ -15,8 +17,47 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import { doc, setDoc } from "firebase/firestore";
+
+
 const database = getDatabase(app);
 const storage = getStorage(app); // Khởi tạo Firebase Storage
+
+
+
+// Hàm ghi dữ liệu nhân viên vào Firestore
+export const addEmployeeFireStore = async (employee) => {
+  try {
+    // Loại bỏ các trường có giá trị undefined
+    const sanitizedEmployee = {};
+    Object.keys(employee).forEach((key) => {
+      if (employee[key] !== undefined) {
+        sanitizedEmployee[key] = employee[key];
+      }
+    });
+
+    // Thêm nhân viên vào Firestore với employeeId làm ID
+    await setDoc(doc(firestore, "employees", employee.employeeId), sanitizedEmployee);
+    console.log("Employee successfully added to Firestore!");
+  } catch (error) {
+    console.error("Error adding employee:", error);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function writeUserData(employee) {
   const employeeId = employee.employeeId; // Sử dụng employeeId
 
@@ -55,6 +96,7 @@ export async function addEmployee(employeeData, profileImage) {
     console.error("Error adding employee:", error);
   }
 }
+
 // Hàm đọc danh sách nhân viên
 export async function readEmployees() {
   try {

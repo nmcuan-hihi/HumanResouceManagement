@@ -1,27 +1,31 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import { writeUserData } from '../../services/database';
+import { getNewEmployeeId ,addEmployeeFireStore} from '../../services/EmployeeFireBase';
 
 export default function TestScreen({ navigation }) {
   // Hàm để thêm nhân viên vào Firebase
   const handleAddEmployee = () => {
     const employee = {
-      cccd: "123456789",
-      chucvuId: "CV001",
-      employeeId: "E01X",
-      luongcobanId: "LCB001",
-      name: "Nguyễn Văn A",
-      ngaybatdau: "2024-01-01",
-      ngaysinh: "1990-01-01",
-      phongbanId: "PB001",
-      sdt: "0123456789",
-      trangthai: true,
-      imageURL: "https://firebasestorage.googleapis.com/v0/b/hrm-pj-team3.appspot.com/o/employee%2Fstar.jpg?alt=media&token=cb1f939b-ecab-4066-b7fd-6f75a7934126" // Thêm imageURL
+      employeeId: "NV000",
+      name: "Nguyễn Văn Hậu", // Tên nhân viên
+      gioitinh: "Nam", // Giới tính
+      ngaysinh: "21/06/1990", // Ngày sinh  
+      cccd: "34123423", // Căn cước công dân
+      sdt: "0123456789", // Số điện thoại phụ     
+      diachi: "Binh Dong", // Địa chỉ
+      chucvuId: "TP", // Mã chức vụ
+      phongbanId: "NS", // Mã phòng ban
+      ngaybatdau: "21/06/2010", // Ngày bắt đầu làm việc
+      luongcoban: "10000000", // Lương cơ bản
+      matKhau: "1", // Mật khẩu
+      trangthai: true, // Trạng thái hoạt động
+      imageUrl:
+        "https://firebasestorage.googleapis.com/v0/b/hrm-pj-team3.appspot.com/o/employee%2FDUC001.jpg?alt=media&token=c9d94d3c-f955-4430-8da1-7154ae1b50e8", // URL ảnh nhân viên
     };
-
     // Ghi nhân viên vào Firebase
-    writeUserData(employee);
-    console.log("Employee added");
+    addEmployeeFireStore(employee);
+
   
   };
 
@@ -34,39 +38,6 @@ export default function TestScreen({ navigation }) {
     <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={handleAddEmployee}>
         <Text style={styles.buttonText}>Add Employee</Text>
-      </TouchableOpacity>
-
-      {/* Các nút điều hướng đến các màn hình khác */}
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('ChamCong')}>
-        <Text style={styles.buttonText}>Kế Toán</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('ChamCongNV')}>
-        <Text style={styles.buttonText}>Chấm công</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('ListEmployee')}>
-        <Text style={styles.buttonText}>List Employee</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('EmployeeDetail')}>
-        <Text style={styles.buttonText}>Employee Detail</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('EditEmployee')}>
-        <Text style={styles.buttonText}>Edit Employee</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('EmployeeScreen')}>
-        <Text style={styles.buttonText}>Quản Lý Nhân Sự</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('HomeScreenGD')}>
-        <Text style={styles.buttonText}>DirectorScreen</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigateToScreen('Skill')}>
-        <Text style={styles.buttonText}>Kỹ năng</Text>
       </TouchableOpacity>
 
     </View>

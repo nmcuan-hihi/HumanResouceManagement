@@ -5,6 +5,7 @@ import ItemListEmployee from '../../Compoment/ItemEmployee';
 import BackNav from '../../Compoment/BackNav';
 import { readEmployees, readPhongBan1 } from '../../services/database';
 import { filterEmployeesByPhongBan, filterEmployeesByGender, filterEmployeesByStatus, searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
+import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
 
 export default function EmployeeList({ navigation }) {
   const [employeeData, setEmployeeData] = useState([]);
@@ -18,7 +19,7 @@ export default function EmployeeList({ navigation }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await readEmployees();
+        const data = await readEmployeesFireStore();
         if (data && typeof data === 'object') {
           const employeeArray = Object.keys(data).map((key) => ({
             ...data[key],

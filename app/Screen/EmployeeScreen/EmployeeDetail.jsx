@@ -16,27 +16,23 @@ import IconIonicons from 'react-native-vector-icons/Ionicons'; // Đổi tên bi
 import IconMaterial from "react-native-vector-icons/MaterialIcons"; // Đổi tên biến Icon thành IconMaterial
 import ItemListEmployee from "../../Compoment/ItemEmployee";
 import { readBangCap } from "../../services/database";
+import { getEmployeeById } from "../../services/EmployeeFireBase";
 const database = getDatabase();
 
 export default function EmployeeDetailScreen({ route, navigation }) {
   const { manv } = route.params; // Lấy mã nhân viên từ tham số điều hướng
   const { key } = route.params; // Lấy mã nhân viên từ tham số điều hướng
-  console.log("key " + key)
   const [employeeData, setEmployeeData] = useState(null); // State để lưu dữ liệu nhân viên
   const [bangCapNV, setBangCapNV] = useState([]);
 
   // Hàm đọc dữ liệu nhân viên từ Firebase
   const fetchEmployeeData = async () => {
     try {
-      const dbRef = ref(database);
-      const snapshot = await get(child(dbRef, `employees/${manv}`)); // Lấy dữ liệu của nhân viên cụ thể
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        setEmployeeData(data); // Cập nhật state với dữ liệu của nhân viên
-      } else {
-        console.log("No data available for this employee");
-      }
+      
+      const empl = await getEmployeeById(manv);
+      
+        setEmployeeData(empl); // Cập nhật state với dữ liệu của nhân viên
+      
     } catch (error) {
       console.error("Error fetching employee data:", error);
     }
@@ -94,7 +90,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
           navigation={navigation}
           name={"Chi tiết nhân viên"}
 
-          {...(key == "inf" ? { btn: "Chỉnh sửa", onEditPress: handlePress } : {})}
+          {...(key == "inf" ? { btn: "Sửa", onEditPress: handlePress } : {})}
         />
       </View>
 
@@ -226,7 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+
   },
   image: {
     width: "70%",

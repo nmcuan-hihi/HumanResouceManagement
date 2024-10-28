@@ -3,35 +3,35 @@ import {
   View, Text, TextInput, StyleSheet, SafeAreaView,
   ScrollView, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker'; // Thư viện chọn ảnh từ thiết bị
-import BackNav from '../../Compoment/BackNav'; // Điều hướng quay lại
-import RNPickerSelect from 'react-native-picker-select'; // Component chọn dữ liệu từ danh sách
-import { addEmployee, readChucVu, readPhongBan } from '../../services/database'; // Hàm tương tác với DB
-import ViewLoading, { openModal } from '../../Compoment/ViewLoading';
+import * as ImagePicker from 'expo-image-picker';
+import BackNav from '../../Compoment/BackNav';
+import RNPickerSelect from 'react-native-picker-select';
+import { addEmployee, readChucVu, readPhongBan } from '../../services/database';
+import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
+import { addEmployeeFireStore, getNewEmployeeId } from '../../services/EmployeeFireBase';
 
-// Component chính để thêm nhân viên
 export default function AddMember({ navigation }) {
-  // State lưu thông tin nhân viên
+  const [employeeId, setEmployeeId] = useState("");
   const [employeeData, setEmployeeData] = useState({
     cccd: '',
-    employeeId: '',
+    employeeId: employeeId,
     name: '',
     diachi: '',
     sdt: '',
-    gioitinh: 'Nam', // Giá trị mặc định là "Nam"
-    phongbanId: '',
-    chucvuId: '',
+    gioitinh: 'Nam', // Giá trị mặc định
+    phongbanId: '', 
+    chucvuId: '', 
     luongcoban: '',
     ngaysinh: '',
     ngaybatdau: '',
     matKhau: '',
+    trangthai: 'true',
   });
 
-  const [profileImage, setProfileImage] = useState(null); // Lưu ảnh đại diện
-  const [phongBans, setPhongBans] = useState([]); // Danh sách phòng ban
-  const [chucVus, setChucVus] = useState([]); // Danh sách chức vụ
+  const [profileImage, setProfileImage] = useState(null);
+  const [phongBans, setPhongBans] = useState([]);
+  const [chucVus, setChucVus] = useState([]);
 
-  // Hàm chọn ảnh từ thư viện
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -42,21 +42,19 @@ export default function AddMember({ navigation }) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1], // Ảnh vuông
-      quality: 1, // Chất lượng ảnh cao
+      aspect: [1, 1],
+      quality: 1,
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri); // Lưu ảnh đã chọn
+      setProfileImage(result.assets[0].uri);
     }
   };
 
-  // Hàm cập nhật giá trị từng trường trong state employeeData
   const updateField = (field, value) => {
     setEmployeeData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Hàm thêm nhân viên
   const handleAddEmployee = async () => {
     if (!profileImage) {
       Alert.alert('Chưa chọn hình ảnh!', 'Vui lòng chọn hình ảnh cho nhân viên.');
@@ -64,29 +62,33 @@ export default function AddMember({ navigation }) {
     }
 
     try {
-      openModal()
-      await addEmployee(employeeData, profileImage); // Thêm nhân viên vào DB
+      openModal();
+      await addEmployeeFireStore(employeeData, profileImage);
       Alert.alert('Thành công!', 'Nhân viên đã được thêm thành công.');
-      navigation.goBack(); // Quay lại màn hình trước
+      navigation.goBack();
     } catch (error) {
       Alert.alert('Lỗi!', 'Có lỗi xảy ra khi thêm nhân viên.');
       console.error(error);
-    }finally {
-      closeModal(); // Đóng modal loading
+    } finally {
+      closeModal();
     }
   };
 
-  // useEffect để lấy dữ liệu phòng ban và chức vụ khi màn hình tải
   useEffect(() => {
     const fetchPhongBan = async () => {
       try {
-        const data = await readPhongBan(); // Lấy dữ liệu phòng ban từ DB
+        const data = await readPhongBan();
         if (data) {
           const phongBanArray = Object.values(data).map(p => ({
             label: p.tenPhongBan,
             value: p.maPhongBan,
           }));
           setPhongBans(phongBanArray);
+
+          // Cập nhật phongbanId với giá trị đầu tiên nếu có ít nhất một phòng ban
+          if (phongBanArray.length > 0) {
+            updateField('phongbanId', phongBanArray[0].value);
+          }
         }
       } catch (error) {
         console.error("Lỗi khi lấy phòng ban:", error);
@@ -95,31 +97,46 @@ export default function AddMember({ navigation }) {
 
     const fetchChucVu = async () => {
       try {
-        const data = await readChucVu(); // Lấy dữ liệu chức vụ từ DB
+        const data = await readChucVu();
         if (data) {
           const chucVuArr = Object.values(data).map(p => ({
             label: p.loaichucvu,
             value: p.chucvu_id,
           }));
           setChucVus(chucVuArr);
+
+          // Cập nhật chucvuId với giá trị đầu tiên nếu có ít nhất một chức vụ
+          if (chucVuArr.length > 0) {
+            updateField('chucvuId', chucVuArr[0].value);
+          }
         }
       } catch (error) {
         console.error("Lỗi khi lấy chức vụ:", error);
       }
     };
 
-    fetchPhongBan(); // Gọi hàm lấy phòng ban
-    fetchChucVu(); // Gọi hàm lấy chức vụ
+    const fetchNewEmployeeId = async () => {
+      try {
+        const newId = await getNewEmployeeId();
+        setEmployeeId(newId);
+        updateField('employeeId', newId); // Cập nhật mã nhân viên mới
+      } catch (error) {
+        console.error("Error fetching new employee ID:", error);
+      }
+    };
+
+    fetchNewEmployeeId();
+    fetchPhongBan(); // Lấy phòng ban
+    fetchChucVu(); // Lấy chức vụ
   }, []);
 
-  // Giao diện người dùng
   return (
     <>
       <BackNav
         navigation={navigation}
         name={"Add Member"}
         btn={"Lưu"}
-        onEditPress={handleAddEmployee} // Gọi hàm thêm nhân viên
+        onEditPress={handleAddEmployee}
       />
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"} 
@@ -132,7 +149,7 @@ export default function AddMember({ navigation }) {
                 <Image
                   source={profileImage
                     ? { uri: profileImage }
-                    : require("../../../assets/image/images.png")} // Ảnh mặc định nếu chưa chọn
+                    : require("../../../assets/image/images.png")}
                   style={styles.avatar}
                 />
               </TouchableOpacity>
@@ -148,8 +165,8 @@ export default function AddMember({ navigation }) {
             <Text style={styles.label}>Mã Nhân Viên</Text>
             <TextInput
               style={styles.input}
-              value={employeeData.employeeId}
-              onChangeText={(value) => updateField('employeeId', value)}
+              value={employeeId}
+              editable={false} // Để không cho phép chỉnh sửa mã nhân viên
             />
 
             <Text style={styles.label}>Họ Tên</Text>
@@ -177,6 +194,7 @@ export default function AddMember({ navigation }) {
             <Text style={styles.label}>Giới tính</Text>
             <RNPickerSelect
               onValueChange={(value) => updateField('gioitinh', value)}
+              value={employeeData.gioitinh}
               items={[
                 { label: 'Nam', value: 'Nam' },
                 { label: 'Nữ', value: 'Nữ' },
@@ -215,21 +233,38 @@ export default function AddMember({ navigation }) {
               onChangeText={(value) => updateField('ngaybatdau', value)}
             />
 
-            <Text style={styles.label}>Mức lương cơ bản</Text>
+            <Text style={styles.label}>Lương cơ bản</Text>
             <TextInput
               style={styles.input}
               value={employeeData.luongcoban}
               onChangeText={(value) => updateField('luongcoban', value)}
-              keyboardType="numeric"
+            />
+
+            <Text style={styles.label}>Mật khẩu</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.matKhau}
+              onChangeText={(value) => updateField('matKhau', value)}
+              secureTextEntry={true}
+            />
+
+            <Text style={styles.label}>Trạng thái</Text>
+            <RNPickerSelect
+              onValueChange={(value) => updateField('trangthai', value)}
+              value={employeeData.trangthai}
+              items={[
+                { label: 'Đang làm', value: 'true' },
+                { label: 'Ngừng làm', value: 'false' },
+              ]}
+              style={pickerSelectStyles}
             />
           </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>
-      <ViewLoading/>
+      <ViewLoading />
     </>
   );
 }
-
 // Các style cho giao diện
 const styles = StyleSheet.create({
   container: {

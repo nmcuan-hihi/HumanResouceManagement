@@ -17,12 +17,13 @@ import {
   toggleEmployeeStatus,
   readPhongBan1,
   readChucVu,
-  getEmployeeById,
+  
   editPhongBan,
 } from "../../services/database";
 import { Picker } from "@react-native-picker/picker";
 import RNPickerSelect from "react-native-picker-select";
 import BackNav from "../../Compoment/BackNav";
+import { readEmployeesFireStore, getEmployeeById } from "../../services/EmployeeFireBase";
 
 export default function EmployeeEditScreen({ navigation, route }) {
   const { manv } = route.params;
@@ -36,8 +37,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
-      const data = await readEmployees();
-      const employee = data[manv];
+      const employee = await getEmployeeById(manv);
       if (employee) {
         setEmployeeData(employee);
         setCurrentNV(employee);

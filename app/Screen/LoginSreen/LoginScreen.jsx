@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { getDatabase, ref, get, child } from "firebase/database";
 import { app } from "../../services/database";
+import { getEmployeeById } from "../../services/EmployeeFireBase";
 
 const database = getDatabase(app);
 
@@ -25,18 +26,13 @@ export default function LoginScreen({ navigation }) {
     }
 
     try {
-      const dbRef = ref(database);
-      const snapshot = await get(child(dbRef, `employees/${employeeId}`));
+      const employeeData = await getEmployeeById(employeeId);
 
-      if (snapshot.exists()) {
-
-
-        const employeeData = snapshot.val(); // Get employee data
+      if (employeeData != null) {
 
         if (password === employeeData.matKhau) {
-          // Assuming the password is stored as 'matKhau'
 
-          navigation.navigate("UserTabNav", { employee: employeeData }); // Navigate to ManagerScreen
+          navigation.navigate("UserTabNav", { employee: employeeData }); 
         } else {
           Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
         }
