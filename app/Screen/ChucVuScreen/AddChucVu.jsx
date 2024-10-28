@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Text } from 'react-native';
 import { createChucVu } from '../../services/database'; // Giả sử bạn có một hàm này để thêm chức vụ vào cơ sở dữ liệu
+import BackNav from '../../Compoment/BackNav';
 
 export default function AddChucVu({ navigation }) {
   const [chucvu_id
@@ -31,45 +32,48 @@ export default function AddChucVu({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Thêm Chức Vụ</Text>
+    <><BackNav
+      navigation={navigation}
+      name={"Danh sách chức vụ"} /><View style={styles.container}>
+        <View style={styles.headerSection}>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Mã Chức Vụ"
-        value={chucvu_id}
-        onChangeText={setchucvu_id}
-      />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Tên Chức Vụ"
-        value={tenChucVu}
-        onChangeText={setTenChucVu}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Hệ Số Chức Vụ"
-        value={heSoChucVu}
-        onChangeText={setHeSoChucVu}
-        keyboardType="numeric"
-      />
-      
-      <TouchableOpacity style={styles.button} onPress={handleAddChucVu}>
-        <Text style={styles.buttonText}>Thêm Chức Vụ</Text>
-      </TouchableOpacity>
-      
-      <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.cancelButtonText}>Hủy Bỏ</Text>
-      </TouchableOpacity>
-    </View>
+
+        </View>
+     
+
+        <TextInput
+          style={styles.input}
+          placeholder="Mã Chức Vụ"
+          value={chucvu_id}
+          onChangeText={setchucvu_id} />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Tên Chức Vụ"
+          value={tenChucVu}
+          onChangeText={setTenChucVu} />
+        <TextInput
+          style={styles.input}
+          placeholder="Hệ Số Chức Vụ"
+          value={heSoChucVu}
+          onChangeText={setHeSoChucVu}
+          keyboardType="numeric" />
+
+        <TouchableOpacity style={styles.button} onPress={handleAddChucVu}>
+          <Text style={styles.buttonText}>Thêm Chức Vụ</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.cancelButtonText}>Hủy Bỏ</Text>
+        </TouchableOpacity>
+      </View></>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#f8f8f8',
+    flex: 15,
+    backgroundColor: '#fff',
     padding: 20,
   },
   title: {

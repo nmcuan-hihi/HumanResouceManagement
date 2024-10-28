@@ -13,7 +13,7 @@ export default function ListChucVu({ navigation }) {
 
   const handleOtherButtonPress = () => {
     navigation.navigate("AddChucVu")
-    console.log("Nút khác đã được nhấn!"); // Có thể hiển thị một thông báo hoặc thực hiện hành động khác
+   
   };
 
   useEffect(() => {
@@ -38,14 +38,11 @@ export default function ListChucVu({ navigation }) {
           navigation={navigation} 
           name={"Danh sách chức vụ"} 
           soLuong={chucVuData.length} 
-          // Nút chính để thêm chức vụ
-          
+          btn={"Add"}
+          onEditPress={handleOtherButtonPress}
         />
         
-        {/* Nút khác không điều hướng */}
-        <TouchableOpacity onPress={handleOtherButtonPress} style={styles.otherButton}>
-          <Text style={styles.otherButtonText}>Add</Text>
-        </TouchableOpacity>
+      
       </View>
 
       <FlatList
@@ -75,7 +72,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
+
     paddingBottom: 10,
   },
   otherButton: {

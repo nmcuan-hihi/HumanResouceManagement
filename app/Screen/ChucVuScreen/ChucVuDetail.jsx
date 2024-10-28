@@ -90,24 +90,8 @@ export default function ChucVuDetail({ route, navigation }) {
 
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Tên chức vụ</Text>
-            {isEditing ? (
-              <TextInput
-                style={styles.textInput}
-                placeholder="Tên chức vụ"
-                value={editedChucVu}
-                onChangeText={(text) => setEditedChucVu(text)}
-              />
-            ) : (
-              <View style={styles.inlineEditContainer}>
-                <Text style={styles.sectionTitle22}>{currentChucVu}</Text>
-                <TouchableOpacity
-                  onPress={() => setIsEditing(true)}
-                  style={styles.editBtn}
-                >
-                  <Feather name="edit-2" size={20} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
-            )}
+            
+              <Text>{currentChucVu}</Text>
           </View>
 
           <View style={styles.infoSection}>
@@ -121,7 +105,17 @@ export default function ChucVuDetail({ route, navigation }) {
                 keyboardType="numeric"
               />
             ) : (
+             
+
+              <View style={styles.inlineEditContainer}>
               <Text style={styles.sectionTitle1}>{currentHeSo}</Text>
+              <TouchableOpacity
+                onPress={() => setIsEditing(true)}
+                style={styles.editBtn}
+              >
+                <Feather name="edit-2" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
             )}
           </View>
 
