@@ -3,15 +3,13 @@ import {
   View, Text, TextInput, StyleSheet, SafeAreaView,
   ScrollView, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker'; // Thư viện chọn ảnh từ thiết bị
-import BackNav from '../../Compoment/BackNav'; // Điều hướng quay lại
-import RNPickerSelect from 'react-native-picker-select'; // Component chọn dữ liệu từ danh sách
-import { addEmployee, readChucVu, readPhongBan } from '../../services/database'; // Hàm tương tác với DB
-import ViewLoading, { openModal } from '../../Compoment/ViewLoading';
+import * as ImagePicker from 'expo-image-picker';
+import BackNav from '../../Compoment/BackNav';
+import RNPickerSelect from 'react-native-picker-select';
+import { addEmployee, readChucVu, readPhongBan } from '../../services/database';
+import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
 
-// Component chính để thêm nhân viên
 export default function AddMember({ navigation }) {
-  // State lưu thông tin nhân viên
   const [employeeData, setEmployeeData] = useState({
     cccd: '',
     employeeId: '',
@@ -27,7 +25,7 @@ export default function AddMember({ navigation }) {
     matKhau: '',
   });
 
-  const [profileImage, setProfileImage] = useState(null); // Lưu ảnh đại diện
+  const [profileImage, setProfileImage] = useState(null); // Ảnh đại diện
   const [phongBans, setPhongBans] = useState([]); // Danh sách phòng ban
   const [chucVus, setChucVus] = useState([]); // Danh sách chức vụ
 
@@ -35,7 +33,7 @@ export default function AddMember({ navigation }) {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Quyền bị từ chối!', 'Vui lòng cấp quyền để chọn ảnh.');
+      Alert.alert('Từ chối quyền truy cập', 'Vui lòng cấp quyền để chọn ảnh.');
       return;
     }
 
@@ -43,7 +41,7 @@ export default function AddMember({ navigation }) {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1], // Ảnh vuông
-      quality: 1, // Chất lượng ảnh cao
+      quality: 1, // Ảnh chất lượng cao
     });
 
     if (!result.canceled) {
@@ -51,32 +49,50 @@ export default function AddMember({ navigation }) {
     }
   };
 
-  // Hàm cập nhật giá trị từng trường trong state employeeData
+  // Hàm cập nhật từng trường trong state employeeData
   const updateField = (field, value) => {
     setEmployeeData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Hàm kiểm tra tất cả các trường có đầy đủ không
+  const isFormComplete = () => {
+    return (
+      employeeData.cccd &&
+      employeeData.employeeId &&
+      employeeData.name &&
+      employeeData.diachi &&
+      employeeData.sdt &&
+      employeeData.gioitinh &&
+      employeeData.phongbanId &&
+      employeeData.chucvuId &&
+      employeeData.luongcoban &&
+      employeeData.ngaysinh &&
+      employeeData.ngaybatdau &&
+      profileImage
+    );
+  };
+
   // Hàm thêm nhân viên
   const handleAddEmployee = async () => {
-    if (!profileImage) {
-      Alert.alert('Chưa chọn hình ảnh!', 'Vui lòng chọn hình ảnh cho nhân viên.');
+    if (!isFormComplete()) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng điền đủ tất cả các trường.');
       return;
     }
 
     try {
-      openModal()
+      openModal();
       await addEmployee(employeeData, profileImage); // Thêm nhân viên vào DB
-      Alert.alert('Thành công!', 'Nhân viên đã được thêm thành công.');
+      Alert.alert('Thành công!', 'Đã thêm nhân viên thành công.');
       navigation.goBack(); // Quay lại màn hình trước
     } catch (error) {
       Alert.alert('Lỗi!', 'Có lỗi xảy ra khi thêm nhân viên.');
       console.error(error);
-    }finally {
-      closeModal(); // Đóng modal loading
+    } finally {
+      closeModal(); // Đóng modal tải
     }
   };
 
-  // useEffect để lấy dữ liệu phòng ban và chức vụ khi màn hình tải
+  // useEffect để lấy dữ liệu phòng ban và chức vụ khi tải màn hình
   useEffect(() => {
     const fetchPhongBan = async () => {
       try {
@@ -108,18 +124,17 @@ export default function AddMember({ navigation }) {
       }
     };
 
-    fetchPhongBan(); // Gọi hàm lấy phòng ban
-    fetchChucVu(); // Gọi hàm lấy chức vụ
+    fetchPhongBan();
+    fetchChucVu();
   }, []);
 
-  // Giao diện người dùng
   return (
     <>
       <BackNav
         navigation={navigation}
-        name={"Add Member"}
+        name={"Thêm nhân viên"}
         btn={"Lưu"}
-        onEditPress={handleAddEmployee} // Gọi hàm thêm nhân viên
+        onEditPress={handleAddEmployee}
       />
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"} 
@@ -132,27 +147,27 @@ export default function AddMember({ navigation }) {
                 <Image
                   source={profileImage
                     ? { uri: profileImage }
-                    : require("../../../assets/image/images.png")} // Ảnh mặc định nếu chưa chọn
+                    : require("../../../assets/image/images.png")}
                   style={styles.avatar}
                 />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.label}>Mã số CCCD</Text>
+            <Text style={styles.label}>Số CCCD</Text>
             <TextInput
               style={styles.input}
               value={employeeData.cccd}
               onChangeText={(value) => updateField('cccd', value)}
             />
 
-            <Text style={styles.label}>Mã Nhân Viên</Text>
+            <Text style={styles.label}>Mã nhân viên</Text>
             <TextInput
               style={styles.input}
               value={employeeData.employeeId}
               onChangeText={(value) => updateField('employeeId', value)}
             />
 
-            <Text style={styles.label}>Họ Tên</Text>
+            <Text style={styles.label}>Họ và tên</Text>
             <TextInput
               style={styles.input}
               value={employeeData.name}
@@ -215,13 +230,14 @@ export default function AddMember({ navigation }) {
               onChangeText={(value) => updateField('ngaybatdau', value)}
             />
 
-            <Text style={styles.label}>Mức lương cơ bản</Text>
+            <Text style={styles.label}>Lương cơ bản</Text>
             <TextInput
               style={styles.input}
               value={employeeData.luongcoban}
               onChangeText={(value) => updateField('luongcoban', value)}
               keyboardType="numeric"
             />
+
           </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>
@@ -230,7 +246,6 @@ export default function AddMember({ navigation }) {
   );
 }
 
-// Các style cho giao diện
 const styles = StyleSheet.create({
   container: {
     flex: 16,
@@ -245,41 +260,34 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#e0e0e0',
   },
   label: {
-    fontSize: 16,
-    marginBottom: 5,
+    fontWeight: 'bold',
+    marginVertical: 5,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    padding: 8,
     borderRadius: 5,
-    padding: 10,
-    marginBottom: 15,
+    marginBottom: 10,
+    borderColor: '#ccc',
   },
 });
 
-// Styles cho RNPickerSelect
-const pickerSelectStyles = {
+// Styles cho component picker select
+const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    padding: 8,
     borderRadius: 5,
-    color: 'black',
-    marginBottom: 15,
+    marginBottom: 10,
+    borderColor: '#ccc',
   },
   inputAndroid: {
-    fontSize: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    padding: 8,
     borderRadius: 5,
-    color: 'black',
-    marginBottom: 15,
+    marginBottom: 10,
+    borderColor: '#ccc',
   },
-};
+});
