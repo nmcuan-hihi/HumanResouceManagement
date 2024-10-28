@@ -17,11 +17,11 @@ export default function LoginScreen({ navigation }) {
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState(""); // Mock password input
 
-  // Function to handle login and check role
+
   const handleLogin = async () => {
     if (!employeeId) {
-      Alert.alert("Error", "Please enter your employee ID.");
-      return;
+        Alert.alert("Error", "Please enter your employee ID.");
+        return;
     }
 
     try {
@@ -46,7 +46,9 @@ export default function LoginScreen({ navigation }) {
     } catch (error) {
       Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
     }
-  };
+};
+
+  
 
   return (
     <View style={styles.container}>

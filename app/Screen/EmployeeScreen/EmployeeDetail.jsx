@@ -60,11 +60,11 @@ export default function EmployeeDetailScreen({ route, navigation }) {
       // Sử dụng đúng chỉ số và tên biến trong vòng lặp
       for (let i = 0; i < dataByNvId.length; i++) {
         for (let j = 0; j < arrDatabc.length; j++) {
-          if (arrDatabc[j].bangcap_id === arrDatabcnv[i].bangcap_id) {
+          if (arrDatabc[j].bangcap_id === dataByNvId[i].bangcap_id) {
             newData.push({
-              bangcap_id: arrDatabcnv[i].bangcap_id,
+              bangcap_id: dataByNvId[i].bangcap_id,
               tenBang: arrDatabc[j].tenBang,
-              xacthuc: arrDatabcnv[i].xacthuc, // Sửa điều kiện để lấy giá trị đúng
+              xacthuc: dataByNvId[i].xacthuc, 
             });
           }
         }

@@ -129,7 +129,7 @@ export default function HomeScreenGD({ navigation, route }) {
             <Icon name="house" size={24} color="#FFC107" />
             <Text style={styles.statValue}>Phòng ban</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statItem} onPress={() => { }}>
+          <TouchableOpacity style={styles.statItem} onPress={() => {navigation.navigate('ListChucVu')}}>
             <Icon name="badge" size={24} color="#F44336" />
             <Text style={styles.statValue}>Chức Vụ</Text>
           </TouchableOpacity>
