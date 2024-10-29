@@ -35,6 +35,7 @@ import DetailSkill from './app/Screen/BangCapScreen/DetailSkill';
 
 import EditMatKhau from './app/Screen/ProfileSreen/EditMatKhau';
 import ThemBangCapNV from './app/Screen/BangCapScreen/ThemBangCapNV';
+import ThemSkillNV from './app/Screen/BangCapScreen/ThemSkillNV';
 import CccdScreen from './app/Screen/EmployeeScreen/CccdScreen';
 
 
@@ -94,6 +95,7 @@ export default function App() {
 
         <Stack.Screen name="EditMatKhau" component={EditMatKhau} options={{ headerShown: false }} />
         <Stack.Screen name="ThemBangCapNV" component={ThemBangCapNV} options={{ headerShown: false }} />
+        <Stack.Screen name="ThemSkillNV" component={ThemSkillNV} options={{ headerShown: false }} />
 
       </Stack.Navigator>  
     </NavigationContainer>

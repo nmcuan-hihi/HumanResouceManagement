@@ -16,6 +16,8 @@ import IconIonicons from 'react-native-vector-icons/Ionicons'; // Đổi tên bi
 import IconMaterial from "react-native-vector-icons/MaterialIcons"; // Đổi tên biến Icon thành IconMaterial
 import ItemListEmployee from "../../Compoment/ItemEmployee";
 import { readBangCap } from "../../services/database";
+import { readSkills } from "../../services/skill";
+import { readSkillNhanVien } from "../../services/skill";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
 const database = getDatabase();
 
@@ -24,7 +26,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
   const { key } = route.params; // Lấy mã nhân viên từ tham số điều hướng
   const [employeeData, setEmployeeData] = useState(null); // State để lưu dữ liệu nhân viên
   const [bangCapNV, setBangCapNV] = useState([]);
-
+  const [skillNV, setSkillNV] = useState([]);
   // Hàm đọc dữ liệu nhân viên từ Firebase
   const fetchEmployeeData = async () => {
     try {
@@ -73,8 +75,43 @@ export default function EmployeeDetailScreen({ route, navigation }) {
     }
   };
 
+  const getDataSKNV = async () => {
+    try {
+      const databcnv = await readSkillNhanVien();
+      const arrDatabcnv = Object.values(databcnv);
+
+      const dataByNvId = arrDatabcnv.filter((bc) => {
+        return bc.employeeId == manv;
+      });
+
+      const databc = await readSkills();
+      const arrDatabc = Object.values(databc);
+
+      const newData = [];
+
+      // Sử dụng đúng chỉ số và tên biến trong vòng lặp
+      for (let i = 0; i < dataByNvId.length; i++) {
+        for (let j = 0; j < arrDatabc.length; j++) {
+          if (arrDatabc[j].mask === dataByNvId[i].mask) {
+            newData.push({
+              mask: dataByNvId[i].mask,
+              tensk: arrDatabc[j].tensk,
+              xacthuc: dataByNvId[i].xacthuc, 
+            });
+          }
+        }
+      }
+
+      setSkillNV(newData);
+      console.log(newData, "-----------");
+    } catch (error) {
+      console.error("Lỗi lấy data bc:", error);
+    }
+  };
+
   useEffect(() => {
     getDataBCNV();
+    getDataSKNV();
     fetchEmployeeData(); // Gọi hàm fetch khi component mount
   }, [manv]);
 
@@ -165,14 +202,33 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                   <TouchableOpacity
                     style={styles.addButton}
                     onPress={() => {
-                      navigation.navigate("ThemBangCapNV", { employeeId: manv });
+                      navigation.navigate("ThemSkillNV", { employeeId: manv });
                     }}
                   >
                     <IconMaterial name={"add"} size={30} color="orange" />
                   </TouchableOpacity>
                 </View>
                
-                  <Text>Không có kĩ năng</Text>
+                {skillNV && skillNV.length > 0 ? (
+                  skillNV.map((item, index) => (
+                    <TouchableOpacity >
+                      <View key={index} style={styles.infoItem}>
+                        <Text style={styles.infoValue}>{item.tensk || "N/A"}</Text>
+
+                        <View style={styles.iconContainer}>
+                          <IconIonicons
+                            name="checkmark-circle"
+                            size={20}
+                            color={item.xacthuc === "1" ? "green" : "black"} // Kiểm tra điều kiện xác thực
+                          />
+
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <Text>Không có bằng cấp</Text>
+                )}
            
 
 

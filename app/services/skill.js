@@ -105,3 +105,61 @@ export const readSkill1 = async (mask) => {
     return null; // Nếu có lỗi, trả về null
   }
 };
+
+export async function addSkillNV(Skill, image) {
+  function random(length) {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      result += characters[randomIndex];
+    }
+    return result;
+  }
+
+  const randomImg = random(20);
+  try {
+    // Tạo tham chiếu tới nơi lưu trữ hình ảnh
+    const imageRef = storageRef(storage, `skills/${randomImg}.jpg`);
+
+    // Tải lên hình ảnh
+    const response = await fetch(image);
+    const blob = await response.blob();
+    await uploadBytes(imageRef, blob);
+
+    // Lấy URL hình ảnh
+    const imageUrl = await getDownloadURL(imageRef);
+
+    // Cập nhật imageUrl vào employeeData
+    const data = { ...Skill, imageUrl };
+
+    // Ghi dữ liệu nhân viên vào Firestore
+    await setDoc(doc(firestore, "skillnhanvien", `${Skill.employeeId}-${Skill.mask}`), data);
+    console.log(`Employee ${Skill.employeeId} added successfully!`);
+  } catch (error) {
+    console.error("Error adding employee:", error);
+  }
+}
+
+// Lấy danh sách bằng cấp của nhân viên
+export async function readSkillNhanVien() {
+  try {
+    const bangCapCollection = collection(firestore, "skillnhanvien");
+    const snapshot = await getDocs(bangCapCollection);
+
+    if (!snapshot.empty) {
+      const skillnhanvien = {};
+      snapshot.forEach(doc => {
+        console.log("Document data:", doc.data()); // Log dữ liệu tài liệu để kiểm tra cấu trúc
+        skillnhanvien[doc.id] = doc.data();
+      });
+      return skillnhanvien; 
+    } else {
+      console.log("No data available");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error reading employees:", error);
+  }
+}
