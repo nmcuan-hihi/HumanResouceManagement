@@ -1,53 +1,25 @@
-
-
-import {
-  getDatabase,
-  ref,
-  set,
-  get,
-  child,
-  update,
-  remove,
-} from "firebase/database";
-import { app } from "../config/firebaseconfig";
-import { firestore } from "../config/firebaseconfig";
-
+// Import các thư viện và cấu hình Firebase
 import { initializeApp } from "firebase/app";
-import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
+import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { app, firestore } from "../config/firebaseconfig"; // Đảm bảo cấu hình đúng
 
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  limit, 
-  getDocs, 
-  setDoc, 
-  doc, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc 
-} from "firebase/firestore";
-
-const database = getDatabase(app);
-const storage = getStorage(app); // Khởi tạo Firebase Storage
+// Khởi tạo Firebase Storage (nếu cần thiết)
+const storage = getStorage(app);
 
 // Hàm lọc nhân viên theo phòng ban
 
 export async function filterEmployeesByPhongBan(phongbanId) {
   try {
-    const employeesRef = collection(firestore, "employees"); // Tham chiếu đến collection 'employees'
-    const q = query(employeesRef, where("phongbanId", "==", phongbanId)); // Tạo truy vấn lọc theo phòng ban
-    const snapshot = await getDocs(q);
+    const employeesRef = collection(firestore, "employees");
+    const q = query(employeesRef, where("phongbanId", "==", phongbanId));
+    const querySnapshot = await getDocs(q);
 
-    const filteredEmployees = snapshot.docs.map((doc) => ({
+    const filteredEmployees = querySnapshot.docs.map(doc => ({
       ...doc.data(),
-      manv: doc.id,
-    })); // Thêm mã nhân viên vào đối tượng
+      manv: doc.id
+    }));
+
     return filteredEmployees;
   } catch (error) {
     console.error("Error filtering employees by phòng ban:", error);
@@ -60,13 +32,14 @@ export async function filterEmployeesByPhongBan(phongbanId) {
 export async function filterEmployeesByGender(gender) {
   try {
     const employeesRef = collection(firestore, "employees");
-    const q = query(employeesRef, where("gioitinh", "==", gender)); // Tạo truy vấn lọc theo giới tính
-    const snapshot = await getDocs(q);
+    const q = query(employeesRef, where("gioitinh", "==", gender));
+    const querySnapshot = await getDocs(q);
 
-    const filteredEmployees = snapshot.docs.map((doc) => ({
+    const filteredEmployees = querySnapshot.docs.map(doc => ({
       ...doc.data(),
-      manv: doc.id,
-    })); // Thêm mã nhân viên vào đối tượng
+      manv: doc.id
+    }));
+
     return filteredEmployees;
   } catch (error) {
     console.error("Error filtering employees by gender:", error);
@@ -78,13 +51,14 @@ export async function filterEmployeesByGender(gender) {
 export async function filterEmployeesByStatus(status) {
   try {
     const employeesRef = collection(firestore, "employees");
-    const q = query(employeesRef, where("trangthai", "==", status)); // Tạo truy vấn lọc theo trạng thái
-    const snapshot = await getDocs(q);
+    const q = query(employeesRef, where("trangthai", "==", status));
+    const querySnapshot = await getDocs(q);
 
-    const filteredEmployees = snapshot.docs.map((doc) => ({
+    const filteredEmployees = querySnapshot.docs.map(doc => ({
       ...doc.data(),
-      manv: doc.id,
-    })); // Thêm mã nhân viên vào đối tượng
+      manv: doc.id
+    }));
+
     return filteredEmployees;
   } catch (error) {
     console.error("Error filtering employees by status:", error);
@@ -96,27 +70,44 @@ export async function filterEmployeesByStatus(status) {
 export async function searchEmployeesByNameOrId(searchTerm) {
   try {
     const employeesRef = collection(firestore, "employees");
-    const snapshot = await getDocs(employeesRef);
+    const querySnapshot = await getDocs(employeesRef);
 
-    const searchResults = snapshot.docs.reduce((result, doc) => {
+    const searchResults = querySnapshot.docs.reduce((result, doc) => {
       const employee = doc.data();
       const employeeName = employee.name || "";
       const employeeId = employee.employeeId || "";
 
       if (
-        employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employeeId.toLowerCase().includes(searchTerm.toLowerCase())
+        (typeof employeeName === 'string' && employeeName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (typeof employeeId === 'string' && employeeId.toLowerCase().includes(searchTerm.toLowerCase()))
       ) {
-        result[doc.id] = { ...employee, manv: doc.id }; // Thêm nhân viên vào kết quả
+        result[doc.id] = employee;
       }
 
       return result;
     }, {});
 
-    return searchResults; // Trả về đối tượng chứa các nhân viên tìm thấy
+    return searchResults;
   } catch (error) {
     console.error("Error searching employees by name or ID:", error);
     return {};
+  }
+}
+
+// Hàm đọc thông tin phòng ban từ Firestore
+export async function readPhongBan1Firestore() {
+  try {
+    const phongBanCollection = collection(firestore, "phongban");
+    const phongBanSnapshot = await getDocs(phongBanCollection);
+
+    return phongBanSnapshot.docs.map(doc => ({
+      maPhongBan: doc.id,
+      maQuanLy: doc.data().maQuanLy,
+      tenPhongBan: doc.data().tenPhongBan,
+    }));
+  } catch (error) {
+    console.error("Error reading phong ban:", error);
+    return [];
   }
 }
 
@@ -124,46 +115,43 @@ export async function searchEmployeesByNameOrId(searchTerm) {
 export async function searchEmployeesById(employeeId) {
   try {
     const employeesRef = collection(firestore, "employees");
-    const snapshot = await getDocs(employeesRef);
+    const q = query(employeesRef, where("employeeId", "==", employeeId));
+    const querySnapshot = await getDocs(q);
 
-    const searchResults = snapshot.docs
-      .filter((doc) => doc.data().employee_id === employeeId)
-      .map((doc) => doc.data());
-    return searchResults; // Trả về danh sách nhân viên tìm thấy
+    const searchResults = querySnapshot.docs.map(doc => ({
+      ...doc.data(),
+      manv: doc.id
+    }));
+
+    return searchResults;
   } catch (error) {
     console.error("Error searching employees by employee ID:", error);
     return [];
   }
 }
-// Hàm lọc theo nhiều tiêu chí (phòng ban, giới tính, trạng thái)
 
+// Hàm lọc nhân viên theo nhiều tiêu chí (phòng ban, giới tính, trạng thái)
 export async function filterEmployees({ phongbanId, gender, status }) {
   try {
-    const employeesRef = collection(firestore, "employees"); // Tham chiếu đến collection 'employees'
-    let q = employeesRef; // Khởi tạo q với tham chiếu đến collection
+    const employeesRef = collection(firestore, "employees");
+    let q = employeesRef;
 
-    // Xây dựng truy vấn dựa trên các tiêu chí lọc
+    // Thêm điều kiện lọc nếu tồn tại
     if (phongbanId) {
-      q = query(q, where("phongbanId", "==", phongbanId)); // thêm điều kiện phòng ban
+      q = query(q, where("phongban_id", "==", phongbanId));
     }
-
     if (gender) {
-      q = query(q, where("gioitinh", "==", gender)); // thêm điều kiện giới tính
+      q = query(q, where("gioitinh", "==", gender));
     }
-
     if (status !== undefined) {
-      q = query(q, where("trangthai", "==", status)); // thêm điều kiện trạng thái
+      q = query(q, where("trangthai", "==", status));
     }
 
-    const snapshot = await getDocs(q); // Thực hiện truy vấn
-
-    // Chuyển đổi kết quả thành mảng đối tượng
-    const employees = snapshot.docs.map((doc) => ({
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
       ...doc.data(),
-      manv: doc.id,
+      manv: doc.id
     }));
-
-    return employees; // Trả về danh sách nhân viên đã lọc
   } catch (error) {
     console.error("Error filtering employees:", error);
     return [];
