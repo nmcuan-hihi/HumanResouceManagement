@@ -6,6 +6,7 @@ export default function UserProfileScreen({ navigation ,route}) {
   const { employee } = route.params;
   const [phongBan, setPhongBan] = useState(null);
   const phongbanId = employee?.phongbanId;
+ 
   const employeeId = employee?.employeeId;
   const handleLogOut = () => {
     navigation.reset({
