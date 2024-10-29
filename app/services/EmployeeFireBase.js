@@ -1,11 +1,5 @@
 import {
-    getDatabase,
-    ref,
-    set,
-    get,
-    child,
-    update,
-    remove,
+    getDatabase,ref,set,get,child,update,remove,
   } from "firebase/database";
   import { app } from "../config/firebaseconfig";
   import { firestore } from '../config/firebaseconfig';
@@ -24,7 +18,43 @@ import {
   const storage = getStorage(app); // Khởi tạo Firebase Storage
   
   
+  // Hàm sửa thông tin nhân viên trong Firestore
+export const editEmployeeFireStore = async (updatedData, newProfileImage = null) => {
+  const employeeId = updatedData.employeeId;
   
+  try {
+    const employeeDocRef = doc(firestore, "employees", employeeId);
+
+    // Kiểm tra nếu có ảnh mới cần cập nhật
+    let imageUrl = updatedData.imageUrl; // Giữ URL cũ nếu không có ảnh mới
+    if (newProfileImage) {
+      const imageRef = storageRef(storage, `employee/${employeeId}.jpg`);
+
+      // Fetch ảnh mới và upload lên Storage
+      const response = await fetch(newProfileImage);
+      const blob = await response.blob();
+      const metadata = { contentType: "image/jpeg" };
+      await uploadBytes(imageRef, blob, metadata);
+
+      // Lấy URL ảnh mới
+      imageUrl = await getDownloadURL(imageRef);
+    }
+
+    // Kiểm tra trường dữ liệu không có giá trị undefined
+    const updatedEmployee = { ...updatedData, imageUrl };
+    console.log('Updated Employee Data:', updatedEmployee);
+
+    // Cập nhật thông tin nhân viên với dữ liệu mới
+    await update(employeeDocRef, updatedEmployee);
+
+    console.log(`Employee ${employeeId} updated successfully!`);
+  } catch (error) {
+    console.error(`Error updating employee ${employeeId}:`, error);
+    throw new Error("Failed to update employee!");
+  }
+};
+
+
   export const addEmployeeFireStore = async (employee,profileImage) => {
     try {
       employee.employeeId = await getNewEmployeeId();
