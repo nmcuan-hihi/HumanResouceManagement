@@ -8,7 +8,6 @@ import { app, firestore } from "../config/firebaseconfig"; // Đảm bảo cấu
 const storage = getStorage(app);
 
 // Hàm lọc nhân viên theo phòng ban
-
 export async function filterEmployeesByPhongBan(phongbanId) {
   try {
     const employeesRef = collection(firestore, "employees");
@@ -28,7 +27,6 @@ export async function filterEmployeesByPhongBan(phongbanId) {
 }
 
 // Hàm lọc nhân viên theo giới tính
-
 export async function filterEmployeesByGender(gender) {
   try {
     const employeesRef = collection(firestore, "employees");

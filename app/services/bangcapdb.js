@@ -12,6 +12,12 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "fire
 const firestore = getFirestore(app);
 const storage = getStorage(app); // Khởi tạo Firebase Storage
 
+import { updateDoc } from "firebase/firestore"; // Đảm bảo đã import hàm này
+
+
+
+
+
 export async function addBangCapNV(bangCap, image) {
   function random(length) {
     const characters =
@@ -66,5 +72,31 @@ export async function readBangCapNhanVien() {
     }
   } catch (error) {
     console.error("Error reading employees:", error);
+  }
+}
+
+// Cập nhật trạng thái xác thực bằng cấp
+export async function toggleXacthuc(employeeId, bangcapId) {
+  try {
+    // Kiểm tra đường dẫn đến bộ sưu tập bằng cấp của nhân viên
+    const docRef = doc(firestore, "bangcapnhanvien", `${employeeId}-${bangcapId}`);
+    const docSnapshot = await getDoc(docRef);
+
+    if (docSnapshot.exists()) {
+      const currentXacthuc = docSnapshot.data().xacthuc;
+
+      // Cập nhật giá trị xacthuc
+      const newXacthuc = currentXacthuc === "0" ? "1" : "0";
+      await updateDoc(docRef, { xacthuc: newXacthuc });
+
+      console.log(`Cập nhật xacthuc thành công cho ${employeeId} - ${bangcapId}:`, newXacthuc);
+      return newXacthuc;
+    } else {
+      console.log("Không tìm thấy tài liệu để cập nhật!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Lỗi khi cập nhật xacthuc:", error);
+    return null;
   }
 }
