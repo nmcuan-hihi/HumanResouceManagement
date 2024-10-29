@@ -240,7 +240,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
                   style={styles.closeButton}
                   onPress={() => setShowCalendar(false)}
                 >
-                  <Text style={styles.closeButtonText}>Đóng</Text>
+                  <Text style={styles.closeButtonText}>X</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -365,13 +365,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   closeButton: {
-    marginTop: 20,
-    backgroundColor: "#4CAF50",
-    padding: 10,
-    borderRadius: 5,
+    position: 'absolute',
+    top: 10, // Khoảng cách từ trên xuống
+    right: 15, // Khoảng cách từ bên phải
+    alignSelf: 'flex-end',
+    backgroundColor: 'red',
+    borderRadius: 20,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   closeButtonText: {
-    color: "#FFF",
-    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
+

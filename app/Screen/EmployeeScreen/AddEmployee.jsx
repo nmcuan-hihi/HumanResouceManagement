@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, StyleSheet, SafeAreaView,
-  ScrollView, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform
+  ScrollView, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform, Modal
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import BackNav from '../../Compoment/BackNav';
@@ -9,6 +9,8 @@ import RNPickerSelect from 'react-native-picker-select';
 import { addEmployee, readChucVu, readPhongBan } from '../../services/database';
 import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
 import { addEmployeeFireStore, getNewEmployeeId } from '../../services/EmployeeFireBase';
+import { Calendar } from 'react-native-calendars';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function AddMember({ navigation }) {
   const [employeeId, setEmployeeId] = useState("");
@@ -18,9 +20,9 @@ export default function AddMember({ navigation }) {
     name: '',
     diachi: '',
     sdt: '',
-    gioitinh: 'Nam', // Giá trị mặc định
-    phongbanId: '', 
-    chucvuId: '', 
+    gioitinh: 'Nam',
+    phongbanId: '',
+    chucvuId: '',
     luongcoban: '',
     ngaysinh: '',
     ngaybatdau: '',
@@ -31,6 +33,10 @@ export default function AddMember({ navigation }) {
   const [profileImage, setProfileImage] = useState(null);
   const [phongBans, setPhongBans] = useState([]);
   const [chucVus, setChucVus] = useState([]);
+  
+  // State cho chọn ngày
+  const [visibleCalendar, setVisibleCalendar] = useState(false);
+  const [selectedDateField, setSelectedDateField] = useState('ngaysinh'); // Trường đang chọn
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -84,8 +90,6 @@ export default function AddMember({ navigation }) {
             value: p.maPhongBan,
           }));
           setPhongBans(phongBanArray);
-
-          // Cập nhật phongbanId với giá trị đầu tiên nếu có ít nhất một phòng ban
           if (phongBanArray.length > 0) {
             updateField('phongbanId', phongBanArray[0].value);
           }
@@ -104,8 +108,6 @@ export default function AddMember({ navigation }) {
             value: p.chucvu_id,
           }));
           setChucVus(chucVuArr);
-
-          // Cập nhật chucvuId với giá trị đầu tiên nếu có ít nhất một chức vụ
           if (chucVuArr.length > 0) {
             updateField('chucvuId', chucVuArr[0].value);
           }
@@ -119,22 +121,28 @@ export default function AddMember({ navigation }) {
       try {
         const newId = await getNewEmployeeId();
         setEmployeeId(newId);
-        updateField('employeeId', newId); // Cập nhật mã nhân viên mới
+        updateField('employeeId', newId);
       } catch (error) {
         console.error("Error fetching new employee ID:", error);
       }
     };
 
     fetchNewEmployeeId();
-    fetchPhongBan(); // Lấy phòng ban
-    fetchChucVu(); // Lấy chức vụ
+    fetchPhongBan();
+    fetchChucVu();
   }, []);
+
+  // Hàm xử lý chọn ngày
+  const handleDayPress = (day) => {
+    updateField(selectedDateField, day.dateString);
+    setVisibleCalendar(false);
+  };
 
   return (
     <>
       <BackNav
         navigation={navigation}
-        name={"Add Member"}
+        name={"Thêm Nhân Viên"}
         btn={"Lưu"}
         onEditPress={handleAddEmployee}
       />
@@ -155,113 +163,126 @@ export default function AddMember({ navigation }) {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.label}>Mã số CCCD</Text>
-            <TextInput
-              style={styles.input}
-              value={employeeData.cccd}
-              onChangeText={(value) => updateField('cccd', value)}
-            />
-
-            <Text style={styles.label}>Mã Nhân Viên</Text>
-            <TextInput
-              style={styles.input}
-              value={employeeId}
-              editable={false} // Để không cho phép chỉnh sửa mã nhân viên
-            />
-
-            <Text style={styles.label}>Họ Tên</Text>
+            <Text style={styles.label}>Họ và Tên</Text>
             <TextInput
               style={styles.input}
               value={employeeData.name}
-              onChangeText={(value) => updateField('name', value)}
+              onChangeText={(text) => updateField('name', text)}
+            />
+
+            <Text style={styles.label}>CCCD</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.cccd}
+              onChangeText={(text) => updateField('cccd', text)}
             />
 
             <Text style={styles.label}>Địa chỉ</Text>
             <TextInput
               style={styles.input}
               value={employeeData.diachi}
-              onChangeText={(value) => updateField('diachi', value)}
+              onChangeText={(text) => updateField('diachi', text)}
             />
 
             <Text style={styles.label}>Số điện thoại</Text>
             <TextInput
               style={styles.input}
               value={employeeData.sdt}
-              onChangeText={(value) => updateField('sdt', value)}
-              keyboardType="phone-pad"
+              onChangeText={(text) => updateField('sdt', text)}
             />
 
             <Text style={styles.label}>Giới tính</Text>
             <RNPickerSelect
               onValueChange={(value) => updateField('gioitinh', value)}
-              value={employeeData.gioitinh}
               items={[
                 { label: 'Nam', value: 'Nam' },
                 { label: 'Nữ', value: 'Nữ' },
                 { label: 'Khác', value: 'Khác' },
               ]}
               style={pickerSelectStyles}
+              value={employeeData.gioitinh}
             />
 
             <Text style={styles.label}>Phòng ban</Text>
             <RNPickerSelect
               onValueChange={(value) => updateField('phongbanId', value)}
-              value={employeeData.phongbanId}
               items={phongBans}
               style={pickerSelectStyles}
+              value={employeeData.phongbanId}
             />
 
             <Text style={styles.label}>Chức vụ</Text>
             <RNPickerSelect
               onValueChange={(value) => updateField('chucvuId', value)}
-              value={employeeData.chucvuId}
               items={chucVus}
               style={pickerSelectStyles}
-            />
-
-            <Text style={styles.label}>Ngày sinh</Text>
-            <TextInput
-              style={styles.input}
-              value={employeeData.ngaysinh}
-              onChangeText={(value) => updateField('ngaysinh', value)}
-            />
-
-            <Text style={styles.label}>Ngày bắt đầu</Text>
-            <TextInput
-              style={styles.input}
-              value={employeeData.ngaybatdau}
-              onChangeText={(value) => updateField('ngaybatdau', value)}
+              value={employeeData.chucvuId}
             />
 
             <Text style={styles.label}>Lương cơ bản</Text>
             <TextInput
               style={styles.input}
               value={employeeData.luongcoban}
-              onChangeText={(value) => updateField('luongcoban', value)}
+              onChangeText={(text) => updateField('luongcoban', text)}
+              keyboardType="numeric"
+            />
+
+            <Text style={styles.label}>Ngày sinh</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.ngaysinh}
+              editable={false}
+              onTouchEnd={() => {
+                setSelectedDateField('ngaysinh');
+                setVisibleCalendar(true);
+              }}
+            />
+
+            <Text style={styles.label}>Ngày bắt đầu</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.ngaybatdau}
+              editable={false}
+              onTouchEnd={() => {
+                setSelectedDateField('ngaybatdau');
+                setVisibleCalendar(true);
+              }}
             />
 
             <Text style={styles.label}>Mật khẩu</Text>
             <TextInput
               style={styles.input}
               value={employeeData.matKhau}
-              onChangeText={(value) => updateField('matKhau', value)}
-              secureTextEntry={true}
+              onChangeText={(text) => updateField('matKhau', text)}
+              secureTextEntry
             />
 
-            <Text style={styles.label}>Trạng thái</Text>
-            <RNPickerSelect
-              onValueChange={(value) => updateField('trangthai', value)}
-              value={employeeData.trangthai}
-              items={[
-                { label: 'Đang làm', value: 'true' },
-                { label: 'Ngừng làm', value: 'false' },
-              ]}
-              style={pickerSelectStyles}
-            />
+            {/* Modal chọn ngày */}
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={visibleCalendar}
+            >
+              <View style={styles.modal}>
+                <View style={styles.modalContent}>
+                  <TouchableOpacity 
+                    style={styles.closeButton} 
+                    onPress={() => setVisibleCalendar(false)}
+                  >
+                    <Text style={styles.closeText}>X</Text>
+                  </TouchableOpacity>
+                  <Calendar
+                    onDayPress={handleDayPress}
+                    markedDates={{
+                      [employeeData[selectedDateField]]: { selected: true },
+                    }}
+                  />
+                </View>
+              </View>
+            </Modal>
           </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>
-      <ViewLoading />
     </>
   );
 }
@@ -292,6 +313,33 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 15,
+  },
+  modal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: 'red',
+    borderRadius: 20,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  closeText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
