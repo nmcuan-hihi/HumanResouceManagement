@@ -12,7 +12,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import BackNav from "../../Compoment/BackNav";
 import { writeInfoCCCD, readInfoCCCD } from '../../services/CCCDDatabase'; // Import cả hai hàm
-import ViewLoading, { openModal } from "../../Compoment/ViewLoading";
+import ViewLoading, { openModal, closeModal } from "../../Compoment/ViewLoading"; // Ensure closeModal is imported
 
 export default function CccdScreen({ navigation, route }) {
     const [frontImage, setFrontImage] = useState(null);
@@ -67,16 +67,16 @@ export default function CccdScreen({ navigation, route }) {
         }
 
         try {
-            openModal()
+            openModal(); // Open the loading modal
             await writeInfoCCCD(cccdNumber, frontImage, backImage);
             Alert.alert('Thành công!', 'Thông tin CCCD đã được lưu.');
             navigation.goBack();
         } catch (error) {
             Alert.alert('Lỗi!', 'Có lỗi xảy ra khi lưu thông tin.');
             console.error(error);
-        }finally {
-            closeModal(); // Đóng modal loading
-          }
+        } finally {
+            closeModal(); // Ensure the modal is closed after completion
+        }
     };
 
     return (
