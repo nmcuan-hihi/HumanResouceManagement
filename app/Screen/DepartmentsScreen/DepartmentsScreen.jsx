@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import {
   writePhongBan,
 } from "../../services/database";
 import ItemDepartment from "../../Compoment/ItemDepartment";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function PhongBanScreen({ navigation }) {
   const [phongBanData, setPhongBanData] = useState([]);
@@ -79,9 +80,11 @@ export default function PhongBanScreen({ navigation }) {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const hienThiModal = () => setVisibleModal(true);
 
