@@ -3,7 +3,7 @@ import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Text } from 'r
 import RNPickerSelect from 'react-native-picker-select';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
 import BackNav from '../../Compoment/BackNav';
-import { readEmployees, readPhongBan1 } from '../../services/database';
+import { readPhongBan1Firestore } from '../../services/PhongBanDatabase';
 import { filterEmployeesByPhongBan, filterEmployeesByGender, filterEmployeesByStatus, searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
 
@@ -31,7 +31,7 @@ export default function EmployeeList({ navigation }) {
           console.warn('Dữ liệu nhân viên không hợp lệ:', data);
         }
 
-        const phongBans = await readPhongBan1();
+        const phongBans = await readPhongBan1Firestore();
         if (phongBans) {
           setPhongBanList(phongBans);
         } else {
