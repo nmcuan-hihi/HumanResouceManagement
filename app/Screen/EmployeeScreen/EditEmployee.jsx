@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, StyleSheet, SafeAreaView,
-  ScrollView, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import BackNav from '../../Compoment/BackNav';
-import RNPickerSelect from 'react-native-picker-select';
-import { readChucVu, readPhongBan } from '../../services/database';
 import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
-import { editEmployeeFireStore, getEmployeeById, updateEmployeeFireStore } from '../../services/EmployeeFireBase'; // Hàm cập nhật
+import { editEmployeeFireStore, getEmployeeById } from '../../services/EmployeeFireBase';
+import { readChucVu, readPhongBan } from '../../services/database';
 
 export default function EditMember({ route, navigation }) {
-  const { manv } = route.params || {}; // Nhận dữ liệu từ params
+  const { manv } = route.params || {}; 
 
   const [employeeData, setEmployeeData] = useState({
     cccd: '',
@@ -19,7 +27,7 @@ export default function EditMember({ route, navigation }) {
     name: '',
     diachi: '',
     sdt: '',
-    gioitinh: 'Nam', 
+    gioitinh: 'Nam',
     phongbanId: '',
     chucvuId: '',
     luongcoban: '',
@@ -30,11 +38,10 @@ export default function EditMember({ route, navigation }) {
     imageUrl: '',
   });
 
-  const [profileImage, setProfileImage] = useState(null);  
+  const [profileImage, setProfileImage] = useState(null);
   const [phongBans, setPhongBans] = useState([]);
   const [chucVus, setChucVus] = useState([]);
 
-  // Lấy thông tin nhân viên khi component được mount
   useEffect(() => {
     const fetchEmployeeData = async () => {
       try {
@@ -45,7 +52,7 @@ export default function EditMember({ route, navigation }) {
           name: employee?.name || '',
           diachi: employee?.diachi || '',
           sdt: employee?.sdt || '',
-          gioitinh: employee?.gioitinh || 'Nam', 
+          gioitinh: employee?.gioitinh || 'Nam',
           phongbanId: employee?.phongbanId || '',
           chucvuId: employee?.chucvuId || '',
           luongcoban: employee?.luongcoban || '',
@@ -55,16 +62,15 @@ export default function EditMember({ route, navigation }) {
           trangthai: employee?.trangthai || 'true',
           imageUrl: employee?.imageUrl || '',
         });
-        setProfileImage(employee?.imageUrl || null); // Set hình ảnh hồ sơ
+        setProfileImage(employee?.imageUrl || null);
       } catch (error) {
         console.error('Lỗi khi lấy thông tin nhân viên:', error);
       }
     };
 
     fetchEmployeeData();
-  }, [manv]); // Chạy lại khi manv thay đổi
+  }, [manv]);
 
-  // Hàm chọn ảnh từ thư viện
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -84,31 +90,26 @@ export default function EditMember({ route, navigation }) {
     }
   };
 
-  // Cập nhật trường dữ liệu
   const updateField = (field, value) => {
     setEmployeeData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Xử lý cập nhật nhân viên
-const handleEditEmployee = async () => {
-  try {
-    openModal();
-    // Kiểm tra xem hình ảnh đã thay đổi chưa
-    const imageToUpload = profileImage !== employeeData.imageUrl ? profileImage : null;
+  const handleEditEmployee = async () => {
+    try {
+      openModal();
+      const imageToUpload = profileImage !== employeeData.imageUrl ? profileImage : null;
 
-    await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
-    Alert.alert('Thành công!', 'Thông tin nhân viên đã được cập nhật.');
-    navigation.goBack();
-  } catch (error) {
-    Alert.alert('Lỗi!', 'Có lỗi xảy ra khi cập nhật thông tin.');
-    console.error(error);
-  } finally {
-    closeModal();
-  }
-};
+      await editEmployeeFireStore(employeeData, imageToUpload);
+      Alert.alert('Thành công!', 'Thông tin nhân viên đã được cập nhật.');
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Lỗi!', 'Có lỗi xảy ra khi cập nhật thông tin.');
+      console.error(error);
+    } finally {
+      closeModal();
+    }
+  };
 
-
-  // Lấy dữ liệu phòng ban và chức vụ từ Firestore
   useEffect(() => {
     const fetchPhongBan = async () => {
       try {
@@ -144,6 +145,22 @@ const handleEditEmployee = async () => {
     fetchChucVu();
   }, []);
 
+  const toggleTrangThai = () => {
+    const currentStatus = employeeData.trangthai === 'true';
+    const newStatus = !currentStatus;
+    const message = newStatus
+      ? 'Bạn có muốn bật hoạt động không?'
+      : 'Bạn có muốn tắt hoạt động không?';
+
+    Alert.alert('Xác nhận', message, [
+      { text: 'Không', style: 'cancel' },
+      {
+        text: 'Có',
+        onPress: () => updateField('trangthai', newStatus ? 'true' : 'false'),
+      },
+    ]);
+  };
+
   return (
     <>
       <BackNav
@@ -170,110 +187,71 @@ const handleEditEmployee = async () => {
                 />
               </TouchableOpacity>
             </View>
-
-            <Text style={styles.label}>Mã số CCCD</Text>
+            
+            <Text style={styles.label}>Họ và tên</Text>
             <TextInput
-              style={styles.input}
-              value={employeeData.cccd}
-              onChangeText={(value) => updateField('cccd', value)}
-            />
-
-            <Text style={styles.label}>Mã Nhân Viên</Text>
-            <TextInput
-              style={styles.input}
-              value={employeeData.employeeId}
-              editable={false}
-            />
-
-            <Text style={styles.label}>Họ Tên</Text>
-            <TextInput
-              style={styles.input}
               value={employeeData.name}
-              onChangeText={(value) => updateField('name', value)}
-            />
-
-            <Text style={styles.label}>Địa chỉ</Text>
-            <TextInput
+              onChangeText={(text) => updateField('name', text)}
               style={styles.input}
-              value={employeeData.diachi}
-              onChangeText={(value) => updateField('diachi', value)}
             />
 
             <Text style={styles.label}>Số điện thoại</Text>
             <TextInput
-              style={styles.input}
               value={employeeData.sdt}
-              onChangeText={(value) => updateField('sdt', value)}
+              onChangeText={(text) => updateField('sdt', text)}
+              style={styles.input}
               keyboardType="phone-pad"
             />
 
-            <Text style={styles.label}>Giới tính</Text>
-            <RNPickerSelect
-              onValueChange={(value) => updateField('gioitinh', value)}
-              value={employeeData.gioitinh}
-              items={[
-                { label: 'Nam', value: 'Nam' },
-                { label: 'Nữ', value: 'Nữ' },
-                { label: 'Khác', value: 'Khác' },
-              ]}
-              style={pickerSelectStyles}
-            />
-
-            <Text style={styles.label}>Phòng ban</Text>
-            <RNPickerSelect
-              onValueChange={(value) => updateField('phongbanId', value)}
-              value={employeeData.phongbanId}
-              items={phongBans}
-              style={pickerSelectStyles}
-            />
-
-            <Text style={styles.label}>Chức vụ</Text>
-            <RNPickerSelect
-              onValueChange={(value) => updateField('chucvuId', value)}
-              value={employeeData.chucvuId}
-              items={chucVus}
-              style={pickerSelectStyles}
+            <Text style={styles.label}>Địa chỉ</Text>
+            <TextInput
+              value={employeeData.diachi}
+              onChangeText={(text) => updateField('diachi', text)}
+              style={styles.input}
             />
 
             <Text style={styles.label}>Ngày sinh</Text>
             <TextInput
-              style={styles.input}
               value={employeeData.ngaysinh}
-              onChangeText={(value) => updateField('ngaysinh', value)}
+              onChangeText={(text) => updateField('ngaysinh', text)}
+              style={styles.input}
+              placeholder="YYYY-MM-DD"
             />
 
             <Text style={styles.label}>Ngày bắt đầu</Text>
             <TextInput
-              style={styles.input}
               value={employeeData.ngaybatdau}
-              onChangeText={(value) => updateField('ngaybatdau', value)}
+              onChangeText={(text) => updateField('ngaybatdau', text)}
+              style={styles.input}
+              placeholder="YYYY-MM-DD"
             />
 
-            <Text style={styles.label}>Lương cơ bản</Text>
+            <Text style={styles.label}>Chức vụ</Text>
             <TextInput
+              value={employeeData.chucvuId}
+              onChangeText={(text) => updateField('chucvuId', text)}
               style={styles.input}
-              value={employeeData.luongcoban}
-              onChangeText={(value) => updateField('luongcoban', value)}
             />
 
-            <Text style={styles.label}>Mật khẩu</Text>
+            <Text style={styles.label}>Phòng ban</Text>
             <TextInput
+              value={employeeData.phongbanId}
+              onChangeText={(text) => updateField('phongbanId', text)}
               style={styles.input}
-              value={employeeData.matKhau}
-              onChangeText={(value) => updateField('matKhau', value)}
-              secureTextEntry
             />
 
             <Text style={styles.label}>Trạng thái</Text>
-            <RNPickerSelect
-              onValueChange={(value) => updateField('trangthai', value)}
-              value={employeeData.trangthai}
-              items={[
-                { label: 'Kích hoạt', value: 'true' },
-                { label: 'Khóa', value: 'false' },
-              ]}
-              style={pickerSelectStyles}
-            />
+            <TouchableOpacity style={styles.statusContainer} onPress={toggleTrangThai}>
+              <Text style={styles.statusText}>
+                {employeeData.trangthai === 'true' ? 'Đang hoạt động' : 'Không hoạt động'}
+              </Text>
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: employeeData.trangthai === 'true' ? 'green' : 'red' },
+                ]}
+              />
+            </TouchableOpacity>
           </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>
@@ -281,6 +259,7 @@ const handleEditEmployee = async () => {
     </>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -308,27 +287,109 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     marginBottom: 15,
   },
-});
+  closeButton: {
+    position: 'absolute',
+    top: 10, // Khoảng cách từ trên xuống
+    right: 15, // Khoảng cách từ bên phải
+    alignSelf: 'flex-end',
+    backgroundColor: 'red',
+    borderRadius: 20,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  datePicker: {
+    marginBottom: 20,
+    padding: 15,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    alignItems: "flex-start",
+  },
+  updateButton: {
+    backgroundColor: "#007BFF",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  updateButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: "#FF5733",
+    padding: 15,
+    marginBottom: 5,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  deleteButtonText: {
+    marginBottom: 5,
+    color: "#FFFFFF",
+    fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  
 
-const pickerSelectStyles = {
+  statusContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+  statusText: { fontSize: 16, marginRight: 10 },
+  statusDot: { width: 10, height: 10, borderRadius: 5 },
+  closeButton: {
+    position: 'absolute',
+    top: 10, // Khoảng cách từ trên xuống
+    right: 15, // Khoảng cách từ bên phải
+    alignSelf: 'flex-end',
+    backgroundColor: 'red',
+    borderRadius: 20,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+});
+const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
     fontSize: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
-    color: 'black', // Màu chữ
-    marginBottom: 15,
+    color: "black",
+    marginBottom: 20,
   },
   inputAndroid: {
     fontSize: 16,
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
-    color: 'black', // Màu chữ
-    marginBottom: 15,
+    color: "black",
+    marginBottom: 20,
   },
-};
+});
+
