@@ -13,6 +13,7 @@ import ItemListEmployee from "../../Compoment/ItemEmployee";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
 import { readSkills, addSkill } from "../../services/skill";
+import { validateSkillData } from "../../utils/validate";
 
 export default function DanhSachSkill({ navigation }) {
   const [data, setData] = useState([]); // Lưu danh sách kỹ năng
@@ -31,40 +32,39 @@ export default function DanhSachSkill({ navigation }) {
 
   const handlePress = (mask) => {
     navigation.navigate("SkillDetail", { item: { maSK: mask } });
-    console.log(mask);
   };
 
-// Thêm kỹ năng và cập nhật danh sách
-const handleAddSkill = async () => {
-  if (!maSKill || !tenSkill) {
-    Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
-    return;
-  }
+  // Thêm kỹ năng và cập nhật danh sách
+  const handleAddSkill = async () => {
+    const newSkill = { mask: maSKill, tensk: tenSkill };
+    const validationErrors = validateSkillData(newSkill);
 
-  const newSkill = { mask: maSKill, tensk: tenSkill };
+    if (validationErrors.length > 0) {
+      Alert.alert("Lỗi", validationErrors.join("\n"));
+      return;
+    }
 
-  // Kiểm tra nếu mã kỹ năng đã tồn tại
-  const skillExists = data.some(skill => skill.mask === maSKill);
-  if (skillExists) {
-    Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
-    return;
-  }
+    // Kiểm tra nếu mã kỹ năng đã tồn tại
+    const skillExists = data.some(skill => skill.mask === maSKill);
+    if (skillExists) {
+      Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
+      return;
+    }
 
-  try {
-    await addSkill(newSkill); // Ghi dữ liệu vào Firebase
+    try {
+      await addSkill(newSkill); // Ghi dữ liệu vào Firebase
 
-    // Cập nhật danh sách kỹ năng sau khi thêm
-    setData((prevData) => [...prevData, newSkill]);
+      // Cập nhật danh sách kỹ năng sau khi thêm
+      setData((prevData) => [...prevData, newSkill]);
 
-    // Reset form và đóng modal
-    setMaSkill("");
-    setTenSkill("");
-    setVisibleModal(false);
-  } catch (error) {
-    Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
-  }
-};
-
+      // Reset form và đóng modal
+      setMaSkill("");
+      setTenSkill("");
+      setVisibleModal(false);
+    } catch (error) {
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -103,13 +103,13 @@ const handleAddSkill = async () => {
             <View style={styles.body}>
               <TextInput
                 style={styles.TextInput}
-                placeholder="Mã skill"
+                placeholder="Mã kỹ năng"
                 value={maSKill}
                 onChangeText={setMaSkill}
               />
               <TextInput
                 style={styles.TextInput}
-                placeholder="Tên skill"
+                placeholder="Tên kỹ năng"
                 value={tenSkill}
                 onChangeText={setTenSkill}
               />

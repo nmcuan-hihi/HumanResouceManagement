@@ -8,61 +8,78 @@ import {
   ScrollView,
   TextInput,
   Modal,
+  Alert,
 } from "react-native";
 import BackNav from "../../Compoment/BackNav";
-import HeaderNav from "../../Compoment/HeaderNav";
 import Feather from "react-native-vector-icons/Feather";
 import { readSkill1, updateSkill, deleteSkill } from "../../services/skill";
+import { validateSkillData } from "../../utils/validate";
 
 export default function DetailSkill({ navigation, route }) {
-  const { item } = route.params; // Lấy item từ params
-  const maSK = item ? item.maSK : ""; // Kiểm tra item có tồn tại không
-  const [skillDetails, setSkillDetails] = useState(null); // State để lưu thông tin kỹ năng
+  const { item } = route.params;
+  const maSK = item ? item.maSK : "";
+  const [skillDetails, setSkillDetails] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTenSK, setEditedTenSK] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state
 
-  // Gọi hàm readSkill để lấy thông tin kỹ năng khi component được mount
   useEffect(() => {
     const fetchSkillDetails = async () => {
-      const details = await readSkill1(maSK.trim()); // Gọi hàm readSkill với mã kỹ năng
+      const details = await readSkill1(maSK.trim());
       if (details) {
         setSkillDetails(details);
-        setEditedTenSK(details.tensk); // Cập nhật tên kỹ năng cho edit
+        setEditedTenSK(details.tensk);
       }
     };
     fetchSkillDetails();
   }, [maSK]);
 
-  // Handle save
-
-
   const handleSave = async () => {
+    if (!validateSkillData({ tensk: editedTenSK })) {
+      Alert.alert("Lỗi", "Tên kỹ năng không hợp lệ."); // Show error message
+      return;
+    }
+    
+    setLoading(true);
     try {
-      // Gọi hàm updateSkill với maSK và dữ liệu đã chỉnh sửa
       await updateSkill(maSK, { tensk: editedTenSK });
-      
-      // Cập nhật state của skillDetails sau khi lưu thành công
       setSkillDetails((prev) => ({ ...prev, tensk: editedTenSK }));
       setIsEditing(false);
+      Alert.alert("Thành công", "Kỹ năng đã được cập nhật."); // Success message
     } catch (error) {
-      console.error("Error saving skill:", error); // Xử lý lỗi
+      console.error("Error saving skill:", error);
+      Alert.alert("Lỗi", "Không thể cập nhật kỹ năng."); // Error message
+    } finally {
+      setLoading(false);
     }
   };
-  
 
-  // Handle delete confirmation
   const handleDelete = () => {
-    setConfirmDelete(true);
+    Alert.alert("Xóa kỹ năng", "Bạn có chắc chắn muốn xóa kỹ năng này?", [
+      {
+        text: "Không",
+        onPress: () => {},
+      },
+      {
+        text: "Có",
+        onPress: confirmDeleteYes,
+      },
+    ]);
   };
 
   const confirmDeleteYes = async () => {
-    await deleteSkill(maSK); // Logic to delete the item
-    navigation.goBack(); // Quay lại màn hình trước
-  };
-
-  const confirmDeleteNo = () => {
-    setConfirmDelete(false);
+    setLoading(true);
+    try {
+      await deleteSkill(maSK);
+      Alert.alert("Thành công", "Kỹ năng đã được xóa."); // Success message
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error deleting skill:", error);
+      Alert.alert("Lỗi", "Không thể xóa kỹ năng."); // Error message
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!skillDetails) {
@@ -70,16 +87,14 @@ export default function DetailSkill({ navigation, route }) {
       <View style={styles.container}>
         <Text>Đang tải thông tin kỹ năng...</Text>
       </View>
-    ); // Trả về loading state nếu không có dữ liệu
+    );
   }
 
   return (
-    <><BackNav navigation={navigation} name={"Chi tiết kỹ năng"}/><>
-
-
+    <>
+      <BackNav navigation={navigation} name={"Chi tiết kỹ năng"} />
       <SafeAreaView style={styles.container}>
         <ScrollView>
-          {/* Thông tin kỹ năng */}
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Mã skill</Text>
             <Text style={styles.sectionTitle1}>{skillDetails.mask}</Text>
@@ -92,25 +107,22 @@ export default function DetailSkill({ navigation, route }) {
                 style={styles.TextInput}
                 placeholder="Tên skill"
                 value={editedTenSK}
-                onChangeText={(text) => setEditedTenSK(text)} />
+                onChangeText={(text) => setEditedTenSK(text)}
+              />
             ) : (
               <View style={styles.inlineEditContainer}>
                 <Text style={styles.sectionTitle22}>{skillDetails.tensk}</Text>
-                <TouchableOpacity
-                  onPress={() => setIsEditing(true)}
-                  style={styles.editBtn}
-                >
+                <TouchableOpacity onPress={() => setIsEditing(true)} style={styles.editBtn}>
                   <Feather name="edit-2" size={20} color="#FFFFFF" style={styles.fea} />
                 </TouchableOpacity>
               </View>
             )}
           </View>
 
-          {/* Nút lưu hoặc hủy bỏ */}
           {isEditing && (
             <View style={styles.btnContainer}>
-              <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
-                <Text style={styles.btnText}>Lưu</Text>
+              <TouchableOpacity style={styles.btnSave} onPress={handleSave} disabled={loading}>
+                <Text style={styles.btnText}>{loading ? "Đang lưu..." : "Lưu"}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.btnCancel} onPress={() => setIsEditing(false)}>
                 <Text style={styles.btnText}>Hủy</Text>
@@ -121,30 +133,9 @@ export default function DetailSkill({ navigation, route }) {
           <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
             <Text style={styles.deleteText}>Xóa kỹ năng</Text>
           </TouchableOpacity>
-
-          {/* Modal xác nhận xóa */}
-          <Modal
-            visible={confirmDelete}
-            transparent={true}
-            animationType="slide"
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalText}>Bạn có chắc chắn muốn xóa kỹ năng này?</Text>
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity onPress={confirmDeleteYes} style={styles.confirmButton}>
-                    <Text style={styles.confirmText}>Có</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={confirmDeleteNo} style={styles.confirmButton}>
-                    <Text style={styles.confirmText}>Không</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </Modal>
         </ScrollView>
       </SafeAreaView>
-    </></>
+    </>
   );
 }
 

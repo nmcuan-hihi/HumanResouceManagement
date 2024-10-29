@@ -20,6 +20,7 @@ import {
   writePhongBan,
 } from "../../services/database";
 import ItemDepartment from "../../Compoment/ItemDepartment";
+import { validatePhongBanData } from "../../utils/validate"; // Import your validation function
 
 export default function PhongBanScreen({ navigation }) {
   const [phongBanData, setPhongBanData] = useState([]);
@@ -32,12 +33,12 @@ export default function PhongBanScreen({ navigation }) {
   });
   const [maPhongBan, setMaPhongBan] = useState("");
   const [tenPhongBan, setTenPhongBan] = useState("");
+  const [validationErrors, setValidationErrors] = useState([]);
 
-  // Fetch dữ liệu từ Firebase
+  // Fetch data from Firebase
   const fetchData = async () => {
     try {
       const data = await readPhongBan();
-
       const phongBanArray = Object.keys(data).map((key) => ({
         ...data[key],
         maPhongBan: key,
@@ -50,32 +51,24 @@ export default function PhongBanScreen({ navigation }) {
       }));
 
       const dataNV = dataEmpArray.filter((nv) => {
-        return nv.chucvuId != "TP" && nv.chucvuId != "GD";
+        return nv.chucvuId !== "TP" && nv.chucvuId !== "GD";
       });
 
       setEmployeeData(dataNV);
-      const newData = [];
-
-      for (let i = 0; i < phongBanArray.length; i++) {
-        const phongBan = {
-          tenPhongBan: phongBanArray[i].tenPhongBan,
-          maPhongBan: phongBanArray[i].maPhongBan,
-        };
-
+      const newData = phongBanArray.map((phongBan) => {
         const employee = dataEmpArray.find(
-          (emp) => emp.employeeId === phongBanArray[i].maQuanLy
+          (emp) => emp.employeeId === phongBan.maQuanLy
         );
-
-        if (employee) {
-          phongBan.tenTp = employee.name;
-        }
-
-        newData.push(phongBan);
-      }
+        return {
+          tenPhongBan: phongBan.tenPhongBan,
+          maPhongBan: phongBan.maPhongBan,
+          tenTp: employee ? employee.name : "",
+        };
+      });
 
       setPhongBanData(newData);
     } catch (error) {
-      console.error("Lỗi khi đọc dữ liệu:", error);
+      console.error("Error reading data:", error);
     }
   };
 
@@ -97,6 +90,18 @@ export default function PhongBanScreen({ navigation }) {
   };
 
   const handleAddPhongBan = async () => {
+    // Validate input data
+    const errors = validatePhongBanData({
+      maPhongBan,
+      tenPhongBan,
+      selectedManager,
+    });
+
+    if (errors.length > 0) {
+      setValidationErrors(errors); // Set errors to state for display
+      return; // Exit the function if there are validation errors
+    }
+
     try {
       const phongban = {
         maPhongBan,
@@ -104,23 +109,24 @@ export default function PhongBanScreen({ navigation }) {
         maQuanLy: selectedManager.employeeID,
       };
 
-      await writePhongBan(phongban); // Ghi dữ liệu vào Firebase
+      await writePhongBan(phongban); // Write data to Firebase
 
-      // sửa chức vụ thành trưởng phòng cho nv
+      // Update employee's role to manager
       const dataTP = await getEmployeeById(selectedManager.employeeID);
       const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
       await updateEmployee(selectedManager.employeeID, updateTP);
 
-      await fetchData(); // Làm mới dữ liệu sau khi thêm mới
+      await fetchData(); // Refresh data after addition
 
-      // Reset các trường sau khi thêm
+      // Reset fields after addition
       setMaPhongBan("");
       setTenPhongBan("");
       setSelectedManager({ name: "", employeeID: "" });
       setSearchText("");
-      setVisibleModal(false); // Đóng modal
+      setValidationErrors([]); // Clear validation errors
+      setVisibleModal(false); // Close modal
     } catch (error) {
-      console.error("Lỗi khi thêm phòng ban:", error);
+      console.error("Error adding department:", error);
     }
   };
 
@@ -203,6 +209,18 @@ export default function PhongBanScreen({ navigation }) {
                   )}
                   keyExtractor={(item) => item.employeeID}
                 />
+                
+                {/* Display validation errors */}
+                {validationErrors.length > 0 && (
+                  <View style={styles.errorContainer}>
+                    {validationErrors.map((error, index) => (
+                      <Text key={index} style={styles.errorText}>
+                        {error}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+
                 <TouchableOpacity
                   style={styles.btnThem}
                   onPress={handleAddPhongBan}
@@ -278,7 +296,12 @@ const styles = StyleSheet.create({
   },
   nameBtn: {
     fontSize: 20,
-
     color: "#FFFFFF",
+  },
+  errorContainer: {
+    marginVertical: 10,
+  },
+  errorText: {
+    color: "red",
   },
 });

@@ -9,6 +9,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { addEmployee, readChucVu, readPhongBan } from '../../services/database';
 import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
 import { addEmployeeFireStore, getNewEmployeeId } from '../../services/EmployeeFireBase';
+import { validateEmployeeData } from '../../utils/validate'; 
 
 export default function AddMember({ navigation }) {
   const [employeeId, setEmployeeId] = useState("");
@@ -58,6 +59,13 @@ export default function AddMember({ navigation }) {
   const handleAddEmployee = async () => {
     if (!profileImage) {
       Alert.alert('Chưa chọn hình ảnh!', 'Vui lòng chọn hình ảnh cho nhân viên.');
+      return;
+    }
+
+    // Kiểm tra dữ liệu nhân viên
+    const validationErrors = validateEmployeeData(employeeData);
+    if (validationErrors.length > 0) {
+      Alert.alert('Lỗi!', validationErrors.join('\n'));
       return;
     }
 
@@ -219,11 +227,20 @@ export default function AddMember({ navigation }) {
               style={pickerSelectStyles}
             />
 
+            <Text style={styles.label}>Lương cơ bản</Text>
+            <TextInput
+              style={styles.input}
+              value={employeeData.luongcoban}
+              onChangeText={(value) => updateField('luongcoban', value)}
+              keyboardType="numeric"
+            />
+
             <Text style={styles.label}>Ngày sinh</Text>
             <TextInput
               style={styles.input}
               value={employeeData.ngaysinh}
               onChangeText={(value) => updateField('ngaysinh', value)}
+              placeholder="dd/mm/yyyy"
             />
 
             <Text style={styles.label}>Ngày bắt đầu</Text>
@@ -231,13 +248,7 @@ export default function AddMember({ navigation }) {
               style={styles.input}
               value={employeeData.ngaybatdau}
               onChangeText={(value) => updateField('ngaybatdau', value)}
-            />
-
-            <Text style={styles.label}>Lương cơ bản</Text>
-            <TextInput
-              style={styles.input}
-              value={employeeData.luongcoban}
-              onChangeText={(value) => updateField('luongcoban', value)}
+              placeholder="dd/mm/yyyy"
             />
 
             <Text style={styles.label}>Mật khẩu</Text>
@@ -245,23 +256,12 @@ export default function AddMember({ navigation }) {
               style={styles.input}
               value={employeeData.matKhau}
               onChangeText={(value) => updateField('matKhau', value)}
-              secureTextEntry={true}
-            />
-
-            <Text style={styles.label}>Trạng thái</Text>
-            <RNPickerSelect
-              onValueChange={(value) => updateField('trangthai', value)}
-              value={employeeData.trangthai}
-              items={[
-                { label: 'Đang làm', value: 'true' },
-                { label: 'Ngừng làm', value: 'false' },
-              ]}
-              style={pickerSelectStyles}
+              secureTextEntry
             />
           </ScrollView>
         </SafeAreaView>
+        <ViewLoading />
       </KeyboardAvoidingView>
-      <ViewLoading />
     </>
   );
 }

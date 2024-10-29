@@ -13,6 +13,7 @@ import {
 import BackNav from "../../Compoment/BackNav";
 import Feather from "react-native-vector-icons/Feather";
 import { deleteBangCap, updateBangCap } from "../../services/database";
+import { validateBangCapData } from "../../utils/validate"; // Import hàm xác thực
 
 export default function DetailBangCap({ navigation, route }) {
   const { bangcap_id, tenBang } = route.params.item;
@@ -24,6 +25,13 @@ export default function DetailBangCap({ navigation, route }) {
 
   // Handle save
   const handleSave = async () => {
+    const validationError = validateBangCapData(editedTenBC); // Gọi hàm xác thực
+
+    if (validationError) {
+      Alert.alert("Lỗi", validationError); // Hiển thị thông báo lỗi
+      return;
+    }
+
     try {
       await updateBangCap(bangcap_id, editedTenBC);
       setCurrentTenBC(editedTenBC);
@@ -58,9 +66,8 @@ export default function DetailBangCap({ navigation, route }) {
   };
 
   return (
-    <><BackNav navigation={navigation} name={"Chi tiết bằng cấp"} /><>
-     
-
+    <>
+      <BackNav navigation={navigation} name={"Chi tiết bằng cấp"} />
       <SafeAreaView style={styles.container}>
         <ScrollView>
           {/* Thông tin bằng cấp */}
@@ -76,7 +83,8 @@ export default function DetailBangCap({ navigation, route }) {
                 style={styles.TextInput}
                 placeholder="Tên bằng cấp"
                 value={editedTenBC}
-                onChangeText={(text) => setEditedTenBC(text)} />
+                onChangeText={(text) => setEditedTenBC(text)}
+              />
             ) : (
               <View style={styles.inlineEditContainer}>
                 <Text style={styles.sectionTitle22}>{currentTenBC}</Text>
@@ -84,11 +92,7 @@ export default function DetailBangCap({ navigation, route }) {
                   onPress={() => setIsEditing(true)}
                   style={styles.editBtn}
                 >
-                  <Feather
-                    name="edit-2"
-                    size={20}
-                    color="#FFFFFF"
-                    style={styles.fea} />
+                  <Feather name="edit-2" size={20} color="#FFFFFF" style={styles.fea} />
                 </TouchableOpacity>
               </View>
             )}
@@ -138,13 +142,13 @@ export default function DetailBangCap({ navigation, route }) {
           </View>
         </Modal>
       </SafeAreaView>
-    </></>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 9,
+    flex: 1,
     backgroundColor: "#F2F2F7",
     margin: 10,
   },
@@ -241,8 +245,8 @@ const styles = StyleSheet.create({
   confirmText: {
     fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
     marginBottom: 20,
+    textAlign: "center",
   },
   modalBtnContainer: {
     flexDirection: "row",
@@ -250,14 +254,14 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   modalBtn: {
-    width: "40%",
     padding: 10,
     backgroundColor: "#FFA500",
     borderRadius: 5,
+    width: "40%",
     alignItems: "center",
   },
   modalBtnText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontWeight: "bold",
   },
 });

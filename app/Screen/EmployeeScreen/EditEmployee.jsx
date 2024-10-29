@@ -22,6 +22,7 @@ import {
 import RNPickerSelect from "react-native-picker-select";
 import BackNav from "../../Compoment/BackNav";
 import { readEmployeesFireStore, getEmployeeById } from "../../services/EmployeeFireBase";
+import { validateEmployeeData } from '../../utils/validate'; 
 import { Calendar } from "react-native-calendars";
 
 export default function EmployeeEditScreen({ navigation, route }) {
@@ -68,42 +69,36 @@ export default function EmployeeEditScreen({ navigation, route }) {
   };
 
   const handleUpdate = async () => {
+    const isValid = validateEmployeeData(employeeData);
+    if (!isValid) {
+      Alert.alert("Thông báo", "Vui lòng kiểm tra dữ liệu nhập!");
+      return;
+    }
     try {
       const currentPhongBan = phongBans.find((pb) => pb.maPhongBan == currentNV.phongbanId);
       const newPhongBan = phongBans.find((pb) => pb.maPhongBan == employeeData.phongbanId);
 
-      if (currentNV.chucvuId != "TP") {
-        if (employeeData.chucvuId == "TP") {
+      if (currentNV.chucvuId !== "TP") {
+        if (employeeData.chucvuId === "TP") {
           await editPhongBan(employeeData.phongbanId, { maQuanLy: manv });
-
-          if (newPhongBan.maQuanLy != "")
+          if (newPhongBan.maQuanLy !== "")
             await updateEmployee(newPhongBan.maQuanLy, { chucvuId: "NV" });
         }
-
-        await updateEmployee(manv, employeeData);
-
-        Alert.alert("Thông báo", `Cập nhật thành công!`, [
-          { text: "OK", onPress: () => navigation.goBack() },
-        ]);
       } else {
-        if (employeeData.chucvuId != "TP") {
+        if (employeeData.chucvuId !== "TP") {
           await editPhongBan(currentNV.phongbanId, { maQuanLy: "" });
-          await updateEmployee(manv, employeeData);
-          Alert.alert("Thông báo", `Cập nhật thành công!`, [
-            { text: "OK", onPress: () => navigation.goBack() },
-          ]);
-        } else if (currentNV.phongbanId == employeeData.phongbanId) {
-          await updateEmployee(manv, employeeData);
-          Alert.alert("Thông báo", `Cập nhật thành công!`, [
-            { text: "OK", onPress: () => navigation.goBack() },
-          ]);
-        } else {
+        } else if (currentNV.phongbanId !== employeeData.phongbanId) {
           Alert.alert(
             "Thông báo",
             `Không thể đổi sang phòng ${newPhongBan.tenPhongBan}, Bạn đang là trưởng phòng ${currentPhongBan.tenPhongBan}!`
           );
+          return;
         }
       }
+      await updateEmployee(manv, employeeData);
+      Alert.alert("Thông báo", `Cập nhật thành công!`, [
+        { text: "OK", onPress: () => navigation.goBack() },
+      ]);
     } catch (error) {
       console.error("Error updating employee:", error);
       Alert.alert("Thông báo", "Cập nhật không thành công!");
@@ -129,15 +124,16 @@ export default function EmployeeEditScreen({ navigation, route }) {
   }
 
   return (
-    <><View style={styles.header}>
-      <BackNav
-        navigation={navigation}
-        name={"Chỉnh Sửa"}
-        btn={"Sửa"}
-        onEditPress={handleUpdate}
-
+    <>
+      <View style={styles.header}>
+        <BackNav
+          navigation={navigation}
+          name={"Chỉnh Sửa"}
+          btn={"Sửa"}
+          onEditPress={handleUpdate}
         />
-    </View><SafeAreaView style={styles.container}>
+      </View>
+      <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollView}>
           <View style={styles.avatarContainer}>
             <Image
@@ -203,7 +199,7 @@ export default function EmployeeEditScreen({ navigation, route }) {
           <InputField
             label="Số điện thoại"
             value={employeeData.sdt}
-            onChangeText={(value) => updateField("phone", value)}
+            onChangeText={(value) => updateField("sdt", value)}
             keyboardType="phone-pad" />
           <InputField
             label="Lương cơ bản"
@@ -219,10 +215,6 @@ export default function EmployeeEditScreen({ navigation, route }) {
               {employeeData.trangthai ? "Ngưng hoạt động" : "Hoạt động lại"}
             </Text>
           </TouchableOpacity>
-{/* 
-          <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
-            <Text style={styles.updateButtonText}>Cập Nhật</Text>
-          </TouchableOpacity> */}
 
           {/* Modal cho Calendar */}
           <Modal
@@ -232,24 +224,25 @@ export default function EmployeeEditScreen({ navigation, route }) {
             onRequestClose={() => setShowCalendar(false)}
           >
             <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Calendar
-                  onDayPress={handleDateSelect}
-                  markedDates={{ [employeeData[dateField]]: { selected: true } }} />
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setShowCalendar(false)}
-                >
-                  <Text style={styles.closeButtonText}>Đóng</Text>
-                </TouchableOpacity>
-              </View>
+              <Calendar
+                onDayPress={handleDateSelect}
+                markedDates={{
+                  [employeeData[dateField]]: { selected: true, marked: true },
+                }}
+              />
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowCalendar(false)}
+              >
+                <Text style={styles.closeButtonText}>Đóng</Text>
+              </TouchableOpacity>
             </View>
           </Modal>
         </ScrollView>
-      </SafeAreaView></>
+      </SafeAreaView>
+    </>
   );
 }
-
 const InputField = ({ label, ...props }) => (
   <View style={styles.inputContainer}>
     <Text style={styles.label}>{label}</Text>

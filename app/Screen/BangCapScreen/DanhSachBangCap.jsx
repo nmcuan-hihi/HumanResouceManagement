@@ -14,6 +14,7 @@ import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
 import { readBangCap, writeBangCap } from "../../services/database";
 import { useFocusEffect } from "@react-navigation/native";
+import { validateBangCapData } from "../../utils/validate";
 
 export default function DanhSachBangCap({ navigation }) {
   const [data, setData] = useState([]); // Lưu danh sách bằng cấp
@@ -30,22 +31,23 @@ export default function DanhSachBangCap({ navigation }) {
       };
   
       fetchData();
-  
-      // Không cần clean-up function ở đây vì không có listener
     }, [])
   );
+
   const handlePress = (item) => {
     navigation.navigate("DetailBangCap", { item });
   };
 
   // Thêm bằng cấp và cập nhật danh sách
   const handleAddBangCap = async () => {
-    if (!maBC || !tenBC) {
-      Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
+    const newBangCap = { bangcap_id: maBC, tenBang: tenBC };
+    const validationErrors = validateBangCapData(newBangCap);
+
+    if (validationErrors.length > 0) {
+      Alert.alert("Lỗi", validationErrors.join("\n"));
       return;
     }
 
-    const newBangCap = { bangcap_id: maBC, tenBang: tenBC };
     await writeBangCap(newBangCap); // Ghi dữ liệu vào Firebase
 
     // Cập nhật danh sách bằng cấp sau khi thêm

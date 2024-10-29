@@ -1,26 +1,31 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Text } from 'react-native';
-import { createChucVu } from '../../services/database'; // Giả sử bạn có một hàm này để thêm chức vụ vào cơ sở dữ liệu
+import { createChucVu } from '../../services/database'; // Assuming this function adds the position to the database
 import BackNav from '../../Compoment/BackNav';
+import { validateChucVuData } from '../../utils/validate'; // Import the validation function
 
 export default function AddChucVu({ navigation }) {
-  const [chucvu_id
-    , setchucvu_id] = useState('');
+  const [chucvu_id, setChucVuId] = useState('');
   const [tenChucVu, setTenChucVu] = useState('');
   const [heSoChucVu, setHeSoChucVu] = useState('');
+  const [errors, setErrors] = useState([]);
 
   const handleAddChucVu = async () => {
-    if (!chucvu_id || !tenChucVu || !heSoChucVu) {
-      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin!");
+    // Validate inputs
+    const validationErrors = validateChucVuData({ chucvu_id, loaichucvu: tenChucVu, hschucvu: heSoChucVu });
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
       return;
+    } else {
+      setErrors([]); // Clear previous errors
     }
-  
+
     const chucVuData = {
-      chucvu_id: chucvu_id,
+      chucvu_id,
       hschucvu: heSoChucVu,
       loaichucvu: tenChucVu
     };
-  
+
     try {
       await createChucVu(chucvu_id, chucVuData);
       Alert.alert("Thành công", "Thêm chức vụ thành công!");
@@ -32,41 +37,45 @@ export default function AddChucVu({ navigation }) {
   };
 
   return (
-    <><BackNav
-      navigation={navigation}
-      name={"Danh sách chức vụ"} /><View style={styles.container}>
-        <View style={styles.headerSection}>
-
-
-        </View>
-     
+    <>
+      <BackNav navigation={navigation} name={"Danh sách chức vụ"} />
+      <View style={styles.container}>
+        <View style={styles.headerSection}></View>
 
         <TextInput
           style={styles.input}
           placeholder="Mã Chức Vụ"
           value={chucvu_id}
-          onChangeText={setchucvu_id} />
-
+          onChangeText={setChucVuId} />
+        
         <TextInput
           style={styles.input}
           placeholder="Tên Chức Vụ"
           value={tenChucVu}
           onChangeText={setTenChucVu} />
+        
         <TextInput
           style={styles.input}
           placeholder="Hệ Số Chức Vụ"
           value={heSoChucVu}
           onChangeText={setHeSoChucVu}
           keyboardType="numeric" />
+        
+        {/* Display validation errors */}
+        {errors.length > 0 && (
+          <View style={styles.errorContainer}>
+            {errors.map((error, index) => (
+              <Text key={index} style={styles.errorText}>{error}</Text>
+            ))}
+          </View>
+        )}
 
         <TouchableOpacity style={styles.button} onPress={handleAddChucVu}>
           <Text style={styles.buttonText}>Thêm Chức Vụ</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.cancelButtonText}>Hủy Bỏ</Text>
-        </TouchableOpacity>
-      </View></>
+      </View>
+    </>
   );
 }
 
@@ -111,5 +120,12 @@ const styles = StyleSheet.create({
     color: '#FF3B30',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  errorContainer: {
+    marginBottom: 10,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
   },
 });

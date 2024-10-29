@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import BackNav from '../../Compoment/BackNav'; // Navigation back button component
 import Feather from 'react-native-vector-icons/Feather';
-import { readChucVu, updateChucVu, deleteChucVu } from '../../services/database'; // Database functions
+import { readChucVu, updateChucVu, deleteChucVu } from '../../services/database';
+import { validateChucVuData } from '../../utils/validate'; // Database functions
 
 export default function ChucVuDetail({ route, navigation }) {
   const { chucVuId } = route.params; // Get Chuc Vu ID from route params
@@ -21,6 +22,7 @@ export default function ChucVuDetail({ route, navigation }) {
   const [currentHeSo, setCurrentHeSo] = useState('');
   const [editedHeSo, setEditedHeSo] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [errors, setErrors] = useState([]); // State for validation errors
 
   useEffect(() => {
     const fetchChucVu = async () => {
@@ -42,6 +44,21 @@ export default function ChucVuDetail({ route, navigation }) {
   }, [chucVuId]);
 
   const handleSave = async () => {
+    // Clear previous errors
+    setErrors([]);
+
+    // Validate data
+    const validationErrors = validateChucVuData({
+      chucvu_id: chucVuId,
+      loaichucvu: editedChucVu,
+      hschucvu: editedHeSo,
+    });
+
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors); // Set errors to state if validation fails
+      return; // Stop execution if there are errors
+    }
+
     try {
       const updatedChucVu = {
         loaichucvu: editedChucVu,
@@ -90,32 +107,34 @@ export default function ChucVuDetail({ route, navigation }) {
 
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Tên chức vụ</Text>
-            
-              <Text>{currentChucVu}</Text>
+            <Text>{currentChucVu}</Text>
           </View>
 
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Hệ số chức vụ</Text>
             {isEditing ? (
-              <TextInput
-                style={styles.textInput}
-                placeholder="Hệ số chức vụ"
-                value={editedHeSo}
-                onChangeText={(text) => setEditedHeSo(text)}
-                keyboardType="numeric"
-              />
+              <>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Hệ số chức vụ"
+                  value={editedHeSo}
+                  onChangeText={(text) => setEditedHeSo(text)}
+                  keyboardType="numeric"
+                />
+                {errors.includes('Hệ số chức vụ không được để trống.') && (
+                  <Text style={styles.errorText}>Hệ số chức vụ không được để trống.</Text>
+                )}
+              </>
             ) : (
-             
-
               <View style={styles.inlineEditContainer}>
-              <Text style={styles.sectionTitle1}>{currentHeSo}</Text>
-              <TouchableOpacity
-                onPress={() => setIsEditing(true)}
-                style={styles.editBtn}
-              >
-                <Feather name="edit-2" size={20} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
+                <Text style={styles.sectionTitle1}>{currentHeSo}</Text>
+                <TouchableOpacity
+                  onPress={() => setIsEditing(true)}
+                  style={styles.editBtn}
+                >
+                  <Feather name="edit-2" size={20} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
             )}
           </View>
 
@@ -182,10 +201,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 20,
   },
-  sectionTitle22: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
   inlineEditContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -202,6 +217,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
+    marginBottom: 5, // Add margin for better spacing
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 5,
   },
   buttonSection: {
     marginTop: 20,
@@ -253,10 +274,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modalBtn: {
-    width: '40%',
     padding: 10,
     backgroundColor: '#FFA500',
     borderRadius: 5,
+    width: '40%',
     alignItems: 'center',
   },
   modalBtnText: {
