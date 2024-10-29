@@ -1,38 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  View, Text, TextInput, StyleSheet, SafeAreaView,
-  ScrollView, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import BackNav from '../../Compoment/BackNav';
-import RNPickerSelect from 'react-native-picker-select';
-import { readChucVu, readPhongBan } from '../../services/database';
-import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
-import { editEmployeeFireStore, getEmployeeById, updateEmployeeFireStore } from '../../services/EmployeeFireBase'; // Hàm cập nhật
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import BackNav from "../../Compoment/BackNav";
+import RNPickerSelect from "react-native-picker-select";
+import {
+  editPhongBan,
+  readChucVu,
+  readPhongBan,
+  updateEmployee,
+} from "../../services/database";
+import ViewLoading, {
+  openModal,
+  closeModal,
+} from "../../Compoment/ViewLoading";
+import {
+  editEmployeeFireStore,
+  getEmployeeById,
+  updateEmployeeFireStore,
+} from "../../services/EmployeeFireBase"; // Hàm cập nhật
 
 export default function EditMember({ route, navigation }) {
   const { manv } = route.params || {}; // Nhận dữ liệu từ params
 
   const [employeeData, setEmployeeData] = useState({
-    cccd: '',
-    employeeId: '',
-    name: '',
-    diachi: '',
-    sdt: '',
-    gioitinh: 'Nam', 
-    phongbanId: '',
-    chucvuId: '',
-    luongcoban: '',
-    ngaysinh: '',
-    ngaybatdau: '',
-    matKhau: '',
-    trangthai: 'true',
-    imageUrl: '',
+    cccd: "",
+    employeeId: "",
+    name: "",
+    diachi: "",
+    sdt: "",
+    gioitinh: "Nam",
+    phongbanId: "",
+    chucvuId: "",
+    luongcoban: "",
+    ngaysinh: "",
+    ngaybatdau: "",
+    matKhau: "",
+    trangthai: "true",
+    imageUrl: "",
   });
 
-  const [profileImage, setProfileImage] = useState(null);  
+  const [profileImage, setProfileImage] = useState(null);
   const [phongBans, setPhongBans] = useState([]);
   const [chucVus, setChucVus] = useState([]);
+
+  const [phongBanUpDate, setPhongBanUpDate] = useState([]);
+
+  const [currentNV, setCurrentNV] = useState(null);
 
   // Lấy thông tin nhân viên khi component được mount
   useEffect(() => {
@@ -40,24 +65,26 @@ export default function EditMember({ route, navigation }) {
       try {
         const employee = await getEmployeeById(manv);
         setEmployeeData({
-          cccd: employee?.cccd || '',
-          employeeId: employee?.employeeId || '',
-          name: employee?.name || '',
-          diachi: employee?.diachi || '',
-          sdt: employee?.sdt || '',
-          gioitinh: employee?.gioitinh || 'Nam', 
-          phongbanId: employee?.phongbanId || '',
-          chucvuId: employee?.chucvuId || '',
-          luongcoban: employee?.luongcoban || '',
-          ngaysinh: employee?.ngaysinh || '',
-          ngaybatdau: employee?.ngaybatdau || '',
-          matKhau: employee?.matKhau || '',
-          trangthai: employee?.trangthai || 'true',
-          imageUrl: employee?.imageUrl || '',
+          cccd: employee?.cccd || "",
+          employeeId: employee?.employeeId || "",
+          name: employee?.name || "",
+          diachi: employee?.diachi || "",
+          sdt: employee?.sdt || "",
+          gioitinh: employee?.gioitinh || "Nam",
+          phongbanId: employee?.phongbanId || "",
+          chucvuId: employee?.chucvuId || "",
+          luongcoban: employee?.luongcoban || "",
+          ngaysinh: employee?.ngaysinh || "",
+          ngaybatdau: employee?.ngaybatdau || "",
+          matKhau: employee?.matKhau || "",
+          trangthai: employee?.trangthai || "true",
+          imageUrl: employee?.imageUrl || "",
         });
         setProfileImage(employee?.imageUrl || null); // Set hình ảnh hồ sơ
+
+        setCurrentNV(employee);
       } catch (error) {
-        console.error('Lỗi khi lấy thông tin nhân viên:', error);
+        console.error("Lỗi khi lấy thông tin nhân viên:", error);
       }
     };
 
@@ -67,8 +94,8 @@ export default function EditMember({ route, navigation }) {
   // Hàm chọn ảnh từ thư viện
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Quyền bị từ chối!', 'Vui lòng cấp quyền để chọn ảnh.');
+    if (status !== "granted") {
+      Alert.alert("Quyền bị từ chối!", "Vui lòng cấp quyền để chọn ảnh.");
       return;
     }
 
@@ -90,23 +117,78 @@ export default function EditMember({ route, navigation }) {
   };
 
   // Xử lý cập nhật nhân viên
-const handleEditEmployee = async () => {
-  try {
-    openModal();
-    // Kiểm tra xem hình ảnh đã thay đổi chưa
-    const imageToUpload = profileImage !== employeeData.imageUrl ? profileImage : null;
+ 
+  const handleEditEmployee = async () => {
+    try {
+      openModal();
+      // Kiểm tra xem hình ảnh đã thay đổi chưa
+      const imageToUpload =
+        profileImage !== employeeData.imageUrl ? profileImage : null;
 
-    await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
-    Alert.alert('Thành công!', 'Thông tin nhân viên đã được cập nhật.');
-    navigation.goBack();
-  } catch (error) {
-    Alert.alert('Lỗi!', 'Có lỗi xảy ra khi cập nhật thông tin.');
-    console.error(error);
-  } finally {
-    closeModal();
-  }
-};
+      // lấy phòng ban hiện tại
+      const currentPhongBan = phongBanUpDate.find((pb) => {
+        return pb.maPhongBan == currentNV.phongbanId;
+      });
 
+      // lấy phòng ban được chọn
+      const newPhongBan = phongBanUpDate.find((pb) => {
+        return pb.maPhongBan == employeeData.phongbanId;
+      });
+
+      console.log(newPhongBan, "newpb");
+      if (currentNV.chucvuId != "TP") {
+        console.log("1---");
+
+        if (employeeData.chucvuId == "TP") {
+          console.log("2---");
+
+          await editPhongBan(employeeData.phongbanId, { maQuanLy: manv });
+
+          if (newPhongBan.maQuanLy != "") {
+            await updateEmployee(newPhongBan.maQuanLy, { chucvuId: "NV" });
+          }
+        }
+        console.log("4---");
+
+        await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
+        console.log("4.1---");
+
+        closeModal();
+        Alert.alert("Thông báo", `Cập nhật thành công!`, [
+          { text: "OK", onPress: () => navigation.goBack() },
+        ]);
+      } else {
+        if (employeeData.chucvuId != "TP") {
+          await editPhongBan(currentNV.phongbanId, { maQuanLy: "" });
+          await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
+          closeModal();
+
+          Alert.alert("Thông báo", `Cập nhật thành công!`, [
+            { text: "OK", onPress: () => navigation.goBack() },
+          ]);
+        } else if (currentNV.phongbanId == employeeData.phongbanId) {
+          await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
+          closeModal();
+
+          Alert.alert("Thông báo", `Cập nhật thành công!`, [
+            { text: "OK", onPress: () => navigation.goBack() },
+          ]);
+        } else {
+          closeModal();
+
+          Alert.alert(
+            "Thông báo",
+            `Không thể đổi sang phòng ${newPhongBan.tenPhongBan}, Bạn đang là trưởng phòng ${currentPhongBan.tenPhongBan}!`
+          );
+        }
+      }
+    } catch (error) {
+      closeModal();
+
+      console.error("Error updating employee 11111:", error);
+      Alert.alert("Thông báo", "Cập nhật không thành công!");
+    }
+  };
 
   // Lấy dữ liệu phòng ban và chức vụ từ Firestore
   useEffect(() => {
@@ -118,10 +200,14 @@ const handleEditEmployee = async () => {
             label: p.tenPhongBan,
             value: p.maPhongBan,
           }));
+
           setPhongBans(phongBanArray);
+          const phongBanUpdate = Object.values(data);
+
+          setPhongBanUpDate(phongBanUpdate);
         }
       } catch (error) {
-        console.error('Lỗi khi lấy phòng ban:', error);
+        console.error("Lỗi khi lấy phòng ban:", error);
       }
     };
 
@@ -136,7 +222,7 @@ const handleEditEmployee = async () => {
           setChucVus(chucVuArr);
         }
       } catch (error) {
-        console.error('Lỗi khi lấy chức vụ:', error);
+        console.error("Lỗi khi lấy chức vụ:", error);
       }
     };
 
@@ -153,7 +239,7 @@ const handleEditEmployee = async () => {
         onEditPress={handleEditEmployee}
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <SafeAreaView>
@@ -164,7 +250,7 @@ const handleEditEmployee = async () => {
                   source={
                     profileImage
                       ? { uri: profileImage }
-                      : require('../../../assets/image/images.png')
+                      : require("../../../assets/image/images.png")
                   }
                   style={styles.avatar}
                 />
@@ -175,7 +261,7 @@ const handleEditEmployee = async () => {
             <TextInput
               style={styles.input}
               value={employeeData.cccd}
-              onChangeText={(value) => updateField('cccd', value)}
+              onChangeText={(value) => updateField("cccd", value)}
             />
 
             <Text style={styles.label}>Mã Nhân Viên</Text>
@@ -189,39 +275,39 @@ const handleEditEmployee = async () => {
             <TextInput
               style={styles.input}
               value={employeeData.name}
-              onChangeText={(value) => updateField('name', value)}
+              onChangeText={(value) => updateField("name", value)}
             />
 
             <Text style={styles.label}>Địa chỉ</Text>
             <TextInput
               style={styles.input}
               value={employeeData.diachi}
-              onChangeText={(value) => updateField('diachi', value)}
+              onChangeText={(value) => updateField("diachi", value)}
             />
 
             <Text style={styles.label}>Số điện thoại</Text>
             <TextInput
               style={styles.input}
               value={employeeData.sdt}
-              onChangeText={(value) => updateField('sdt', value)}
+              onChangeText={(value) => updateField("sdt", value)}
               keyboardType="phone-pad"
             />
 
             <Text style={styles.label}>Giới tính</Text>
             <RNPickerSelect
-              onValueChange={(value) => updateField('gioitinh', value)}
+              onValueChange={(value) => updateField("gioitinh", value)}
               value={employeeData.gioitinh}
               items={[
-                { label: 'Nam', value: 'Nam' },
-                { label: 'Nữ', value: 'Nữ' },
-                { label: 'Khác', value: 'Khác' },
+                { label: "Nam", value: "Nam" },
+                { label: "Nữ", value: "Nữ" },
+                { label: "Khác", value: "Khác" },
               ]}
               style={pickerSelectStyles}
             />
 
             <Text style={styles.label}>Phòng ban</Text>
             <RNPickerSelect
-              onValueChange={(value) => updateField('phongbanId', value)}
+              onValueChange={(value) => updateField("phongbanId", value)}
               value={employeeData.phongbanId}
               items={phongBans}
               style={pickerSelectStyles}
@@ -229,7 +315,7 @@ const handleEditEmployee = async () => {
 
             <Text style={styles.label}>Chức vụ</Text>
             <RNPickerSelect
-              onValueChange={(value) => updateField('chucvuId', value)}
+              onValueChange={(value) => updateField("chucvuId", value)}
               value={employeeData.chucvuId}
               items={chucVus}
               style={pickerSelectStyles}
@@ -239,38 +325,38 @@ const handleEditEmployee = async () => {
             <TextInput
               style={styles.input}
               value={employeeData.ngaysinh}
-              onChangeText={(value) => updateField('ngaysinh', value)}
+              onChangeText={(value) => updateField("ngaysinh", value)}
             />
 
             <Text style={styles.label}>Ngày bắt đầu</Text>
             <TextInput
               style={styles.input}
               value={employeeData.ngaybatdau}
-              onChangeText={(value) => updateField('ngaybatdau', value)}
+              onChangeText={(value) => updateField("ngaybatdau", value)}
             />
 
             <Text style={styles.label}>Lương cơ bản</Text>
             <TextInput
               style={styles.input}
               value={employeeData.luongcoban}
-              onChangeText={(value) => updateField('luongcoban', value)}
+              onChangeText={(value) => updateField("luongcoban", value)}
             />
 
             <Text style={styles.label}>Mật khẩu</Text>
             <TextInput
               style={styles.input}
               value={employeeData.matKhau}
-              onChangeText={(value) => updateField('matKhau', value)}
+              onChangeText={(value) => updateField("matKhau", value)}
               secureTextEntry
             />
 
             <Text style={styles.label}>Trạng thái</Text>
             <RNPickerSelect
-              onValueChange={(value) => updateField('trangthai', value)}
+              onValueChange={(value) => updateField("trangthai", value)}
               value={employeeData.trangthai}
               items={[
-                { label: 'Kích hoạt', value: 'true' },
-                { label: 'Khóa', value: 'false' },
+                { label: "Kích hoạt", value: "true" },
+                { label: "Khóa", value: "false" },
               ]}
               style={pickerSelectStyles}
             />
@@ -288,7 +374,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   avatarContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 20,
   },
   avatar: {
@@ -298,11 +384,11 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 5,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   input: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 5,
     paddingLeft: 10,
@@ -316,9 +402,9 @@ const pickerSelectStyles = {
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
-    color: 'black', // Màu chữ
+    color: "black", // Màu chữ
     marginBottom: 15,
   },
   inputAndroid: {
@@ -326,9 +412,9 @@ const pickerSelectStyles = {
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
-    color: 'black', // Màu chữ
+    color: "black", // Màu chữ
     marginBottom: 15,
   },
 };

@@ -32,6 +32,8 @@ export default function DetailPB({ navigation, route }) {
   const [currentMaTP, setCurrentMaTP] = useState("");
   const [editedMaTP, setEditedMaTP] = useState("");
 
+  const [pbDoc, setPbDoc] = useState("");
+
   const [truongPhong, setTruongPhong] = useState({ name: "" });
 
   const [dataSelect, setDataSelect] = useState([]);
@@ -55,6 +57,8 @@ export default function DetailPB({ navigation, route }) {
     setDataSelect(dataDropDown);
   };
 
+  console.log(maPhongBan);
+
   useEffect(() => {
     getListNV();
   }, [currentMaTP]);
@@ -65,13 +69,13 @@ export default function DetailPB({ navigation, route }) {
 
     console.log(phongBanData);
     if (phongBanData) {
-      const phongBan = phongBanData.find((p) => p.id === maPhongBan);
+      const phongBan = phongBanData.find((p) => p.maPhongBan === maPhongBan);
       if (phongBan) {
         setCurrentTenPB(phongBan.tenPhongBan); // Assuming `tenPhongBan` is a field in data
         setEditedTenPB(phongBan.tenPhongBan);
         setCurrentMaTP(phongBan.maQuanLy); // Assuming `tenPhongBan` is a field in data
         setEditedMaTP(phongBan.maQuanLy);
-
+        setPbDoc(phongBan.id);
         if (phongBan.maQuanLy) {
           getDataTruongPhong(phongBan.maQuanLy);
         }
@@ -101,16 +105,17 @@ export default function DetailPB({ navigation, route }) {
         // Add other fields if necessary
       };
 
-      await editPhongBan(maPhongBan, updatedData); // Call editPhongBan to update data
+      await editPhongBan(pbDoc, updatedData); // Call editPhongBan to update data
 
       //update thông tin nhân viên thành tp
-
-      const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
-      await updateEmployee(editedMaTP, updateTP);
+      if (editedMaTP != currentMaTP) {
+        const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
+        await updateEmployee(editedMaTP, updateTP);
+      }
 
       //update thông tin tp thành nv
 
-      if (currentMaTP && editedMaTP !=currentMaTP) {
+      if (currentMaTP && editedMaTP != currentMaTP) {
         const updateTPCu = { chucvuId: "NV" };
         await updateEmployee(currentMaTP, updateTPCu);
       }
@@ -129,13 +134,12 @@ export default function DetailPB({ navigation, route }) {
 
   const confirmDeleteYes = async () => {
     try {
-      await removePhongBan(maPhongBan); // Gọi hàm xóa phòng ban
+      await removePhongBan(pbDoc); // Gọi hàm xóa phòng ban
       setConfirmDelete(false);
 
-      if (editedMaTP) {
-        const dataTP = getDataTruongPhong(editedMaTP);
+      if (currentMaTP != "") {
         const updateTP = { chucvuId: "NV" };
-        await updateEmployee(editedMaTP, updateTP);
+        await updateEmployee(currentMaTP, updateTP);
       }
       navigation.goBack(); // Quay lại màn hình trước đó sau khi xóa
     } catch (error) {
