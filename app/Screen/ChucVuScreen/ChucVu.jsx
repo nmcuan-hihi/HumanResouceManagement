@@ -51,7 +51,7 @@ export default function ListChucVu({ navigation }) {
         renderItem={({ item }) => (
           <TouchableOpacity 
             style={styles.itemContainer} 
-            onPress={() => navigation.navigate("ChucVuDetail", { chucVuId: item.id })}
+            onPress={() => navigation.navigate("ChucVuDetail", { chucVuId: item.id,chucvu_id: item.chucvu_id})}
           >
             <ItemListEmployee manv={item.loaichucvu} name={item.hschucvu} />
           </TouchableOpacity>

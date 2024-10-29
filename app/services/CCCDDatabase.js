@@ -1,20 +1,29 @@
 import {
     getDatabase,
-    get,
-    child,
     ref,
     set,
-} from "firebase/database";
-import { app } from "../config/firebaseconfig";
-import {
+    get,
+    child,
+    update,
+    remove,
+  } from "firebase/database";
+  import { app } from "../config/firebaseconfig";
+  import { firestore } from '../config/firebaseconfig';
+  
+  import { initializeApp } from "firebase/app";
+  import {
     getStorage,
     ref as storageRef,
     uploadBytes,
     getDownloadURL,
-} from "firebase/storage";
+  } from "firebase/storage";
+  
+  import { collection, query, orderBy, limit, getDocs, setDoc, doc, getDoc } from "firebase/firestore";
+  
+  const database = getDatabase(app);
+  const storage = getStorage(app); // Khởi tạo Firebase Storage
 
-const database = getDatabase(app);
-const storage = getStorage(app); // Khởi tạo Firebase Storage
+
 
 export async function writeInfoCCCD(employeeId, imgFront, imgBack) {
     try {
@@ -34,25 +43,30 @@ export async function writeInfoCCCD(employeeId, imgFront, imgBack) {
         const frontImageURL = await getDownloadURL(frontImageRef);
         const backImageURL = await getDownloadURL(backImageRef);
 
-        // Ghi dữ liệu vào Realtime Database
-        await set(ref(database, `cccd/${employeeId}`), {
+        // Ghi dữ liệu vào Firestore
+        await setDoc(doc(firestore, `cccd/${employeeId}`), {
             frontImage: frontImageURL,
             backImage: backImageURL,
         });
 
         console.log("Thông tin CCCD đã được lưu thành công.");
     } catch (error) {
-        console.error("Lỗi khi thêm ảnh CCCD:", error);
+        console.log("Lỗi khi thêm ảnh CCCD:", error);
     }
 }
+
+
+
+
 export async function readInfoCCCD(employeeId) {
     try {
         // Tạo tham chiếu đến dữ liệu CCCD của nhân viên
-        const dbRef = ref(database);
-        const snapshot = await get(child(dbRef, `cccd/${employeeId}`));
+        const cccdRef = doc(firestore, `cccd/${employeeId}`);
+
+        const snapshot = await getDoc(cccdRef);
 
         if (snapshot.exists()) {
-            const data = snapshot.val();
+            const data = snapshot.data();
             const frontImage = data.frontImage;
             const backImage = data.backImage;
 

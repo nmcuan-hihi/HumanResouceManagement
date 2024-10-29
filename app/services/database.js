@@ -8,7 +8,7 @@ import {
   remove,
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
-import { firestore } from '../config/firebaseconfig';
+import { firestore } from "../config/firebaseconfig";
 
 import { initializeApp } from "firebase/app";
 import {
@@ -17,13 +17,21 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { doc, setDoc } from "firebase/firestore";
 
-
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  setDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 const database = getDatabase(app);
 const storage = getStorage(app); // Khởi tạo Firebase Storage
-
-
 
 // Hàm ghi dữ liệu nhân viên vào Firestore
 export const addEmployeeFireStore = async (employee) => {
@@ -37,31 +45,20 @@ export const addEmployeeFireStore = async (employee) => {
     });
 
     // Thêm nhân viên vào Firestore với employeeId làm ID
-    await setDoc(doc(firestore, "employees", employee.employeeId), sanitizedEmployee);
+    await setDoc(
+      doc(firestore, "employees", employee.employeeId),
+      sanitizedEmployee
+    );
     console.log("Employee successfully added to Firestore!");
   } catch (error) {
     console.error("Error adding employee:", error);
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export function writeUserData(employee) {
-  const employeeId = employee.employeeId; // Sử dụng employeeId
+  const employeeId = employee.employeeId;
 
-  set(ref(database, `employees/${employeeId}`), employee)
+  setDoc(doc(firestore, `employees/${employeeId}`), employee)
     .then(() => {
       console.log(`Employee ${employeeId} written successfully!`);
     })
@@ -69,9 +66,11 @@ export function writeUserData(employee) {
       console.error(`Error writing employee ${employeeId}:`, error);
     });
 }
+
 export async function addEmployee(employeeData, profileImage) {
   try {
     employeeData.matKhau = employeeData.employeeId;
+
     // Tạo tham chiếu tới nơi lưu trữ hình ảnh
     const imageRef = storageRef(
       storage,
@@ -89,8 +88,11 @@ export async function addEmployee(employeeData, profileImage) {
     // Cập nhật imageUrl vào employeeData
     const employee = { ...employeeData, imageUrl };
 
-    // Ghi dữ liệu nhân viên vào Realtime Database
-    await set(ref(database, `employees/${employeeData.employeeId}`), employee);
+    // Ghi dữ liệu nhân viên vào Firestore
+    await setDoc(
+      doc(firestore, `employees/${employeeData.employeeId}`),
+      employee
+    );
     console.log(`Employee ${employeeData.employeeId} added successfully!`);
   } catch (error) {
     console.error("Error adding employee:", error);
@@ -98,13 +100,17 @@ export async function addEmployee(employeeData, profileImage) {
 }
 
 // Hàm đọc danh sách nhân viên
+
 export async function readEmployees() {
   try {
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "employees")); // Lấy dữ liệu từ node 'employees'
+    const employeeCollection = collection(firestore, "employees");
+    const snapshot = await getDocs(employeeCollection);
 
-    if (snapshot.exists()) {
-      const employees = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
+    if (!snapshot.empty) {
+      const employees = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
       return employees; // Trả về danh sách nhân viên
     } else {
@@ -117,10 +123,11 @@ export async function readEmployees() {
 }
 
 // Hàm cập nhật thông tin nhân viên
+
 export const updateEmployee = async (employee_id, employeeData) => {
   try {
-    const employeeRef = ref(database, `employees/${employee_id}`); // Đường dẫn đến nhân viên cần cập nhật
-    await update(employeeRef, employeeData); // Cập nhật dữ liệu nhân viên
+    const employeeRef = doc(firestore, `employees/${employee_id}`);
+    await updateDoc(employeeRef, employeeData);
     console.log(`Employee ${employee_id} updated successfully!`);
   } catch (error) {
     console.error(`Error updating employee ${employee_id}:`, error);
@@ -128,25 +135,25 @@ export const updateEmployee = async (employee_id, employeeData) => {
   }
 };
 
-// Hàm xóa nhân viên
 export const deleteEmployee = async (employee_id) => {
   try {
-    const employeeRef = ref(database, `employees/${employee_id}`); // Đường dẫn đến nhân viên cần xóa
-    await remove(employeeRef); // Xóa nhân viên khỏi Firebase
+    const employeeRef = doc(firestore, `employees/${employee_id}`);
+    await deleteDoc(employeeRef);
     console.log(`Employee ${employee_id} deleted successfully!`);
   } catch (error) {
     console.error(`Error deleting employee ${employee_id}:`, error);
     throw error; // Ném lỗi để xử lý ở component
   }
 };
+
 // Hàm chuyển đổi trạng thái nhân viên
 export const toggleEmployeeStatus = async (employee_id, currentStatus) => {
   try {
-    const employeeRef = ref(database, `employees/${employee_id}`); // Đường dẫn đến nhân viên cần cập nhật
-    const newStatus = !currentStatus; // Đảo ngược trạng thái
+    const employeeRef = doc(firestore, `employees/${employee_id}`);
+    const newStatus = !currentStatus;
 
     // Cập nhật trạng thái mới
-    await update(employeeRef, {
+    await updateDoc(employeeRef, {
       trangthai: newStatus,
     });
 
@@ -161,50 +168,10 @@ export const toggleEmployeeStatus = async (employee_id, currentStatus) => {
   }
 };
 
-export function writeEmployeeData(employee) {
-  console.log("Employee data:", employee); // In ra dữ liệu nhân viên để kiểm tra
-
-  // Kiểm tra từng thuộc tính trong đối tượng employee
-  const requiredFields = [
-    "employee_id",
-    "cccd",
-    "chucvu_id",
-    "luongcoban_id",
-    "name",
-    "ngaybatdau",
-    "ngaysinh",
-    "phongban_id",
-    "sdt",
-    "trangthai",
-  ];
-
-  for (const field of requiredFields) {
-    if (employee[field] === undefined) {
-      console.error(`Field ${field} is undefined`);
-      return; // Ngưng thực hiện nếu một trường bắt buộc không có giá trị
-    }
-  }
-
-  const employeeId = employee.employeeId; // Lấy ID nhân viên
-  if (!employeeId) {
-    console.error("Employee ID is undefined");
-    return; // Ngưng thực hiện nếu employeeId không hợp lệ
-  }
-
-  // Ghi dữ liệu vào Firebase
-  set(ref(database, `employees/${employeeId}`), employee)
-    .then(() => {
-      console.log(`Employee ${employeeId} written successfully!`);
-    })
-    .catch((error) => {
-      console.error(`Error writing employee ${employeeId}:`, error);
-    });
-}
-
 export function writePhongBan(phongBan) {
   const maPhongBan = phongBan.maPhongBan;
 
-  set(ref(database, `phongban/${maPhongBan}`), phongBan)
+  setDoc(doc(firestore, `phongban/${maPhongBan}`), phongBan)
     .then(() => {
       console.log(`Phòng ban ${maPhongBan} written successfully!`);
     })
@@ -215,11 +182,14 @@ export function writePhongBan(phongBan) {
 
 export async function readPhongBan() {
   try {
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "phongban"));
+    const phongBanCollection = collection(firestore, "phongban");
+    const snapshot = await getDocs(phongBanCollection);
 
-    if (snapshot.exists()) {
-      const phongBans = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
+    if (!snapshot.empty) {
+      const phongBans = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
       return phongBans; // Trả về danh sách phòng ban
     } else {
@@ -230,19 +200,19 @@ export async function readPhongBan() {
     console.error("Error reading phong ban:", error);
   }
 }
+
 export async function readPhongBan1() {
   try {
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "phongban"));
+    const phongBanCollection = collection(firestore, "phongban");
+    const snapshot = await getDocs(phongBanCollection);
 
-    if (snapshot.exists()) {
-      const phongBans = snapshot.val(); // Lấy dữ liệu
-      // Chuyển đổi thành mảng
-      return Object.keys(phongBans).map((key) => ({
-        maPhongBan: key,
-        maQuanLy: phongBans[key].maQuanLy,
-        tenPhongBan: phongBans[key].tenPhongBan,
+    if (!snapshot.empty) {
+      const phongBans = snapshot.docs.map((doc) => ({
+        maPhongBan: doc.id, // Lấy ID phòng ban
+        ...doc.data(), // Lấy dữ liệu phòng ban
       }));
+
+      return phongBans; // Trả về danh sách phòng ban
     } else {
       console.log("No data available");
       return []; // Trả về mảng rỗng nếu không có dữ liệu
@@ -252,36 +222,42 @@ export async function readPhongBan1() {
     return []; // Trả về mảng rỗng nếu có lỗi
   }
 }
-
 export const createChucVu = async (chucvu_id, chucVu) => {
   try {
-    const chucVuRef = ref(database, `chucvu/${chucvu_id}`); // Tham chiếu tới đường dẫn chức vụ
-    await set(chucVuRef, chucVu); // Sử dụng hàm set để thêm chức vụ
+    const chucVuRef = doc(firestore, `chucvu/${chucvu_id}`);
+    await setDoc(chucVuRef, chucVu);
     console.log(`Chức vụ ${chucvu_id} đã được thêm thành công`);
   } catch (error) {
     console.error(`Lỗi khi thêm chức vụ ${chucvu_id}:`, error);
   }
 };
+
 export const readChucVu = async () => {
   try {
-    const snapshot = await get(ref(database, 'chucvu')); // Đọc dữ liệu từ node 'chucvu'
-    if (snapshot.exists()) {
-      const ChucVus = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
-      // console.log("Chuc Vu data:", ChucVus);
-      return ChucVus; // Trả về danh sách phòng ban
+    const chucVuCollection = collection(firestore, "chucvu");
+    const snapshot = await getDocs(chucVuCollection);
+
+    if (!snapshot.empty) {
+      const chucVus = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return chucVus; // Trả về danh sách chức vụ
     } else {
-      console.log('No data available');
+      console.log("No data available");
       return null; // Không có dữ liệu
     }
   } catch (error) {
-    console.error('Error reading chuc vu data:', error);
+    console.error("Error reading chuc vu data:", error);
     return null; // Xử lý lỗi
   }
 };
+
 export const updateChucVu = async (maChucVu, updatedData) => {
   try {
-    const chucVuRef = ref(database, `chucvu/${maChucVu}`); // Sử dụng ref để tham chiếu tới chức vụ
-    await update(chucVuRef, updatedData); // Sử dụng hàm update để cập nhật dữ liệu
+    const chucVuRef = doc(firestore, `chucvu/${maChucVu}`); // Tham chiếu tới chức vụ
+    await updateDoc(chucVuRef, updatedData); // Cập nhật dữ liệu
     console.log(`Chức vụ ${maChucVu} đã được cập nhật thành công`);
   } catch (error) {
     console.error(`Lỗi khi cập nhật chức vụ ${maChucVu}:`, error);
@@ -289,19 +265,21 @@ export const updateChucVu = async (maChucVu, updatedData) => {
 };
 
 // Hàm xóa chức vụ
+
 export const deleteChucVu = async (chucvu_id) => {
   try {
-    const chucVuRef = ref(database, `chucvu/${chucvu_id}`); // Tham chiếu tới chức vụ cần xóa
-    await remove(chucVuRef); // Sử dụng hàm remove để xóa chức vụ
+    const chucVuRef = doc(firestore, `chucvu/${chucvu_id}`); // Tham chiếu tới chức vụ cần xóa
+    await deleteDoc(chucVuRef); // Xóa chức vụ
     console.log(`Chức vụ ${chucvu_id} đã được xóa thành công`);
   } catch (error) {
     console.error(`Lỗi khi xóa chức vụ ${chucvu_id}:`, error);
   }
 };
+
 export const editPhongBan = async (maPhongBan, updatedData) => {
   try {
-    const phongBanRef = ref(database, `phongban/${maPhongBan}`); // Sử dụng ref từ database
-    await update(phongBanRef, updatedData); // Sử dụng hàm update
+    const phongBanRef = doc(firestore, `phongban/${maPhongBan}`); // Tham chiếu tới phòng ban
+    await updateDoc(phongBanRef, updatedData); // Cập nhật dữ liệu
     console.log("Cập nhật phòng ban thành công");
   } catch (error) {
     console.error("Lỗi khi cập nhật phòng ban:", error);
@@ -310,8 +288,8 @@ export const editPhongBan = async (maPhongBan, updatedData) => {
 
 export const removePhongBan = async (maPhongBan) => {
   try {
-    const phongBanRef = ref(database, `phongban/${maPhongBan}`); // Đường dẫn tới phòng ban cần xóa
-    await remove(phongBanRef); // Xóa phòng ban
+    const phongBanRef = doc(firestore, `phongban/${maPhongBan}`); // Tham chiếu tới phòng ban cần xóa
+    await deleteDoc(phongBanRef); // Xóa phòng ban
     console.log(`Phòng ban ${maPhongBan} đã được xóa thành công`);
   } catch (error) {
     console.error(`Lỗi khi xóa phòng ban ${maPhongBan}:`, error);
@@ -320,10 +298,11 @@ export const removePhongBan = async (maPhongBan) => {
 
 // bằng cấp
 // Hàm ghi dữ liệu bằng cấp
+
 export function writeBangCap(bangCap) {
   const bangCapId = bangCap.bangcap_id; // Lấy ID bằng cấp
 
-  set(ref(database, `bangcap/${bangCapId}`), bangCap) // Lưu vào node 'bangcap'
+  setDoc(doc(firestore, `bangcap/${bangCapId}`), bangCap) // Lưu vào node 'bangcap'
     .then(() => {
       console.log(`Bằng cấp ${bangCapId} written successfully!`);
     })
@@ -333,14 +312,18 @@ export function writeBangCap(bangCap) {
 }
 
 // Hàm đọc danh sách bằng cấp
+
 export async function readBangCap() {
   try {
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "bangcap")); // Lấy dữ liệu từ node 'bangcap'
+    const bangCapCollection = collection(firestore, "bangcap"); // Tham chiếu tới collection 'bangcap'
+    const snapshot = await getDocs(bangCapCollection); // Lấy dữ liệu
 
-    if (snapshot.exists()) {
-      const bangCaps = snapshot.val(); // Chuyển dữ liệu thành đối tượng
-      console.log("Bang cap data:", bangCaps);
+    if (!snapshot.empty) {
+      const bangCaps = snapshot.docs.map((doc) => ({
+        id: doc.id, // Lấy ID bằng cấp
+        ...doc.data(), // Lấy dữ liệu bằng cấp
+      }));
+
       return bangCaps; // Trả về danh sách bằng cấp
     } else {
       console.log("No data available");
@@ -352,41 +335,40 @@ export async function readBangCap() {
 }
 
 // Hàm xóa bằng cấp
-export function deleteBangCap(bangCapId) {
-  set(ref(database, `bangcap/${bangCapId}`), null) // Xóa node 'bangcap' với ID tương ứng
-    .then(() => {
-      console.log(`Bằng cấp ${bangCapId} deleted successfully!`);
-    })
-    .catch((error) => {
-      console.error(`Error deleting bằng cấp ${bangCapId}:`, error);
-    });
-}
 
+export async function deleteBangCap(bangCapId) {
+  try {
+    const bangCapRef = doc(firestore, `bangcap/${bangCapId}`); // Tham chiếu tới bằng cấp cần xóa
+    await deleteDoc(bangCapRef); // Xóa bằng cấp
+    console.log(`Bằng cấp ${bangCapId} deleted successfully!`);
+  } catch (error) {
+    console.error(`Error deleting bằng cấp ${bangCapId}:`, error);
+  }
+}
 // Hàm sửa dữ liệu bằng cấp
-export function updateBangCap(bangcap_id, tenBang) {
-  update(ref(database, `bangcap/${bangcap_id}`), { tenBang }) // Cập nhật dữ liệu vào node 'bangcap'
-    .then(() => {
-      console.log(`Bằng cấp ${bangcap_id} updated successfully!`);
-    })
-    .catch((error) => {
-      console.error(`Error updating bằng cấp ${bangcap_id}:`, error);
-    });
+export async function updateBangCap(bangcap_id, tenBang) {
+  try {
+    const bangCapRef = doc(firestore, `bangcap/${bangcap_id}`); // Tham chiếu tới bằng cấp
+    await updateDoc(bangCapRef, { tenBang }); // Cập nhật dữ liệu vào node 'bangcap'
+    console.log(`Bằng cấp ${bangcap_id} updated successfully!`);
+  } catch (error) {
+    console.error(`Error updating bằng cấp ${bangcap_id}:`, error);
+  }
 }
 
 export const getEmployeeById = async (employeeId) => {
   try {
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, `employees/${employeeId}`)); // Lấy dữ liệu từ node 'employees/{employeeId}'
+    const employeeRef = doc(firestore, `employees/${employeeId}`); // Tham chiếu tới nhân viên theo ID
+    const snapshot = await getDoc(employeeRef); // Lấy dữ liệu từ document
 
     if (snapshot.exists()) {
-      const employee = snapshot.val(); // Lấy dữ liệu và chuyển đổi thành đối tượng
-      // console.log("Employee Data:", JSON.stringify(employee, null, 2));
+      const employee = snapshot.data(); // Lấy dữ liệu và chuyển đổi thành đối tượng
       return employee; // Trả về thông tin nhân viên
     } else {
       console.log("No employee found with ID:", employeeId);
       return null; // Không tìm thấy nhân viên
     }
   } catch (error) {
-    console.error("Error reading employee:", error);
+    console.error("Error reading employee---:", error);
   }
 };
