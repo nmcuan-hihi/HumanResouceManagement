@@ -62,18 +62,19 @@ export default function DetailPB({ navigation, route }) {
   // Fetch phong ban details
   const fetchPhongBan = async () => {
     const phongBanData = await readPhongBan();
+
+    console.log(phongBanData);
     if (phongBanData) {
-      const phongBan = phongBanData[maPhongBan]; // Get data for specific department
+      const phongBan = phongBanData.find((p) => p.id === maPhongBan);
       if (phongBan) {
         setCurrentTenPB(phongBan.tenPhongBan); // Assuming `tenPhongBan` is a field in data
         setEditedTenPB(phongBan.tenPhongBan);
         setCurrentMaTP(phongBan.maQuanLy); // Assuming `tenPhongBan` is a field in data
         setEditedMaTP(phongBan.maQuanLy);
-        getDataTruongPhong(phongBan.maQuanLy);
 
-        const dataTP = getDataTruongPhong(phongBan.maQuanLy);
-
-        console.log(dataTP);
+        if (phongBan.maQuanLy) {
+          getDataTruongPhong(phongBan.maQuanLy);
+        }
       }
     }
   };
@@ -108,15 +109,17 @@ export default function DetailPB({ navigation, route }) {
       await updateEmployee(editedMaTP, updateTP);
 
       //update thông tin tp thành nv
-      const updateTPCu = { chucvuId: "NV" };
-      await updateEmployee(currentMaTP, updateTPCu);
 
+      if (currentMaTP && editedMaTP !=currentMaTP) {
+        const updateTPCu = { chucvuId: "NV" };
+        await updateEmployee(currentMaTP, updateTPCu);
+      }
       console.log("Lưu", updatedData);
       setCurrentTenPB(editedTenPB);
       setIsEditing(false);
       await fetchPhongBan(); // Refresh data after editing
     } catch (error) {
-      console.error("Lỗi khi lưu thông tin phòng ban:", error);
+      console.error("Lỗi khi lưu thông tin phòng ban:111111", error);
     }
   };
 
@@ -129,10 +132,11 @@ export default function DetailPB({ navigation, route }) {
       await removePhongBan(maPhongBan); // Gọi hàm xóa phòng ban
       setConfirmDelete(false);
 
-      const dataTP = getDataTruongPhong(editedMaTP);
-      const updateTP = { chucvuId: "NV" };
-      await updateEmployee(editedMaTP, updateTP);
-
+      if (editedMaTP) {
+        const dataTP = getDataTruongPhong(editedMaTP);
+        const updateTP = { chucvuId: "NV" };
+        await updateEmployee(editedMaTP, updateTP);
+      }
       navigation.goBack(); // Quay lại màn hình trước đó sau khi xóa
     } catch (error) {
       console.error("Lỗi khi xóa phòng ban:", error);

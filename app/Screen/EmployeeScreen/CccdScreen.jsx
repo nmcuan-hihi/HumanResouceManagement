@@ -39,7 +39,7 @@ export default function CccdScreen({ navigation, route }) {
                     setBackImageUrl(data.backImage);
                 }
             } catch (error) {
-                console.error("Lỗi khi tải dữ liệu:", error);
+                console.log("Lỗi khi tải dữ liệu:", error);
             }
         };
 

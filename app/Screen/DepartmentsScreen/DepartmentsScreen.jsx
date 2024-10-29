@@ -40,13 +40,13 @@ export default function PhongBanScreen({ navigation }) {
 
       const phongBanArray = Object.keys(data).map((key) => ({
         ...data[key],
-        maPhongBan: key,
+        maPhongBan: data[key].maPhongBan,
       }));
 
       const dataEmp = await readEmployees();
       const dataEmpArray = Object.keys(dataEmp).map((key) => ({
         ...dataEmp[key],
-        employeeID: key,
+        employeeID: dataEmp[key].employeeId,
       }));
 
       const dataNV = dataEmpArray.filter((nv) => {
@@ -107,12 +107,15 @@ export default function PhongBanScreen({ navigation }) {
       await writePhongBan(phongban); // Ghi dữ liệu vào Firebase
 
       // sửa chức vụ thành trưởng phòng cho nv
-      const dataTP = await getEmployeeById(selectedManager.employeeID);
-      const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
-      await updateEmployee(selectedManager.employeeID, updateTP);
-
+      if(selectedManager.employeeID)
+      {
+        const dataTP = await getEmployeeById(selectedManager.employeeID);
+        const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
+        await updateEmployee(selectedManager.employeeID, updateTP);
+  
+      }
       await fetchData(); // Làm mới dữ liệu sau khi thêm mới
-
+    
       // Reset các trường sau khi thêm
       setMaPhongBan("");
       setTenPhongBan("");

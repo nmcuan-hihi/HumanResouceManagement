@@ -1,21 +1,15 @@
 import {
-  getDatabase,
-  ref,
-  set,
-  get,
-  child,
-  update,
-  remove,
-} from "firebase/database";
-import { app } from "../config/firebaseconfig";
-import { initializeApp } from "firebase/app";
-import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
-const database = getDatabase(app);
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore"; // Import các hàm Firestore
+import { app } from "../config/firebaseconfig"; // Giả sử bạn đã cấu hình firebase ở đây
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+
+const firestore = getFirestore(app);
 const storage = getStorage(app); // Khởi tạo Firebase Storage
 
 export async function addBangCapNV(bangCap, image) {
@@ -46,31 +40,25 @@ export async function addBangCapNV(bangCap, image) {
     // Cập nhật imageUrl vào employeeData
     const data = { ...bangCap, imageUrl };
 
-    // Ghi dữ liệu nhân viên vào Realtime Database
-    await set(
-      ref(
-        database,
-        `bangcapnhanvien/${bangCap.employeeId}-${bangCap.bangcap_id}`
-      ),
-      data
-    );
+    // Ghi dữ liệu nhân viên vào Firestore
+    await setDoc(doc(firestore, "bangcapnhanvien", `${bangCap.employeeId}-${bangCap.bangcap_id}`), data);
     console.log(`Employee ${bangCap.employeeId} added successfully!`);
   } catch (error) {
     console.error("Error adding employee:", error);
   }
-
 }
 
-
-
-// doc danh sach bang cap cua nhan vien
+// Lấy danh sách bằng cấp của nhân viên
 export async function readBangCapNhanVien() {
   try {
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "bangcapnhanvien")); 
+    const bangCapCollection = collection(firestore, "bangcapnhanvien");
+    const snapshot = await getDocs(bangCapCollection);
 
-    if (snapshot.exists()) {
-      const bangcapnhanvien = snapshot.val(); 
+    if (!snapshot.empty) {
+      const bangcapnhanvien = {};
+      snapshot.forEach(doc => {
+        bangcapnhanvien[doc.id] = doc.data(); // Giả sử bạn muốn giữ id của document làm key
+      });
       return bangcapnhanvien; 
     } else {
       console.log("No data available");
@@ -80,4 +68,3 @@ export async function readBangCapNhanVien() {
     console.error("Error reading employees:", error);
   }
 }
-

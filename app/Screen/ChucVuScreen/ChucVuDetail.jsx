@@ -14,7 +14,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import { readChucVu, updateChucVu, deleteChucVu } from '../../services/database'; // Database functions
 
 export default function ChucVuDetail({ route, navigation }) {
-  const { chucVuId } = route.params; // Get Chuc Vu ID from route params
+  const { chucVuId,chucvu_id } = route.params; // Get Chuc Vu ID from route params
   const [isEditing, setIsEditing] = useState(false);
   const [currentChucVu, setCurrentChucVu] = useState('');
   const [editedChucVu, setEditedChucVu] = useState('');
@@ -26,6 +26,8 @@ export default function ChucVuDetail({ route, navigation }) {
     const fetchChucVu = async () => {
       try {
         const chucVuData = await readChucVu();
+
+        console.log(chucVuData[chucVuId])
         if (chucVuData && chucVuData[chucVuId]) {
           const chucVu = chucVuData[chucVuId];
           setCurrentChucVu(chucVu.loaichucvu);
@@ -47,7 +49,7 @@ export default function ChucVuDetail({ route, navigation }) {
         loaichucvu: editedChucVu,
         hschucvu: editedHeSo,
       };
-      await updateChucVu(chucVuId, updatedChucVu);
+      await updateChucVu(chucvu_id, updatedChucVu);
       setCurrentChucVu(editedChucVu);
       setCurrentHeSo(editedHeSo);
       setIsEditing(false);
@@ -62,7 +64,7 @@ export default function ChucVuDetail({ route, navigation }) {
 
   const confirmDeleteYes = async () => {
     try {
-      await deleteChucVu(chucVuId);
+      await deleteChucVu(chucvu_id);
       setConfirmDelete(false);
       navigation.goBack();
     } catch (error) {
@@ -85,7 +87,7 @@ export default function ChucVuDetail({ route, navigation }) {
         <ScrollView>
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Mã chức vụ</Text>
-            <Text style={styles.sectionTitle1}>{chucVuId}</Text>
+            <Text style={styles.sectionTitle1}>{chucvu_id}</Text>
           </View>
 
           <View style={styles.infoSection}>
