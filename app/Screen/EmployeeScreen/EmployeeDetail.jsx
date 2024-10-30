@@ -12,8 +12,12 @@ import {
 import BackNav from "../../Compoment/BackNav";
 import { getDatabase, ref, get, child } from "firebase/database";
 import { readBangCapNhanVien } from "../../services/bangcapdb";
-import IconIonicons from 'react-native-vector-icons/Ionicons';
-import IconMaterial from "react-native-vector-icons/MaterialIcons";
+import IconIonicons from 'react-native-vector-icons/Ionicons'; // Đổi tên biến Icon thành IconIonicons
+import IconMaterial from "react-native-vector-icons/MaterialIcons"; // Đổi tên biến Icon thành IconMaterial
+import ItemListEmployee from "../../Compoment/ItemEmployee";
+import { readBangCap } from "../../services/database";
+import { readSkills } from "../../services/skill";
+import { readSkillNhanVien } from "../../services/skill";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
 import { toggleXacthuc } from "../../services/bangcapdb";
 import { readBangCap} from "../../services/database";
@@ -25,7 +29,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
   const { key } = route.params;
   const [employeeData, setEmployeeData] = useState(null);
   const [bangCapNV, setBangCapNV] = useState([]);
-
+  const [skillNV, setSkillNV] = useState([]);
   // Hàm đọc dữ liệu nhân viên từ Firebase
   const fetchEmployeeData = async () => {
     try {
@@ -66,9 +70,44 @@ export default function EmployeeDetailScreen({ route, navigation }) {
     }
   };
 
+  const getDataSKNV = async () => {
+    try {
+      const databcnv = await readSkillNhanVien();
+      const arrDatabcnv = Object.values(databcnv);
+
+      const dataByNvId = arrDatabcnv.filter((bc) => {
+        return bc.employeeId == manv;
+      });
+
+      const databc = await readSkills();
+      const arrDatabc = Object.values(databc);
+
+      const newData = [];
+
+      // Sử dụng đúng chỉ số và tên biến trong vòng lặp
+      for (let i = 0; i < dataByNvId.length; i++) {
+        for (let j = 0; j < arrDatabc.length; j++) {
+          if (arrDatabc[j].mask === dataByNvId[i].mask) {
+            newData.push({
+              mask: dataByNvId[i].mask,
+              tensk: arrDatabc[j].tensk,
+              xacthuc: dataByNvId[i].xacthuc, 
+            });
+          }
+        }
+      }
+
+      setSkillNV(newData);
+      console.log(newData, "-----------");
+    } catch (error) {
+      console.error("Lỗi lấy data bc:", error);
+    }
+  };
+
   useEffect(() => {
     getDataBCNV();
-    fetchEmployeeData();
+    getDataSKNV();
+    fetchEmployeeData(); // Gọi hàm fetch khi component mount
   }, [manv]);
 
   // Hàm điều hướng đến màn hình chỉnh sửa
@@ -170,6 +209,44 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 )}
               </View>
 
+                <View style={styles.headerBC}>
+                  <Text style={styles.sectionTitle}>Kĩ Năng</Text>
+
+                  {/* Nút điều hướng để thêm bằng cấp mới */}
+                  <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={() => {
+                      navigation.navigate("ThemSkillNV", { employeeId: manv });
+                    }}
+                  >
+                    <IconMaterial name={"add"} size={30} color="orange" />
+                  </TouchableOpacity>
+                </View>
+               
+                {skillNV && skillNV.length > 0 ? (
+                  skillNV.map((item, index) => (
+                    <TouchableOpacity >
+                      <View key={index} style={styles.infoItem}>
+                        <Text style={styles.infoValue}>{item.tensk || "N/A"}</Text>
+
+                        <View style={styles.iconContainer}>
+                          <IconIonicons
+                            name="checkmark-circle"
+                            size={20}
+                            color={item.xacthuc === "1" ? "green" : "black"} // Kiểm tra điều kiện xác thực
+                          />
+
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <Text>Không có bằng cấp</Text>
+                )}
+           
+
+
+              </View>
               <View style={styles.infoSection}>
                 <Text style={styles.sectionTitle}>Trạng Thái</Text>
                 <InfoItem
