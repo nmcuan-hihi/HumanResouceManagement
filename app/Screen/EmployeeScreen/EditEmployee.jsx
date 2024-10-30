@@ -117,7 +117,7 @@ export default function EditMember({ route, navigation }) {
   };
 
   // Xử lý cập nhật nhân viên
- 
+
   const handleEditEmployee = async () => {
     try {
       openModal();
@@ -189,7 +189,21 @@ export default function EditMember({ route, navigation }) {
       Alert.alert("Thông báo", "Cập nhật không thành công!");
     }
   };
+  const toggleTrangThai = () => {
+    const currentStatus = employeeData.trangthai === 'true';
+    const newStatus = !currentStatus;
+    const message = newStatus
+      ? 'Bạn có muốn bật hoạt động không?'
+      : 'Bạn có muốn tắt hoạt động không?';
 
+    Alert.alert('Xác nhận', message, [
+      { text: 'Không', style: 'cancel' },
+      {
+        text: 'Có',
+        onPress: () => updateField('trangthai', newStatus ? 'true' : 'false'),
+      },
+    ]);
+  };
   // Lấy dữ liệu phòng ban và chức vụ từ Firestore
   useEffect(() => {
     const fetchPhongBan = async () => {
@@ -351,24 +365,30 @@ export default function EditMember({ route, navigation }) {
             />
 
             <Text style={styles.label}>Trạng thái</Text>
-            <RNPickerSelect
-              onValueChange={(value) => updateField("trangthai", value)}
-              value={employeeData.trangthai}
-              items={[
-                { label: "Kích hoạt", value: "true" },
-                { label: "Khóa", value: "false" },
-              ]}
-              style={pickerSelectStyles}
-            />
+            <TouchableOpacity style={styles.statusContainer} onPress={toggleTrangThai}>
+              <Text style={styles.statusText}>
+                {employeeData.trangthai === 'true' ? 'Đang hoạt động' : 'Không hoạt động'}
+              </Text>
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: employeeData.trangthai === 'true' ? 'green' : 'red' },
+                ]}
+              />
+            </TouchableOpacity>
           </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>
       <ViewLoading />
+      
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  statusContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+  statusText: { fontSize: 16, marginRight: 10 },
+  statusDot: { width: 10, height: 10, borderRadius: 5 },
   container: {
     flex: 15,
     padding: 20,
