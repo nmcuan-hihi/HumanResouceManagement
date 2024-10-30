@@ -9,7 +9,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { readChucVu, readPhongBan } from '../../services/database';
 import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
 import { editEmployeeFireStore, getEmployeeById, updateEmployeeFireStore } from '../../services/EmployeeFireBase'; // Hàm cập nhật
-
+import { validateEmployeeData } from '../../services/validate';
 export default function EditMember({ route, navigation }) {
   const { manv } = route.params || {}; // Nhận dữ liệu từ params
 
@@ -90,22 +90,27 @@ export default function EditMember({ route, navigation }) {
   };
 
   // Xử lý cập nhật nhân viên
-const handleEditEmployee = async () => {
-  try {
-    openModal();
-    // Kiểm tra xem hình ảnh đã thay đổi chưa
-    const imageToUpload = profileImage !== employeeData.imageUrl ? profileImage : null;
-
-    await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
-    Alert.alert('Thành công!', 'Thông tin nhân viên đã được cập nhật.');
-    navigation.goBack();
-  } catch (error) {
-    Alert.alert('Lỗi!', 'Có lỗi xảy ra khi cập nhật thông tin.');
-    console.error(error);
-  } finally {
-    closeModal();
-  }
-};
+  const handleEditEmployee = async () => {
+    // Kiểm tra hợp lệ dữ liệu trước khi cập nhật
+    const validationErrors = validateEmployeeData(employeeData);
+    if (validationErrors.length > 0) {
+      Alert.alert('Lỗi', validationErrors.join('\n')); // Hiển thị các lỗi trong một cảnh báo
+      return; // Dừng xử lý nếu có lỗi
+    }
+  
+    try {
+      openModal();
+      const imageToUpload = profileImage !== employeeData.imageUrl ? profileImage : null;
+      await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật Firestore
+      Alert.alert('Thành công!', 'Thông tin nhân viên đã được cập nhật.');
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Lỗi!', 'Có lỗi xảy ra khi cập nhật thông tin.');
+      console.error(error);
+    } finally {
+      closeModal();
+    }
+  };
 
 
   // Lấy dữ liệu phòng ban và chức vụ từ Firestore

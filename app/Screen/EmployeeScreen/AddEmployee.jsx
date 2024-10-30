@@ -9,6 +9,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { addEmployee, readChucVu, readPhongBan } from '../../services/database';
 import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
 import { addEmployeeFireStore, getNewEmployeeId } from '../../services/EmployeeFireBase';
+import { validateEmployeeData } from '../../services/validate';
 
 export default function AddMember({ navigation }) {
   const [employeeId, setEmployeeId] = useState("");
@@ -18,7 +19,7 @@ export default function AddMember({ navigation }) {
     name: '',
     diachi: '',
     sdt: '',
-    gioitinh: 'Nam', // Giá trị mặc định
+    gioitinh: 'Nam',
     phongbanId: '', 
     chucvuId: '', 
     luongcoban: '',
@@ -56,6 +57,12 @@ export default function AddMember({ navigation }) {
   };
 
   const handleAddEmployee = async () => {
+    const validationErrors = validateEmployeeData(employeeData);
+    if (validationErrors.length > 0) {
+      Alert.alert('Lỗi xác thực!', validationErrors.join('\n'));
+      return;
+    }
+
     if (!profileImage) {
       Alert.alert('Chưa chọn hình ảnh!', 'Vui lòng chọn hình ảnh cho nhân viên.');
       return;
@@ -85,7 +92,6 @@ export default function AddMember({ navigation }) {
           }));
           setPhongBans(phongBanArray);
 
-          // Cập nhật phongbanId với giá trị đầu tiên nếu có ít nhất một phòng ban
           if (phongBanArray.length > 0) {
             updateField('phongbanId', phongBanArray[0].value);
           }
@@ -105,7 +111,6 @@ export default function AddMember({ navigation }) {
           }));
           setChucVus(chucVuArr);
 
-          // Cập nhật chucvuId với giá trị đầu tiên nếu có ít nhất một chức vụ
           if (chucVuArr.length > 0) {
             updateField('chucvuId', chucVuArr[0].value);
           }
@@ -119,15 +124,15 @@ export default function AddMember({ navigation }) {
       try {
         const newId = await getNewEmployeeId();
         setEmployeeId(newId);
-        updateField('employeeId', newId); // Cập nhật mã nhân viên mới
+        updateField('employeeId', newId);
       } catch (error) {
         console.error("Error fetching new employee ID:", error);
       }
     };
 
     fetchNewEmployeeId();
-    fetchPhongBan(); // Lấy phòng ban
-    fetchChucVu(); // Lấy chức vụ
+    fetchPhongBan();
+    fetchChucVu();
   }, []);
 
   return (
@@ -166,7 +171,7 @@ export default function AddMember({ navigation }) {
             <TextInput
               style={styles.input}
               value={employeeId}
-              editable={false} // Để không cho phép chỉnh sửa mã nhân viên
+              editable={false}
             />
 
             <Text style={styles.label}>Họ Tên</Text>
@@ -265,6 +270,7 @@ export default function AddMember({ navigation }) {
     </>
   );
 }
+
 // Các style cho giao diện
 const styles = StyleSheet.create({
   container: {
