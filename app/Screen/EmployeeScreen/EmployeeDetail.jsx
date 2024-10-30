@@ -20,7 +20,7 @@ import { readSkills } from "../../services/skill";
 import { readSkillNhanVien } from "../../services/skill";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
 import { toggleXacthuc } from "../../services/bangcapdb";
-import { readBangCap} from "../../services/database";
+
 
 const database = getDatabase();
 
@@ -209,7 +209,9 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 )}
               </View>
 
+              <View style={styles.infoSection}>
                 <View style={styles.headerBC}>
+                  
                   <Text style={styles.sectionTitle}>Kĩ Năng</Text>
 
                   {/* Nút điều hướng để thêm bằng cấp mới */}
@@ -229,14 +231,6 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                       <View key={index} style={styles.infoItem}>
                         <Text style={styles.infoValue}>{item.tensk || "N/A"}</Text>
 
-                        <View style={styles.iconContainer}>
-                          <IconIonicons
-                            name="checkmark-circle"
-                            size={20}
-                            color={item.xacthuc === "1" ? "green" : "black"} // Kiểm tra điều kiện xác thực
-                          />
-
-                        </View>
                       </View>
                     </TouchableOpacity>
                   ))
@@ -245,8 +239,8 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 )}
            
 
-
-              </View>
+           </View>
+             
               <View style={styles.infoSection}>
                 <Text style={styles.sectionTitle}>Trạng Thái</Text>
                 <InfoItem
@@ -333,6 +327,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerBC: {
+   
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
