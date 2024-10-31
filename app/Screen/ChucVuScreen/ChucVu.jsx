@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import BackNav from '../../Compoment/BackNav';
 import { readChucVu } from '../../services/database';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function ListChucVu({ navigation }) {
   const [chucVuData, setChucVuData] = useState([]);
@@ -16,20 +17,24 @@ export default function ListChucVu({ navigation }) {
    
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await readChucVu();
-      if (data) {
-        const chucVuArray = Object.keys(data).map(key => ({
-          ...data[key],
-          id: key,
-        }));
-        setChucVuData(chucVuArray);
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const data = await readChucVu();
+        if (data) {
+          const chucVuArray = Object.keys(data).map(key => ({
+            ...data[key],
+            id: key,
+          }));
+          setChucVuData(chucVuArray);
+        }
+      };
+  
+      fetchData();
+    }, [])
+  );
 
-    fetchData();
-  }, []);
+
 
   return (
     <View style={styles.container}>

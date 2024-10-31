@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -13,6 +13,7 @@ import ItemListEmployee from "../../Compoment/ItemEmployee";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
 import { readSkills, addSkill } from "../../services/skill";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function DanhSachSkill({ navigation }) {
   const [data, setData] = useState([]); // Lưu danh sách kỹ năng
@@ -21,50 +22,52 @@ export default function DanhSachSkill({ navigation }) {
   const [tenSkill, setTenSkill] = useState(""); // Tên kỹ năng
 
   // Đọc dữ liệu kỹ năng khi màn hình được load
-  useEffect(() => {
-    const fetchData = async () => {
-      const skillsData = await readSkills();
-      setData(skillsData); // Cập nhật dữ liệu từ Firebase
-    };
-    fetchData();
-  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const skillsData = await readSkills();
+        setData(skillsData); // Cập nhật dữ liệu từ Firebase
+      };
+      fetchData();
+    }, [])
+  );
 
   const handlePress = (mask) => {
     navigation.navigate("SkillDetail", { item: { maSK: mask } });
     console.log(mask);
   };
 
-// Thêm kỹ năng và cập nhật danh sách
-const handleAddSkill = async () => {
-  if (!maSKill || !tenSkill) {
-    Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
-    return;
-  }
+  // Thêm kỹ năng và cập nhật danh sách
+  const handleAddSkill = async () => {
+    if (!maSKill || !tenSkill) {
+      Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
+      return;
+    }
 
-  const newSkill = { mask: maSKill, tensk: tenSkill };
+    const newSkill = { mask: maSKill, tensk: tenSkill };
 
-  // Kiểm tra nếu mã kỹ năng đã tồn tại
-  const skillExists = data.some(skill => skill.mask === maSKill);
-  if (skillExists) {
-    Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
-    return;
-  }
+    // Kiểm tra nếu mã kỹ năng đã tồn tại
+    const skillExists = data.some((skill) => skill.mask === maSKill);
+    if (skillExists) {
+      Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
+      return;
+    }
 
-  try {
-    await addSkill(newSkill); // Ghi dữ liệu vào Firebase
+    try {
+      await addSkill(newSkill); // Ghi dữ liệu vào Firebase
 
-    // Cập nhật danh sách kỹ năng sau khi thêm
-    setData((prevData) => [...prevData, newSkill]);
+      // Cập nhật danh sách kỹ năng sau khi thêm
+      setData((prevData) => [...prevData, newSkill]);
 
-    // Reset form và đóng modal
-    setMaSkill("");
-    setTenSkill("");
-    setVisibleModal(false);
-  } catch (error) {
-    Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
-  }
-};
-
+      // Reset form và đóng modal
+      setMaSkill("");
+      setTenSkill("");
+      setVisibleModal(false);
+    } catch (error) {
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
+    }
+  };
 
   return (
     <View style={styles.container}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Text } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
@@ -6,6 +6,7 @@ import BackNav from '../../Compoment/BackNav';
 import { readPhongBan1Firestore } from '../../services/PhongBanDatabase';
 import { filterEmployeesByPhongBan, filterEmployeesByGender, filterEmployeesByStatus, searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function EmployeeList({ navigation }) {
   const [employeeData, setEmployeeData] = useState([]);
@@ -16,34 +17,39 @@ export default function EmployeeList({ navigation }) {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [phongBanList, setPhongBanList] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await readEmployeesFireStore();
-        if (data && typeof data === 'object') {
-          const employeeArray = Object.keys(data).map((key) => ({
-            ...data[key],
-            manv: data[key].employeeId,
-          }));
-          setEmployeeData(employeeArray);
-          setFilteredData(employeeArray);
-        } else {
-          console.warn('Dữ liệu nhân viên không hợp lệ:', data);
-        }
 
-        const phongBans = await readPhongBan1Firestore();
-        if (phongBans) {
-          setPhongBanList(phongBans);
-        } else {
-          console.warn('Dữ liệu phòng ban không hợp lệ:', phongBans);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const data = await readEmployeesFireStore();
+          if (data && typeof data === 'object') {
+            const employeeArray = Object.keys(data).map((key) => ({
+              ...data[key],
+              manv: data[key].employeeId,
+            }));
+            setEmployeeData(employeeArray);
+            setFilteredData(employeeArray);
+          } else {
+            console.warn('Dữ liệu nhân viên không hợp lệ:', data);
+          }
+  
+          const phongBans = await readPhongBan1Firestore();
+          if (phongBans) {
+            setPhongBanList(phongBans);
+          } else {
+            console.warn('Dữ liệu phòng ban không hợp lệ:', phongBans);
+          }
+        } catch (error) {
+          console.error('Lỗi khi fetching dữ liệu:', error);
         }
-      } catch (error) {
-        console.error('Lỗi khi fetching dữ liệu:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
+      };
+  
+      fetchData();
+    }, [])
+  );
+  
+ 
 
   useEffect(() => {
     const applyFilters = async () => {

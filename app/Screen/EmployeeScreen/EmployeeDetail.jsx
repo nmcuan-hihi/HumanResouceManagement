@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 import BackNav from "../../Compoment/BackNav";
 import { getDatabase, ref, get, child } from "firebase/database";
 import { readBangCapNhanVien } from "../../services/bangcapdb";
-import IconIonicons from 'react-native-vector-icons/Ionicons'; // Đổi tên biến Icon thành IconIonicons
+import IconIonicons from "react-native-vector-icons/Ionicons"; // Đổi tên biến Icon thành IconIonicons
 import IconMaterial from "react-native-vector-icons/MaterialIcons"; // Đổi tên biến Icon thành IconMaterial
 import ItemListEmployee from "../../Compoment/ItemEmployee";
 import { readBangCap } from "../../services/database";
@@ -20,7 +20,7 @@ import { readSkills } from "../../services/skill";
 import { readSkillNhanVien } from "../../services/skill";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
 import { toggleXacthuc } from "../../services/bangcapdb";
-
+import { useFocusEffect } from "@react-navigation/native";
 
 const database = getDatabase();
 
@@ -46,10 +46,10 @@ export default function EmployeeDetailScreen({ route, navigation }) {
       const databcnv = await readBangCapNhanVien();
       const arrDatabcnv = Object.values(databcnv);
       const dataByNvId = arrDatabcnv.filter((bc) => bc.employeeId === manv);
-      
+
       const databc = await readBangCap();
       const arrDatabc = Object.values(databc);
-      
+
       const newData = [];
 
       for (let i = 0; i < dataByNvId.length; i++) {
@@ -91,7 +91,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
             newData.push({
               mask: dataByNvId[i].mask,
               tensk: arrDatabc[j].tensk,
-              xacthuc: dataByNvId[i].xacthuc, 
+              xacthuc: dataByNvId[i].xacthuc,
             });
           }
         }
@@ -104,11 +104,13 @@ export default function EmployeeDetailScreen({ route, navigation }) {
     }
   };
 
-  useEffect(() => {
-    getDataBCNV();
-    getDataSKNV();
-    fetchEmployeeData(); // Gọi hàm fetch khi component mount
-  }, [manv]);
+  useFocusEffect(
+    useCallback(() => {
+      getDataBCNV();
+      getDataSKNV();
+      fetchEmployeeData(); // Gọi hàm fetch khi component mount
+    }, [manv])
+  );
 
   // Hàm điều hướng đến màn hình chỉnh sửa
   const handlePress = () => {
@@ -121,9 +123,10 @@ export default function EmployeeDetailScreen({ route, navigation }) {
       return;
     }
 
-    const message = item.xacthuc === "0"
-      ? "Xác thực bằng cấp này là chuẩn? Bạn có muốn xác thực bằng cấp này không?"
-      : "Bạn muốn hủy xác thực bằng cấp này?";
+    const message =
+      item.xacthuc === "0"
+        ? "Xác thực bằng cấp này là chuẩn? Bạn có muốn xác thực bằng cấp này không?"
+        : "Bạn muốn hủy xác thực bằng cấp này?";
 
     Alert.alert(
       "Xác thực bằng cấp",
@@ -169,12 +172,35 @@ export default function EmployeeDetailScreen({ route, navigation }) {
               <View style={styles.infoSection}>
                 <Text style={styles.sectionTitle}>Thông tin tài khoản</Text>
                 <InfoItem label="Tên" value={employeeData.name || "N/A"} />
-                <InfoItem label="Ngày sinh" value={employeeData.ngaysinh || "N/A"} />
-                <InfoItem label="Số điện thoại" value={employeeData.sdt || "N/A"} />
-                <InfoItem label="CCCD" value={employeeData.cccd || "N/A"} onPress={() => { navigation.navigate("cccd", { cccdNumber: employeeData.cccd }) }} />
-                <InfoItem label="Giới tính" value={employeeData.gioitinh || "N/A"} />
-                <InfoItem label="Mật khẩu" value={employeeData.matKhau || "N/A"} />
-                <InfoItem label="Thời gian đăng ký" value={employeeData.ngaybatdau || "N/A"} />
+                <InfoItem
+                  label="Ngày sinh"
+                  value={employeeData.ngaysinh || "N/A"}
+                />
+                <InfoItem
+                  label="Số điện thoại"
+                  value={employeeData.sdt || "N/A"}
+                />
+                <InfoItem
+                  label="CCCD"
+                  value={employeeData.cccd || "N/A"}
+                  onPress={() => {
+                    navigation.navigate("cccd", {
+                      cccdNumber: employeeData.cccd,
+                    });
+                  }}
+                />
+                <InfoItem
+                  label="Giới tính"
+                  value={employeeData.gioitinh || "N/A"}
+                />
+                <InfoItem
+                  label="Mật khẩu"
+                  value={employeeData.matKhau || "N/A"}
+                />
+                <InfoItem
+                  label="Thời gian đăng ký"
+                  value={employeeData.ngaybatdau || "N/A"}
+                />
               </View>
 
               <View style={styles.infoSection}>
@@ -183,7 +209,9 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                   <TouchableOpacity
                     style={styles.addButton}
                     onPress={() => {
-                      navigation.navigate("ThemBangCapNV", { employeeId: manv });
+                      navigation.navigate("ThemBangCapNV", {
+                        employeeId: manv,
+                      });
                     }}
                   >
                     <IconMaterial name={"add"} size={30} color="orange" />
@@ -191,9 +219,14 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 </View>
                 {bangCapNV && bangCapNV.length > 0 ? (
                   bangCapNV.map((item, index) => (
-                    <TouchableOpacity key={index} onPress={() => handleXacThuc(item)}>
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => handleXacThuc(item)}
+                    >
                       <View style={styles.infoItem}>
-                        <Text style={styles.infoValue}>{item.tenBang || "N/A"}</Text>
+                        <Text style={styles.infoValue}>
+                          {item.tenBang || "N/A"}
+                        </Text>
                         <View style={styles.iconContainer}>
                           <IconIonicons
                             name="checkmark-circle"
@@ -211,7 +244,6 @@ export default function EmployeeDetailScreen({ route, navigation }) {
 
               <View style={styles.infoSection}>
                 <View style={styles.headerBC}>
-                  
                   <Text style={styles.sectionTitle}>Kĩ Năng</Text>
 
                   {/* Nút điều hướng để thêm bằng cấp mới */}
@@ -224,28 +256,29 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                     <IconMaterial name={"add"} size={30} color="orange" />
                   </TouchableOpacity>
                 </View>
-               
+
                 {skillNV && skillNV.length > 0 ? (
                   skillNV.map((item, index) => (
-                    <TouchableOpacity >
+                    <TouchableOpacity>
                       <View key={index} style={styles.infoItem}>
-                        <Text style={styles.infoValue}>{item.tensk || "N/A"}</Text>
-
+                        <Text style={styles.infoValue}>
+                          {item.tensk || "N/A"}
+                        </Text>
                       </View>
                     </TouchableOpacity>
                   ))
                 ) : (
                   <Text>Không có bằng cấp</Text>
                 )}
-           
+              </View>
 
-           </View>
-             
               <View style={styles.infoSection}>
                 <Text style={styles.sectionTitle}>Trạng Thái</Text>
                 <InfoItem
                   label="Trạng thái"
-                  value={employeeData.trangthai ? "Đang hoạt động" : "Đã Nghỉ Việc"}
+                  value={
+                    employeeData.trangthai ? "Đang hoạt động" : "Đã Nghỉ Việc"
+                  }
                 />
               </View>
             </>
@@ -309,7 +342,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: "#666",
   },
   infoValue: {
@@ -327,8 +360,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerBC: {
-   
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });
