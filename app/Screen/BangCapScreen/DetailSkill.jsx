@@ -14,6 +14,7 @@ import BackNav from "../../Compoment/BackNav";
 import Feather from "react-native-vector-icons/Feather";
 import { readSkill1, updateSkill, deleteSkill } from "../../services/skill";
 
+
 export default function DetailSkill({ navigation, route }) {
   const { item } = route.params;
   const maSK = item ? item.maSK : "";
@@ -34,6 +35,13 @@ export default function DetailSkill({ navigation, route }) {
   }, [maSK]);
 
   const handleSave = async () => {
+    // Kiểm tra dữ liệu trước khi lưu
+    if (editedTenSK == null || editedTenSK.trim() === "") {
+      Alert.alert("Lỗi", "Tên kĩ năng không được để trống.");
+      return;
+    }
+
+    // Nếu dữ liệu hợp lệ, tiếp tục cập nhật
     try {
       await updateSkill(maSK, { tensk: editedTenSK });
       setSkillDetails((prev) => ({ ...prev, tensk: editedTenSK }));

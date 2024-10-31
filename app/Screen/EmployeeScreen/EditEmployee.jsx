@@ -30,6 +30,7 @@ import {
   getEmployeeById,
   updateEmployeeFireStore,
 } from "../../services/EmployeeFireBase"; // Hàm cập nhật
+import { validateEmployeeData } from "../../services/validate";
 
 export default function EditMember({ route, navigation }) {
   const { manv } = route.params || {}; // Nhận dữ liệu từ params
@@ -120,39 +121,46 @@ export default function EditMember({ route, navigation }) {
 
   const handleEditEmployee = async () => {
     try {
+      // Validate employee data
+      const errors = validateEmployeeData(employeeData);
+      if (errors.length > 0) {
+        Alert.alert("Lỗi", errors.join("\n")); // Hiển thị tất cả lỗi trong một thông báo
+        return;
+      }
+  
       openModal();
       // Kiểm tra xem hình ảnh đã thay đổi chưa
       const imageToUpload =
         profileImage !== employeeData.imageUrl ? profileImage : null;
-
+  
       // lấy phòng ban hiện tại
       const currentPhongBan = phongBanUpDate.find((pb) => {
         return pb.maPhongBan == currentNV.phongbanId;
       });
-
+  
       // lấy phòng ban được chọn
       const newPhongBan = phongBanUpDate.find((pb) => {
         return pb.maPhongBan == employeeData.phongbanId;
       });
-
+  
       console.log(newPhongBan, "newpb");
       if (currentNV.chucvuId != "TP") {
         console.log("1---");
-
+  
         if (employeeData.chucvuId == "TP") {
           console.log("2---");
-
+  
           await editPhongBan(employeeData.phongbanId, { maQuanLy: manv });
-
+  
           if (newPhongBan.maQuanLy != "") {
             await updateEmployee(newPhongBan.maQuanLy, { chucvuId: "NV" });
           }
         }
         console.log("4---");
-
+  
         await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
         console.log("4.1---");
-
+  
         closeModal();
         Alert.alert("Thông báo", `Cập nhật thành công!`, [
           { text: "OK", onPress: () => navigation.goBack() },
@@ -162,33 +170,34 @@ export default function EditMember({ route, navigation }) {
           await editPhongBan(currentNV.phongbanId, { maQuanLy: "" });
           await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
           closeModal();
-
+  
           Alert.alert("Thông báo", `Cập nhật thành công!`, [
             { text: "OK", onPress: () => navigation.goBack() },
           ]);
         } else if (currentNV.phongbanId == employeeData.phongbanId) {
           await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
           closeModal();
-
+  
           Alert.alert("Thông báo", `Cập nhật thành công!`, [
             { text: "OK", onPress: () => navigation.goBack() },
           ]);
         } else {
           closeModal();
-
+  
           Alert.alert(
             "Thông báo",
             `Không thể đổi sang phòng ${newPhongBan.tenPhongBan}, Bạn đang là trưởng phòng ${currentPhongBan.tenPhongBan}!`
           );
         }
-      }
+      }       
     } catch (error) {
       closeModal();
-
+  
       console.error("Error updating employee 11111:", error);
       Alert.alert("Thông báo", "Cập nhật không thành công!");
     }
   };
+  
   const toggleTrangThai = () => {
     const currentStatus = employeeData.trangthai === 'true';
     const newStatus = !currentStatus;

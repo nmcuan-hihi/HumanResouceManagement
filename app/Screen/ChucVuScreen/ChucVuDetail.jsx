@@ -8,26 +8,27 @@ import {
   ScrollView,
   TextInput,
   Modal,
+  Alert,
 } from 'react-native';
-import BackNav from '../../Compoment/BackNav'; // Navigation back button component
+import BackNav from '../../Compoment/BackNav';
 import Feather from 'react-native-vector-icons/Feather';
-import { readChucVu, updateChucVu, deleteChucVu } from '../../services/database'; // Database functions
+import { readChucVu, updateChucVu, deleteChucVu } from '../../services/database';
 
 export default function ChucVuDetail({ route, navigation }) {
-  const { chucVuId,chucvu_id } = route.params; // Get Chuc Vu ID from route params
+  const { chucVuId, chucvu_id } = route.params;
   const [isEditing, setIsEditing] = useState(false);
   const [currentChucVu, setCurrentChucVu] = useState('');
   const [editedChucVu, setEditedChucVu] = useState('');
   const [currentHeSo, setCurrentHeSo] = useState('');
   const [editedHeSo, setEditedHeSo] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchChucVu = async () => {
+      setLoading(true);
       try {
         const chucVuData = await readChucVu();
-
-        console.log(chucVuData[chucVuId])
         if (chucVuData && chucVuData[chucVuId]) {
           const chucVu = chucVuData[chucVuId];
           setCurrentChucVu(chucVu.loaichucvu);
@@ -36,7 +37,10 @@ export default function ChucVuDetail({ route, navigation }) {
           setEditedHeSo(chucVu.hschucvu);
         }
       } catch (error) {
+        Alert.alert('Lỗi', 'Không thể tải dữ liệu chức vụ.');
         console.error('Lỗi khi lấy dữ liệu chức vụ:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -44,6 +48,14 @@ export default function ChucVuDetail({ route, navigation }) {
   }, [chucVuId]);
 
   const handleSave = async () => {
+    if (editedHeSo.trim() === "") {
+      Alert.alert("Lỗi", "Hệ số chức vụ không được để trống.");
+      return;
+    }
+    if (isNaN(editedHeSo)) {
+      Alert.alert("Lỗi", "Hệ số chức vụ phải là một số.");
+      return;
+    }
     try {
       const updatedChucVu = {
         loaichucvu: editedChucVu,
@@ -54,6 +66,7 @@ export default function ChucVuDetail({ route, navigation }) {
       setCurrentHeSo(editedHeSo);
       setIsEditing(false);
     } catch (error) {
+      Alert.alert("Lỗi", "Không thể lưu thông tin chức vụ.");
       console.error('Lỗi khi lưu thông tin chức vụ:', error);
     }
   };
@@ -68,6 +81,7 @@ export default function ChucVuDetail({ route, navigation }) {
       setConfirmDelete(false);
       navigation.goBack();
     } catch (error) {
+      Alert.alert("Lỗi", "Không thể xóa chức vụ.");
       console.error('Lỗi khi xóa chức vụ:', error);
       setConfirmDelete(false);
     }
@@ -84,55 +98,56 @@ export default function ChucVuDetail({ route, navigation }) {
       </View>
 
       <SafeAreaView style={styles.container}>
-        <ScrollView>
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Mã chức vụ</Text>
-            <Text style={styles.sectionTitle1}>{chucvu_id}</Text>
-          </View>
-
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Tên chức vụ</Text>
-            
-              <Text>{currentChucVu}</Text>
-          </View>
-
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Hệ số chức vụ</Text>
-            {isEditing ? (
-              <TextInput
-                style={styles.textInput}
-                placeholder="Hệ số chức vụ"
-                value={editedHeSo}
-                onChangeText={(text) => setEditedHeSo(text)}
-                keyboardType="numeric"
-              />
-            ) : (
-             
-
-              <View style={styles.inlineEditContainer}>
-              <Text style={styles.sectionTitle1}>{currentHeSo}</Text>
-              <TouchableOpacity
-                onPress={() => setIsEditing(true)}
-                style={styles.editBtn}
-              >
-                <Feather name="edit-2" size={20} color="#FFFFFF" />
-              </TouchableOpacity>
+        {loading ? (
+          <Text>Loading...</Text>
+        ) : (
+          <ScrollView>
+            <View style={styles.infoSection}>
+              <Text style={styles.sectionTitle}>Mã chức vụ</Text>
+              <Text style={styles.sectionTitle1}>{chucvu_id}</Text>
             </View>
-            )}
-          </View>
 
-          <View style={styles.buttonSection}>
-            {isEditing ? (
-              <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
-                <Text style={styles.nameBtn}>Lưu</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
-                <Text style={styles.nameBtn}>Xóa</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </ScrollView>
+            <View style={styles.infoSection}>
+              <Text style={styles.sectionTitle}>Tên chức vụ</Text>
+              <Text>{currentChucVu}</Text>
+            </View>
+
+            <View style={styles.infoSection}>
+              <Text style={styles.sectionTitle}>Hệ số chức vụ</Text>
+              {isEditing ? (
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Hệ số chức vụ"
+                  value={editedHeSo}
+                  onChangeText={setEditedHeSo}
+                  keyboardType="numeric"
+                />
+              ) : (
+                <View style={styles.inlineEditContainer}>
+                  <Text style={styles.sectionTitle1}>{currentHeSo}</Text>
+                  <TouchableOpacity
+                    onPress={() => setIsEditing(true)}
+                    style={styles.editBtn}
+                  >
+                    <Feather name="edit-2" size={20} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.buttonSection}>
+              {isEditing ? (
+                <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
+                  <Text style={styles.nameBtn}>Lưu</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
+                  <Text style={styles.nameBtn}>Xóa</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </ScrollView>
+        )}
 
         <Modal visible={confirmDelete} transparent={true} animationType="slide">
           <View style={styles.modalCtn}>
@@ -184,10 +199,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 20,
   },
-  sectionTitle22: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
   inlineEditContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -212,57 +223,58 @@ const styles = StyleSheet.create({
   btnSave: {
     width: '90%',
     height: 50,
-    borderRadius: 20,
-    backgroundColor: '#FFA500',
-    justifyContent: 'center',
+    borderRadius: 10,
+    backgroundColor: '#4CAF50',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
   btnXoa: {
     width: '90%',
     height: 50,
-    borderRadius: 20,
-    backgroundColor: 'red',
-    justifyContent: 'center',
+    borderRadius: 10,
+    backgroundColor: '#FF6347',
     alignItems: 'center',
-    marginTop: 20,
+    justifyContent: 'center',
   },
   nameBtn: {
-    fontSize: 22,
-    color: '#FFFFFF',
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   modalCtn: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   bodyModal: {
-    width: '85%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+    width: '80%',
     padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
     alignItems: 'center',
   },
   confirmText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
     marginBottom: 20,
+    textAlign: 'center',
   },
   modalBtnContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     width: '100%',
   },
   modalBtn: {
-    width: '40%',
     padding: 10,
-    backgroundColor: '#FFA500',
+    backgroundColor: '#007BFF',
     borderRadius: 5,
+    width: '45%',
     alignItems: 'center',
   },
   modalBtnText: {
-    color: '#FFFFFF',
+    color: 'white',
     fontSize: 16,
   },
 });
+

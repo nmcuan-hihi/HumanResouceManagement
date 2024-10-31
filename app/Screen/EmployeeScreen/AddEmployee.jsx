@@ -9,6 +9,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { addEmployee, readChucVu, readPhongBan } from '../../services/database';
 import ViewLoading, { openModal, closeModal } from '../../Compoment/ViewLoading';
 import { addEmployeeFireStore, getNewEmployeeId } from '../../services/EmployeeFireBase';
+import { validateEmployeeData } from '../../services/validate';
 
 export default function AddMember({ navigation }) {
   const [employeeId, setEmployeeId] = useState("");
@@ -56,11 +57,18 @@ export default function AddMember({ navigation }) {
   };
 
   const handleAddEmployee = async () => {
+    const errors = validateEmployeeData(employeeData);
+    
+    if (errors.length > 0) {
+      Alert.alert('Lỗi nhập liệu', errors.join('\n'));
+      return;
+    }
+  
     if (!profileImage) {
       Alert.alert('Chưa chọn hình ảnh!', 'Vui lòng chọn hình ảnh cho nhân viên.');
       return;
     }
-
+  
     try {
       openModal();
       await addEmployeeFireStore(employeeData, profileImage);
@@ -73,7 +81,7 @@ export default function AddMember({ navigation }) {
       closeModal();
     }
   };
-
+  
   useEffect(() => {
     const fetchPhongBan = async () => {
       try {

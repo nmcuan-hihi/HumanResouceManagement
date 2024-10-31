@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Text } from 'react-native';
 import { createChucVu } from '../../services/database'; // Giả sử bạn có một hàm này để thêm chức vụ vào cơ sở dữ liệu
 import BackNav from '../../Compoment/BackNav';
+import { validateChucVuData } from '../../services/validate';
 
 export default function AddChucVu({ navigation }) {
-  const [chucvu_id
-    , setchucvu_id] = useState('');
+  const [chucvu_id, setchucvu_id] = useState('');
   const [tenChucVu, setTenChucVu] = useState('');
   const [heSoChucVu, setHeSoChucVu] = useState('');
 
