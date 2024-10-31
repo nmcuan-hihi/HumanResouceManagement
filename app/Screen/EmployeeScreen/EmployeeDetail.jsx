@@ -104,6 +104,12 @@ export default function EmployeeDetailScreen({ route, navigation }) {
       { cancelable: false }
     );
   };
+  const bangcap = (item) => {
+    navigation.navigate('DetailBangCapNV', { bangcap_id: item.bangcap_id, employeeId: manv});
+    console.log("bangcap"+item.bangcap_id);
+    console.log("id"+manv);
+  };
+  
 
   return (
     <>
@@ -152,7 +158,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 </View>
                 {bangCapNV && bangCapNV.length > 0 ? (
                   bangCapNV.map((item, index) => (
-                    <TouchableOpacity key={index} onPress={() => handleXacThuc(item)}>
+                    <TouchableOpacity key={index} onPress={() => bangcap(item)}>
                       <View style={styles.infoItem}>
                         <Text style={styles.infoValue}>{item.tenBang || "N/A"}</Text>
                         <View style={styles.iconContainer}>

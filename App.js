@@ -42,6 +42,7 @@ import CccdScreen from './app/Screen/EmployeeScreen/CccdScreen';
 import ListChucVu from './app/Screen/ChucVuScreen/ChucVu';
 import ChucVuDetail from './app/Screen/ChucVuScreen/ChucVuDetail';
 import AddChucVu from './app/Screen/ChucVuScreen/AddChucVu';
+import DetailBangCapNhanVien from './app/Screen/EmployeeScreen/BangCapNVDetail';
 
 const Tab = createBottomTabNavigator();
 
@@ -94,7 +95,7 @@ export default function App() {
 
         <Stack.Screen name="EditMatKhau" component={EditMatKhau} options={{ headerShown: false }} />
         <Stack.Screen name="ThemBangCapNV" component={ThemBangCapNV} options={{ headerShown: false }} />
-
+        <Stack.Screen name="DetailBangCapNV" component={DetailBangCapNhanVien} options={{ headerShown: false }} />
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />
