@@ -97,7 +97,8 @@ export default function App() {
         <Stack.Screen name="EditMatKhau" component={EditMatKhau} options={{ headerShown: false }} />
         <Stack.Screen name="ThemBangCapNV" component={ThemBangCapNV} options={{ headerShown: false }} />
         <Stack.Screen name="ThemSkillNV" component={ThemSkillNV} options={{ headerShown: false }} />
-
+        <Stack.Screen name="DetailBangCapNV" component={DetailBangCapNhanVien} options={{ headerShown: false }} />
+     
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />
