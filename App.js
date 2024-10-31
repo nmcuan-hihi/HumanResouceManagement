@@ -43,6 +43,7 @@ import CccdScreen from './app/Screen/EmployeeScreen/CccdScreen';
 import ListChucVu from './app/Screen/ChucVuScreen/ChucVu';
 import ChucVuDetail from './app/Screen/ChucVuScreen/ChucVuDetail';
 import AddChucVu from './app/Screen/ChucVuScreen/AddChucVu';
+import DetailBangCapNhanVien from './app/Screen/EmployeeScreen/BangCapNVDetail';
 
 const Tab = createBottomTabNavigator();
 
