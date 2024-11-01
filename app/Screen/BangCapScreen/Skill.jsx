@@ -42,7 +42,7 @@ const handleAddSkill = async () => {
     return;
   }
 
-  const newSkill = { mask: maSkill, tensk: tenSkill };
+  const newSkill = { mask: maSKill, tensk: tenSkill };
   const validationError = validateSkillData(newSkill);
   if (validationError) {
     Alert.alert("Lỗi", validationError);
