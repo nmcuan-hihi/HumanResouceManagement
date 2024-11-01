@@ -30,20 +30,15 @@ export default function DanhSachSkill({ navigation }) {
         setData(skillsData); // Cập nhật dữ liệu từ Firebase
       };
       fetchData();
+  
     }, [])
   );
+
 
   const handlePress = (mask) => {
     navigation.navigate("SkillDetail", { item: { maSK: mask } });
     console.log(mask);
   };
-
-  // Thêm kỹ năng và cập nhật danh sách
-  const handleAddSkill = async () => {
-    if (!maSKill || !tenSkill) {
-      Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
-      return;
-    }
 
 // Thêm kỹ năng và cập nhật danh sách
 const handleAddSkill = async () => {
@@ -52,27 +47,27 @@ const handleAddSkill = async () => {
     return;
   }
 
-  const newSkill = { mask: maSkill, tensk: tenSkill };
-  const validationError = validateSkillData(newSkill);
-  if (validationError) {
-    Alert.alert("Lỗi", validationError);
-    return;
-  }
+  const newSkill = { mask: maSKill, tensk: tenSkill };
 
-  const skillExists = data.some(skill => skill.mask === maSkill);
+  // Kiểm tra nếu mã kỹ năng đã tồn tại
+  const skillExists = data.some(skill => skill.mask === maSKill);
   if (skillExists) {
     Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
     return;
   }
 
   try {
-    await addSkill(newSkill);
+    await addSkill(newSkill); // Ghi dữ liệu vào Firebase
+
+    // Cập nhật danh sách kỹ năng sau khi thêm
     setData((prevData) => [...prevData, newSkill]);
+
+    // Reset form và đóng modal
     setMaSkill("");
     setTenSkill("");
     setVisibleModal(false);
   } catch (error) {
-    Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng.");
+    Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
   }
 };
 
@@ -108,7 +103,7 @@ const handleAddSkill = async () => {
                 name={"Thêm Skill"}
                 nameIconRight={"close"}
                 onEditPress={() => setVisibleModal(false)}
-              />
+/>
             </View>
 
             <View style={styles.body}>
