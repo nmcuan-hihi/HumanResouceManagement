@@ -13,7 +13,6 @@ import ItemListEmployee from "../../Compoment/ItemEmployee";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
 import { readSkills, addSkill } from "../../services/skill";
-import { validateSkillData } from "../../services/validate";
 
 export default function DanhSachSkill({ navigation }) {
   const [data, setData] = useState([]); // Lưu danh sách kỹ năng
@@ -43,26 +42,26 @@ const handleAddSkill = async () => {
   }
 
   const newSkill = { mask: maSKill, tensk: tenSkill };
-  const validationError = validateSkillData(newSkill);
-  if (validationError) {
-    Alert.alert("Lỗi", validationError);
-    return;
-  }
 
-  const skillExists = data.some(skill => skill.mask === maSkill);
+  // Kiểm tra nếu mã kỹ năng đã tồn tại
+  const skillExists = data.some(skill => skill.mask === maSKill);
   if (skillExists) {
     Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
     return;
   }
 
   try {
-    await addSkill(newSkill);
+    await addSkill(newSkill); // Ghi dữ liệu vào Firebase
+
+    // Cập nhật danh sách kỹ năng sau khi thêm
     setData((prevData) => [...prevData, newSkill]);
+
+    // Reset form và đóng modal
     setMaSkill("");
     setTenSkill("");
     setVisibleModal(false);
   } catch (error) {
-    Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng.");
+    Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
   }
 };
 
