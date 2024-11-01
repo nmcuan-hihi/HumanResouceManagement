@@ -11,10 +11,13 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import BackNav from "../../Compoment/BackNav";
 import RNPickerSelect from "react-native-picker-select";
+import { Calendar } from "react-native-calendars";
+
 import {
   editPhongBan,
   readChucVu,
@@ -55,10 +58,12 @@ export default function EditMember({ route, navigation }) {
   const [profileImage, setProfileImage] = useState(null);
   const [phongBans, setPhongBans] = useState([]);
   const [chucVus, setChucVus] = useState([]);
+  const [dateField, setDateField] = useState("");
 
   const [phongBanUpDate, setPhongBanUpDate] = useState([]);
 
   const [currentNV, setCurrentNV] = useState(null);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // Lấy thông tin nhân viên khi component được mount
   useEffect(() => {
@@ -91,6 +96,16 @@ export default function EditMember({ route, navigation }) {
 
     fetchEmployeeData();
   }, [manv]); // Chạy lại khi manv thay đổi
+
+  const handleDateSelect = (day) => {
+    updateField(dateField, day.dateString);
+    setShowCalendar(false);
+  };
+
+  const showCalendarModal = (field) => {
+    setDateField(field);
+    setShowCalendar(true);
+  };
 
   // Hàm chọn ảnh từ thư viện
   const pickImage = async () => {
@@ -127,40 +142,40 @@ export default function EditMember({ route, navigation }) {
         Alert.alert("Lỗi", errors.join("\n")); // Hiển thị tất cả lỗi trong một thông báo
         return;
       }
-  
+
       openModal();
       // Kiểm tra xem hình ảnh đã thay đổi chưa
       const imageToUpload =
         profileImage !== employeeData.imageUrl ? profileImage : null;
-  
+
       // lấy phòng ban hiện tại
       const currentPhongBan = phongBanUpDate.find((pb) => {
         return pb.maPhongBan == currentNV.phongbanId;
       });
-  
+
       // lấy phòng ban được chọn
       const newPhongBan = phongBanUpDate.find((pb) => {
         return pb.maPhongBan == employeeData.phongbanId;
       });
-  
+
       console.log(newPhongBan, "newpb");
       if (currentNV.chucvuId != "TP") {
         console.log("1---");
-  
+
         if (employeeData.chucvuId == "TP") {
           console.log("2---");
-  
+
           await editPhongBan(employeeData.phongbanId, { maQuanLy: manv });
-  
+
           if (newPhongBan.maQuanLy != "") {
             await updateEmployee(newPhongBan.maQuanLy, { chucvuId: "NV" });
           }
         }
         console.log("4---");
-  
+
         await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
         console.log("4.1---");
-  
+
         closeModal();
         Alert.alert("Thông báo", `Cập nhật thành công!`, [
           { text: "OK", onPress: () => navigation.goBack() },
@@ -170,46 +185,46 @@ export default function EditMember({ route, navigation }) {
           await editPhongBan(currentNV.phongbanId, { maQuanLy: "" });
           await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
           closeModal();
-  
+
           Alert.alert("Thông báo", `Cập nhật thành công!`, [
             { text: "OK", onPress: () => navigation.goBack() },
           ]);
         } else if (currentNV.phongbanId == employeeData.phongbanId) {
           await editEmployeeFireStore(employeeData, imageToUpload); // Cập nhật vào Firestore
           closeModal();
-  
+
           Alert.alert("Thông báo", `Cập nhật thành công!`, [
             { text: "OK", onPress: () => navigation.goBack() },
           ]);
         } else {
           closeModal();
-  
+
           Alert.alert(
             "Thông báo",
             `Không thể đổi sang phòng ${newPhongBan.tenPhongBan}, Bạn đang là trưởng phòng ${currentPhongBan.tenPhongBan}!`
           );
         }
-      }       
+      }
     } catch (error) {
       closeModal();
-  
+
       console.error("Error updating employee 11111:", error);
       Alert.alert("Thông báo", "Cập nhật không thành công!");
     }
   };
-  
+
   const toggleTrangThai = () => {
-    const currentStatus = employeeData.trangthai === 'true';
+    const currentStatus = employeeData.trangthai === "true";
     const newStatus = !currentStatus;
     const message = newStatus
-      ? 'Bạn có muốn bật hoạt động không?'
-      : 'Bạn có muốn tắt hoạt động không?';
+      ? "Bạn có muốn bật hoạt động không?"
+      : "Bạn có muốn tắt hoạt động không?";
 
-    Alert.alert('Xác nhận', message, [
-      { text: 'Không', style: 'cancel' },
+    Alert.alert("Xác nhận", message, [
+      { text: "Không", style: "cancel" },
       {
-        text: 'Có',
-        onPress: () => updateField('trangthai', newStatus ? 'true' : 'false'),
+        text: "Có",
+        onPress: () => updateField("trangthai", newStatus ? "true" : "false"),
       },
     ]);
   };
@@ -344,19 +359,19 @@ export default function EditMember({ route, navigation }) {
               style={pickerSelectStyles}
             />
 
-            <Text style={styles.label}>Ngày sinh</Text>
-            <TextInput
-              style={styles.input}
-              value={employeeData.ngaysinh}
-              onChangeText={(value) => updateField("ngaysinh", value)}
-            />
+            <TouchableOpacity onPress={() => showCalendarModal("ngaysinh")}>
+              <Text style={styles.label}>Ngày sinh</Text>
+              <View style={styles.datePicker}>
+                <Text>{employeeData.ngaysinh || "Chọn ngày"}</Text>
+              </View>
+            </TouchableOpacity>
 
-            <Text style={styles.label}>Ngày bắt đầu</Text>
-            <TextInput
-              style={styles.input}
-              value={employeeData.ngaybatdau}
-              onChangeText={(value) => updateField("ngaybatdau", value)}
-            />
+            <TouchableOpacity onPress={() => showCalendarModal("ngaybatdau")}>
+              <Text style={styles.label}>Ngày vào</Text>
+              <View style={styles.datePicker}>
+                <Text>{employeeData.ngaybatdau || "Chọn ngày"}</Text>
+              </View>
+            </TouchableOpacity>
 
             <Text style={styles.label}>Lương cơ bản</Text>
             <TextInput
@@ -374,28 +389,64 @@ export default function EditMember({ route, navigation }) {
             />
 
             <Text style={styles.label}>Trạng thái</Text>
-            <TouchableOpacity style={styles.statusContainer} onPress={toggleTrangThai}>
+            <TouchableOpacity
+              style={styles.statusContainer}
+              onPress={toggleTrangThai}
+            >
               <Text style={styles.statusText}>
-                {employeeData.trangthai === 'true' ? 'Đang hoạt động' : 'Không hoạt động'}
+                {employeeData.trangthai === "true"
+                  ? "Đang hoạt động"
+                  : "Không hoạt động"}
               </Text>
               <View
                 style={[
                   styles.statusDot,
-                  { backgroundColor: employeeData.trangthai === 'true' ? 'green' : 'red' },
+                  {
+                    backgroundColor:
+                      employeeData.trangthai === "true" ? "green" : "red",
+                  },
                 ]}
               />
             </TouchableOpacity>
+
+            {/* Modal cho Calendar */}
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={showCalendar}
+              onRequestClose={() => setShowCalendar(false)}
+            >
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Calendar
+                    onDayPress={handleDateSelect}
+                    markedDates={{
+                      [employeeData[dateField]]: { selected: true },
+                    }}
+                  />
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setShowCalendar(false)}
+                  >
+                    <Text style={styles.closeButtonText}>X</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
           </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>
       <ViewLoading />
-      
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  statusContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
   statusText: { fontSize: 16, marginRight: 10 },
   statusDot: { width: 10, height: 10, borderRadius: 5 },
   container: {
@@ -405,6 +456,14 @@ const styles = StyleSheet.create({
   avatarContainer: {
     alignItems: "center",
     marginVertical: 20,
+  },
+  datePicker: {
+    marginBottom: 20,
+    padding: 15,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    alignItems: "flex-start",
   },
   avatar: {
     width: 100,
@@ -422,6 +481,37 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingLeft: 10,
     marginBottom: 15,
+  },
+
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10, // Khoảng cách từ trên xuống
+    right: 15, // Khoảng cách từ bên phải
+    alignSelf: "flex-end",
+    backgroundColor: "red",
+    borderRadius: 20,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  closeButtonText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });
 
@@ -445,5 +535,14 @@ const pickerSelectStyles = {
     borderRadius: 5,
     color: "black", // Màu chữ
     marginBottom: 15,
+  },
+
+  datePicker: {
+    marginBottom: 20,
+    padding: 15,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    alignItems: "flex-start",
   },
 };

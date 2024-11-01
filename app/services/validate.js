@@ -55,12 +55,6 @@ export const validateEmployeeData = (data) => {
         errors.push('Ngày bắt đầu không được trước ngày sinh.');
     }
 
-    if (!matKhau) {
-        errors.push('Mật khẩu không được để trống.');
-    } else if (matKhau.length < 8) {
-        errors.push('Mật khẩu phải có ít nhất 8 ký tự.');
-    }
-
     return errors;
 };
 
