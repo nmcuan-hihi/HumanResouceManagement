@@ -106,41 +106,16 @@ export const readSkill1 = async (mask) => {
   }
 };
 
-export async function addSkillNV(Skill, image) {
-  function random(length) {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      result += characters[randomIndex];
-    }
-    return result;
-  }
-
-  const randomImg = random(20);
+export async function addSkillNV(Skill) {
   try {
-    // Tạo tham chiếu tới nơi lưu trữ hình ảnh
-    const imageRef = storageRef(storage, `skills/${randomImg}.jpg`);
-
-    // Tải lên hình ảnh
-    const response = await fetch(image);
-    const blob = await response.blob();
-    await uploadBytes(imageRef, blob);
-
-    // Lấy URL hình ảnh
-    const imageUrl = await getDownloadURL(imageRef);
-
-    // Cập nhật imageUrl vào employeeData
-    const data = { ...Skill, imageUrl };
-
     // Ghi dữ liệu nhân viên vào Firestore
-    await setDoc(doc(firestore, "skillnhanvien", `${Skill.employeeId}-${Skill.mask}`), data);
+    await setDoc(doc(firestore, "skillnhanvien", `${Skill.employeeId}-${Skill.mask}`), Skill);
     console.log(`Employee ${Skill.employeeId} added successfully!`);
   } catch (error) {
     console.error("Error adding employee:", error);
   }
 }
+
 
 // Lấy danh sách bằng cấp của nhân viên
 export async function readSkillNhanVien() {

@@ -20,57 +20,57 @@ export default function DanhSachSkill({ navigation }) {
   const [visibleModal, setVisibleModal] = useState(false);
   const [maSKill, setMaSkill] = useState(""); // Mã kỹ năng
   const [tenSkill, setTenSkill] = useState(""); // Tên kỹ năng
+  const [refreshing, setRefreshing] = useState(false); // State for refreshing
 
   // Đọc dữ liệu kỹ năng khi màn hình được load
+  const fetchData = async () => {
+    setRefreshing(true); // Set refreshing state to true
+    const skillsData = await readSkills();
+    setData(skillsData); // Cập nhật dữ liệu từ Firebase
+    setRefreshing(false); // Set refreshing state to false
+  };
 
   useFocusEffect(
     useCallback(() => {
-      const fetchData = async () => {
-        const skillsData = await readSkills();
-        setData(skillsData); // Cập nhật dữ liệu từ Firebase
-      };
       fetchData();
-  
     }, [])
   );
-
 
   const handlePress = (mask) => {
     navigation.navigate("SkillDetail", { item: { maSK: mask } });
     console.log(mask);
   };
 
-// Thêm kỹ năng và cập nhật danh sách
-const handleAddSkill = async () => {
-  if (!maSKill || !tenSkill) {
-    Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
-    return;
-  }
+  // Thêm kỹ năng và cập nhật danh sách
+  const handleAddSkill = async () => {
+    if (!maSKill || !tenSkill) {
+      Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
+      return;
+    }
 
-  const newSkill = { mask: maSKill, tensk: tenSkill };
+    const newSkill = { mask: maSKill, tensk: tenSkill };
 
-  // Kiểm tra nếu mã kỹ năng đã tồn tại
-  const skillExists = data.some(skill => skill.mask === maSKill);
-  if (skillExists) {
-    Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
-    return;
-  }
+    // Kiểm tra nếu mã kỹ năng đã tồn tại
+    const skillExists = data.some(skill => skill.mask === maSKill);
+    if (skillExists) {
+      Alert.alert("Lỗi", "Mã kỹ năng này đã tồn tại.");
+      return;
+    }
 
-  try {
-    await addSkill(newSkill); // Ghi dữ liệu vào Firebase
+    try {
+      await addSkill(newSkill); // Ghi dữ liệu vào Firebase
 
-    // Cập nhật danh sách kỹ năng sau khi thêm
-    setData((prevData) => [...prevData, newSkill]);
+      // Cập nhật danh sách kỹ năng sau khi thêm
+      setData((prevData) => [...prevData, newSkill]);
 
-    // Reset form và đóng modal
-    setMaSkill("");
-    setTenSkill("");
-    setVisibleModal(false);
-  } catch (error) {
-    Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
-  }
-};
-
+      // Reset form và đóng modal
+      setMaSkill("");
+      setTenSkill("");
+      setVisibleModal(false);
+    } catch (error) {
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm kỹ năng."); // Thông báo lỗi chung
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -93,6 +93,8 @@ const handleAddSkill = async () => {
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.mask}
+        onRefresh={fetchData} // Function to call on pull-to-refresh
+        refreshing={refreshing} // Show loading indicator when refreshing
       />
 
       <Modal visible={visibleModal} transparent={true} animationType="slide">
@@ -103,7 +105,7 @@ const handleAddSkill = async () => {
                 name={"Thêm Skill"}
                 nameIconRight={"close"}
                 onEditPress={() => setVisibleModal(false)}
-/>
+              />
             </View>
 
             <View style={styles.body}>

@@ -21,20 +21,23 @@ export default function DanhSachBangCap({ navigation }) {
   const [visibleModal, setVisibleModal] = useState(false);
   const [maBC, setMaBC] = useState(""); // Mã bằng cấp
   const [tenBC, setTenBC] = useState(""); // Tên bằng cấp
+  const [refreshing, setRefreshing] = useState(false); // State for refresh control
+
+  // Function to fetch data
+  const fetchData = async () => {
+    setRefreshing(true);
+    const bangCapData = await readBangCap();
+    setData(Object.values(bangCapData || {})); // Cập nhật dữ liệu nếu có
+    setRefreshing(false);
+  };
 
   // Đọc dữ liệu bằng cấp khi màn hình được load
   useFocusEffect(
     useCallback(() => {
-      const fetchData = async () => {
-        const bangCapData = await readBangCap();
-        setData(Object.values(bangCapData || {})); // Cập nhật dữ liệu nếu có
-      };
-  
       fetchData();
-  
-      // Không cần clean-up function ở đây vì không có listener
     }, [])
   );
+
   const handlePress = (item) => {
     navigation.navigate("DetailBangCap", { item });
   };
@@ -60,7 +63,6 @@ export default function DanhSachBangCap({ navigation }) {
     setTenBC("");
     setVisibleModal(false);
   };
-  
 
   return (
     <View style={styles.container}>
@@ -83,6 +85,8 @@ export default function DanhSachBangCap({ navigation }) {
           </TouchableOpacity>
         )}
         keyExtractor={(item, index) => index.toString()}
+        refreshing={refreshing} // Control the refreshing state
+        onRefresh={fetchData} // Fetch data on refresh
       />
 
       <Modal visible={visibleModal} transparent={true} animationType="slide">
