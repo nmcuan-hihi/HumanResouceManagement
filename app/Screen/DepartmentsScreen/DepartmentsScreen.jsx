@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
 } from "react-native";
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
@@ -33,12 +34,11 @@ export default function PhongBanScreen({ navigation }) {
   });
   const [maPhongBan, setMaPhongBan] = useState("");
   const [tenPhongBan, setTenPhongBan] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch dữ liệu từ Firebase
   const fetchData = async () => {
     try {
       const data = await readPhongBan();
-
       const phongBanArray = Object.keys(data).map((key) => ({
         ...data[key],
         maPhongBan: data[key].maPhongBan,
@@ -50,29 +50,17 @@ export default function PhongBanScreen({ navigation }) {
         employeeID: dataEmp[key].employeeId,
       }));
 
-      const dataNV = dataEmpArray.filter((nv) => {
-        return nv.chucvuId != "TP" && nv.chucvuId != "GD";
-      });
+      const dataNV = dataEmpArray.filter((nv) => nv.chucvuId !== "TP" && nv.chucvuId !== "GD");
 
       setEmployeeData(dataNV);
-      const newData = [];
 
-      for (let i = 0; i < phongBanArray.length; i++) {
-        const phongBan = {
-          tenPhongBan: phongBanArray[i].tenPhongBan,
-          maPhongBan: phongBanArray[i].maPhongBan,
+      const newData = phongBanArray.map((phongBan) => {
+        const employee = dataEmpArray.find((emp) => emp.employeeId === phongBan.maQuanLy);
+        return {
+          ...phongBan,
+          tenTp: employee ? employee.name : "",
         };
-
-        const employee = dataEmpArray.find(
-          (emp) => emp.employeeId === phongBanArray[i].maQuanLy
-        );
-
-        if (employee) {
-          phongBan.tenTp = employee.name;
-        }
-
-        newData.push(phongBan);
-      }
+      });
 
       setPhongBanData(newData);
     } catch (error) {
@@ -85,6 +73,12 @@ export default function PhongBanScreen({ navigation }) {
       fetchData();
     }, [])
   );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
 
   const hienThiModal = () => setVisibleModal(true);
 
@@ -107,24 +101,20 @@ export default function PhongBanScreen({ navigation }) {
         maQuanLy: selectedManager.employeeID,
       };
 
-      await writePhongBan(phongban); // Ghi dữ liệu vào Firebase
+      await writePhongBan(phongban);
 
-      // sửa chức vụ thành trưởng phòng cho nv
-      if(selectedManager.employeeID)
-      {
-        const dataTP = await getEmployeeById(selectedManager.employeeID);
+      if (selectedManager.employeeID) {
         const updateTP = { chucvuId: "TP", phongbanId: maPhongBan };
         await updateEmployee(selectedManager.employeeID, updateTP);
-  
       }
-      await fetchData(); // Làm mới dữ liệu sau khi thêm mới
-    
-      // Reset các trường sau khi thêm
+
+      await fetchData();
+
       setMaPhongBan("");
       setTenPhongBan("");
       setSelectedManager({ name: "", employeeID: "" });
       setSearchText("");
-      setVisibleModal(false); // Đóng modal
+      setVisibleModal(false);
     } catch (error) {
       console.error("Lỗi khi thêm phòng ban:", error);
     }
@@ -151,6 +141,9 @@ export default function PhongBanScreen({ navigation }) {
             <ItemDepartment item={item} onPress={() => handlePress(item)} />
           )}
           keyExtractor={(item) => item.maPhongBan}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
 
         <Modal visible={visibleModal} transparent={true} animationType="slide">
@@ -284,7 +277,6 @@ const styles = StyleSheet.create({
   },
   nameBtn: {
     fontSize: 20,
-
     color: "#FFFFFF",
   },
 });
