@@ -13,6 +13,7 @@ import {
 import BackNav from "../../Compoment/BackNav";
 import Feather from "react-native-vector-icons/Feather";
 import { deleteBangCap, updateBangCap } from "../../services/database";
+import { validateBangCapData } from "../../services/validate";
 
 export default function DetailBangCap({ navigation, route }) {
   const { bangcap_id, tenBang } = route.params.item;
@@ -24,6 +25,11 @@ export default function DetailBangCap({ navigation, route }) {
 
   // Handle save
   const handleSave = async () => {
+    if (editedTenBC == null || editedTenBC.trim() === "") {
+      Alert.alert("Lỗi", "Tên bằng cấp không được để trống.");
+      return;
+    }
+    
     try {
       await updateBangCap(bangcap_id, editedTenBC);
       setCurrentTenBC(editedTenBC);
@@ -32,6 +38,7 @@ export default function DetailBangCap({ navigation, route }) {
       Alert.alert("Lỗi", "Không thể lưu thông tin. Vui lòng thử lại.");
     }
   };
+  
 
   // Handle cancel
   const handleCancel = () => {

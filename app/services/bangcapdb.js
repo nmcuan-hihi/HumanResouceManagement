@@ -12,7 +12,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "fire
 const firestore = getFirestore(app);
 const storage = getStorage(app); // Khởi tạo Firebase Storage
 
-import { updateDoc } from "firebase/firestore"; // Đảm bảo đã import hàm này
+import { updateDoc,query, where } from "firebase/firestore"; // Đảm bảo đã import hàm này
 
 
 
@@ -53,6 +53,33 @@ export async function addBangCapNV(bangCap, image) {
     console.error("Error adding employee:", error);
   }
 }
+
+// Hàm lấy chi tiết bằng cấp của nhân viên dựa trên bangcap_id và employeeId
+export async function readBangCapNhanVien1(bangcap_id, employeeId) {
+  try {
+    const bangCapRef = collection(firestore, "bangcapnhanvien");
+    const q = query(
+      bangCapRef,
+      where("bangcap_id", "==", bangcap_id),
+      where("employeeId", "==", employeeId)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const bangCapDetail = querySnapshot.docs[0].data(); // Lấy tài liệu đầu tiên khớp với điều kiện
+      return bangCapDetail;
+    } else {
+      console.log("No document found with the provided bangcap_id and employeeId");
+      return {}; // Trả về đối tượng rỗng nếu không tìm thấy dữ liệu
+    }
+  } catch (error) {
+    console.error("Error reading qualification by bangcap_id and employeeId:", error);
+    return {}; // Trả về đối tượng rỗng nếu xảy ra lỗi
+  }
+}
+
+
 
 // Lấy danh sách bằng cấp của nhân viên
 export async function readBangCapNhanVien() {

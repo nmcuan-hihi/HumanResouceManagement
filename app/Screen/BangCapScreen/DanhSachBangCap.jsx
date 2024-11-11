@@ -14,43 +14,50 @@ import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
 import { readBangCap, writeBangCap } from "../../services/database";
 import { useFocusEffect } from "@react-navigation/native";
+import { validateBangCapData } from "../../services/validate";
 
 export default function DanhSachBangCap({ navigation }) {
   const [data, setData] = useState([]); // Lưu danh sách bằng cấp
   const [visibleModal, setVisibleModal] = useState(false);
   const [maBC, setMaBC] = useState(""); // Mã bằng cấp
   const [tenBC, setTenBC] = useState(""); // Tên bằng cấp
+  const [refreshing, setRefreshing] = useState(false); // State for refresh control
+
+  // Function to fetch data
+  const fetchData = async () => {
+    setRefreshing(true);
+    const bangCapData = await readBangCap();
+    setData(Object.values(bangCapData || {})); // Cập nhật dữ liệu nếu có
+    setRefreshing(false);
+  };
 
   // Đọc dữ liệu bằng cấp khi màn hình được load
   useFocusEffect(
     useCallback(() => {
-      const fetchData = async () => {
-        const bangCapData = await readBangCap();
-        setData(Object.values(bangCapData || {})); // Cập nhật dữ liệu nếu có
-      };
-  
       fetchData();
-  
-      // Không cần clean-up function ở đây vì không có listener
     }, [])
   );
+
   const handlePress = (item) => {
     navigation.navigate("DetailBangCap", { item });
   };
 
   // Thêm bằng cấp và cập nhật danh sách
   const handleAddBangCap = async () => {
-    if (!maBC || !tenBC) {
-      Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin.");
+    const newBangCap = { bangcap_id: maBC, tenBang: tenBC };
+  
+    // Validate the new degree data
+    const errors = validateBangCapData(newBangCap);
+    if (errors.length > 0) {
+      Alert.alert("Lỗi", errors.join("\n"));
       return;
     }
-
-    const newBangCap = { bangcap_id: maBC, tenBang: tenBC };
+  
     await writeBangCap(newBangCap); // Ghi dữ liệu vào Firebase
-
+  
     // Cập nhật danh sách bằng cấp sau khi thêm
     setData((prevData) => [...prevData, newBangCap]);
-
+  
     // Reset form và đóng modal
     setMaBC("");
     setTenBC("");
@@ -78,6 +85,8 @@ export default function DanhSachBangCap({ navigation }) {
           </TouchableOpacity>
         )}
         keyExtractor={(item, index) => index.toString()}
+        refreshing={refreshing} // Control the refreshing state
+        onRefresh={fetchData} // Fetch data on refresh
       />
 
       <Modal visible={visibleModal} transparent={true} animationType="slide">

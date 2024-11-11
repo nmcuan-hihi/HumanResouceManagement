@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import { readSkills } from "../../services/skill";
 import { readSkillNhanVien } from "../../services/skill";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
 import { toggleXacthuc } from "../../services/bangcapdb";
-
+import { useFocusEffect } from "@react-navigation/native";
 
 const database = getDatabase();
 
@@ -104,11 +104,13 @@ export default function EmployeeDetailScreen({ route, navigation }) {
     }
   };
 
-  useEffect(() => {
-    getDataBCNV();
-    getDataSKNV();
-    fetchEmployeeData(); // Gọi hàm fetch khi component mount
-  }, [manv]);
+  useFocusEffect(
+    useCallback(() => {
+      getDataBCNV();
+      getDataSKNV();
+      fetchEmployeeData(); // Gọi hàm fetch khi component mount
+    }, [manv])
+  );
 
   // Hàm điều hướng đến màn hình chỉnh sửa
   const handlePress = () => {
@@ -143,6 +145,12 @@ export default function EmployeeDetailScreen({ route, navigation }) {
       { cancelable: false }
     );
   };
+  const bangcap = (item) => {
+    navigation.navigate('DetailBangCapNV', { bangcap_id: item.bangcap_id, employeeId: manv});
+    console.log("bangcap"+item.bangcap_id);
+    console.log("id"+manv);
+  };
+  
 
   return (
     <>
@@ -191,7 +199,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 </View>
                 {bangCapNV && bangCapNV.length > 0 ? (
                   bangCapNV.map((item, index) => (
-                    <TouchableOpacity key={index} onPress={() => handleXacThuc(item)}>
+                    <TouchableOpacity key={index} onPress={() => bangcap(item)}>
                       <View style={styles.infoItem}>
                         <Text style={styles.infoValue}>{item.tenBang || "N/A"}</Text>
                         <View style={styles.iconContainer}>

@@ -1,20 +1,46 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableOpacity, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
+import TimeChamCong from '../../Compoment/Time';
 
 export default function ChamCongNV() {
-  const [timeIn, setTimeIn] = useState('9:30');
-  const [timeOut, setTimeOut] = useState('17:00');
-  const [selectedMonth, setSelectedMonth] = useState('December 2022');
+  const [timeIn, setTimeIn] = useState(new Date());
+  const [timeOut, setTimeOut] = useState(new Date());
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [showTimePicker, setShowTimePicker] = useState({ timeIn: false, timeOut: false, month: false });
   const [searchQuery, setSearchQuery] = useState('');
+  const [employees, setEmployees] = useState([]);
 
-  const employees = [
-    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'checked' },
-    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'checked' },
-    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'checked' },
-    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'checked' },
-    { id: 'NV001', name: 'Nguyễn Minh Quân', department: 'Phòng IT', status: 'unchecked' },
-  ];
+  useEffect(() => {
+    async function fetchEmployees() {
+      try {
+        const employeesData = await readEmployeesFireStore();
+        if (employeesData) {
+          setEmployees(employeesData);
+        }
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    }
+    fetchEmployees();
+  }, []);
+
+  const handleTimeChange = (event, selectedDate, type) => {
+    const currentDate = selectedDate || (type === 'timeIn' ? timeIn : timeOut);
+    setShowTimePicker(prev => ({ ...prev, [type]: Platform.OS === 'ios' && false })); // Close DateTimePicker after selection
+    type === 'timeIn' ? setTimeIn(currentDate) : setTimeOut(currentDate);
+  };
+
+  const handleTimePickerVisibility = (type) => {
+    setShowTimePicker({
+      timeIn: type === 'timeIn',
+      timeOut: type === 'timeOut',
+      month: type === 'month',
+    });
+  };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,48 +55,28 @@ export default function ChamCongNV() {
       </View>
 
       <View style={styles.timeSection}>
-        <Text style={styles.timeLabel}>Thời gian</Text>
+        <View style={styles.timeInputs} >
+          <Text style={styles.timeLabel}>Thời gian</Text>
+         <TimeChamCong/>
+
+        </View>
         <View style={styles.timeInputs}>
           <View style={styles.timeInputContainer}>
             <Text>Vào</Text>
-            <TextInput style={styles.timeInput} value={timeIn} onChangeText={setTimeIn} />
+            <TouchableOpacity onPress={() => handleTimePickerVisibility('timeIn')}>
+              <Text style={styles.timeText}>{timeIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.timeInputContainer}>
             <Text>Ra</Text>
-            <TextInput style={styles.timeInput} value={timeOut} onChangeText={setTimeOut} />
+            <TouchableOpacity onPress={() => handleTimePickerVisibility('timeOut')}>
+              <Text style={styles.timeText}>{timeOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
 
-      <View style={styles.calendarSection}>
-        <TouchableOpacity style={styles.monthSelector}>
-          <Text>{selectedMonth}</Text>
-          <Icon name="arrow-drop-down" size={24} color="black" />
-        </TouchableOpacity>
-        <View style={styles.calendarNavigation}>
-          <TouchableOpacity>
-            <Icon name="chevron-left" size={24} color="black" />
-          </TouchableOpacity>
-          <Icon name="calendar-today" size={24} color="black" />
-          <TouchableOpacity>
-            <Icon name="chevron-right" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-      </View>
 
-      <View style={styles.filterSection}>
-        <TouchableOpacity style={[styles.filterButton, styles.activeFilterButton]}>
-          <Text style={styles.filterButtonText}>Đi làm</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton}>
-          <Text style={styles.filterButtonText}>Nghỉ có lương</Text>
-          <Icon name="arrow-drop-down" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton}>
-          <Text style={styles.filterButtonText}>Phòng ban</Text>
-          <Icon name="arrow-drop-down" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
 
       <View style={styles.searchSection}>
         <Icon name="search" size={24} color="gray" style={styles.searchIcon} />
@@ -84,22 +90,53 @@ export default function ChamCongNV() {
 
       <ScrollView style={styles.employeeList}>
         {employees.map((employee, index) => (
-          <View key={index} style={[
-            styles.employeeItem,
-            index % 2 === 0 ? styles.evenItem : styles.oddItem,
-            employee.status === 'unchecked' && styles.uncheckedItem
-          ]}>
+          <View
+            key={index}
+            style={[
+              styles.employeeItem,
+              index % 2 === 0 ? styles.evenItem : styles.oddItem,
+              employee.trangthai === 'unchecked' && styles.uncheckedItem,
+            ]}
+          >
             <View>
-              <Text style={styles.employeeName}>{employee.id} {employee.name}</Text>
+              <Text style={styles.employeeName}>{employee.employeeId} {employee.name}</Text>
               <Text style={styles.employeeDepartment}>{employee.department}</Text>
             </View>
-            <Icon name="check-circle" size={24} color={employee.status === 'checked' ? 'green' : 'gray'} />
+            <Icon name="check-circle" size={24} color={employee.trangthai === 'checked' ? 'green' : 'gray'} />
           </View>
         ))}
       </ScrollView>
+
+      {/* Thay đổi phần DateTimePicker để sử dụng kiểu 'spinner' trên iOS */}
+      {showTimePicker.timeIn && (
+        <DateTimePicker
+          value={timeIn}
+          mode="time"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(event, date) => handleTimeChange(event, date, 'timeIn')}
+        />
+      )}
+
+      {showTimePicker.timeOut && (
+        <DateTimePicker
+          value={timeOut}
+          mode="time"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(event, date) => handleTimeChange(event, date, 'timeOut')}
+        />
+      )}
+
+      {showTimePicker.month && (
+        <DateTimePicker
+          value={selectedMonth}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleMonthChange}
+        />
+      )}
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -137,7 +174,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  timeInput: {
+  timeText: {
     backgroundColor: 'white',
     padding: 4,
     marginLeft: 8,
@@ -157,28 +194,6 @@ const styles = StyleSheet.create({
   monthSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  calendarNavigation: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  filterSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 8,
-    borderRadius: 16,
-  },
-  activeFilterButton: {
-    backgroundColor: '#4CAF50',
-  },
-  filterButtonText: {
-    marginRight: 4,
   },
   searchSection: {
     flexDirection: 'row',
@@ -221,4 +236,3 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
 });
-

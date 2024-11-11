@@ -14,25 +14,20 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import BackNav from "../../Compoment/BackNav";
 import RNPickerSelect from "react-native-picker-select";
-import { addEmployee, readBangCap } from "../../services/database"; // Import hàm thêm nhân viên và đọc phòng ban
+import { addEmployee, readBangCap } from "../../services/database";
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/MaterialIcons";
-
 import { addBangCapNV } from "../../services/bangcapdb";
 
 export default function AddMember({ navigation, route }) {
   const { employeeId } = route.params;
   const [bangCaps, setBangCaps] = useState([]);
-
   const [selecDate, setSelecDate] = useState("");
-
   const [bangcap_id, setBangCap_id] = useState("");
   const [imageBC, setImageBC] = useState(null);
   const [mota, setMota] = useState("");
-
   const [visibleCalendar, setVisibleCalendar] = useState(false);
 
-  // hamf laays data bằng cấp
   const getListBangCap = async () => {
     const data = await readBangCap();
     const arrData = Object.values(data);
@@ -77,7 +72,6 @@ export default function AddMember({ navigation, route }) {
     }
     await addBangCapNV(data, imageBC);
     Alert.alert("Thông báo!", "Thêm bằng cấp thành công");
-
     navigation.goBack();
   };
 
@@ -93,70 +87,22 @@ export default function AddMember({ navigation, route }) {
         <ScrollView style={{ paddingHorizontal: 15 }}>
           <Text style={styles.label}>Bằng cấp</Text>
           <RNPickerSelect
-            onValueChange={(value) => {
-              setBangCap_id(value);
-            }}
-            items={bangCaps.map((bc) => {
-              return {
-                value: bc.bangcap_id,
-                label: bc.tenBang,
-              };
-            })}
+            onValueChange={(value) => setBangCap_id(value)}
+            items={bangCaps.map((bc) => ({
+              value: bc.bangcap_id,
+              label: bc.tenBang,
+            }))}
             style={pickerSelectStyles}
           />
 
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
+          <TouchableOpacity onPress={() => setVisibleCalendar(true)}>
             <Text style={styles.label}>Ngày cấp</Text>
-
-            <TouchableOpacity
-              onPress={() => {
-                setVisibleCalendar(true);
-              }}
-            >
-              <Icon name={"today"} size={30} color="red" />
-            </TouchableOpacity>
-          </View>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={visibleCalendar}
-          >
-            <View style={styles.modal}>
-              <View style={{ width: "80%" }}>
-                <TouchableOpacity
-                  style={styles.iconCld}
-                  onPress={() => {
-                    setVisibleCalendar(false);
-                  }}
-                >
-                  <Icon name={"close"} size={40} color="black" />
-                </TouchableOpacity>
-                <Calendar
-                  onDayPress={(day) => {
-                    setSelecDate(day.dateString);
-                  }}
-                  markedDates={{
-                    [selecDate]: {
-                      selected: true,
-                      disableTouchEvent: true,
-                      selectedDotColor: "orange",
-                    },
-                  }}
-                />
-              </View>
+            <View style={styles.datePicker}>
+              <Text>{selecDate || "Chọn ngày"}</Text>
             </View>
-          </Modal>
-
-          <TextInput
-            style={styles.input}
-            value={selecDate}
-            editable={false}
-          ></TextInput>
+          </TouchableOpacity>
 
           <Text style={styles.label}>Ảnh</Text>
-
           <View style={styles.avatarContainer}>
             <TouchableOpacity onPress={pickImage}>
               <Image
@@ -169,19 +115,42 @@ export default function AddMember({ navigation, route }) {
               />
             </TouchableOpacity>
           </View>
+
           <Text style={styles.label}>Mô tả</Text>
-          <TextInput style={styles.input} onChangeText={setMota} value={mota} />
+          <TextInput
+            style={styles.input}
+            onChangeText={setMota}
+            value={mota}
+          />
         </ScrollView>
       </SafeAreaView>
+
+      <Modal visible={visibleCalendar} transparent={true} animationType="slide">
+        <View style={styles.modal}>
+          <View style={styles.calendarContainer}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setVisibleCalendar(false)}
+            >
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+            <Calendar
+              onDayPress={(day) => {
+                setSelecDate(day.dateString);
+                setVisibleCalendar(false);
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 10,
+    flex: 13,
     backgroundColor: "#fff",
-    marginTop: -20,
     padding: 16,
   },
   avatarContainer: {
@@ -207,22 +176,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 16,
   },
+  datePicker: {
+    marginBottom: 20,
+    padding: 15,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    alignItems: "flex-start",
+  },
+ 
+
   modal: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-
-  iconCld: {
+  calendarContainer: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  closeButton: {
     position: "absolute",
-    zIndex: 1000,
-    right: 0,
-    marginTop: -40,
+    top: 10,
+    right: 10,
+    backgroundColor: "red",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
   },
 });
 
-// Styles cho RNPickerSelect
 const pickerSelectStyles = {
   inputIOS: {
     color: "black",

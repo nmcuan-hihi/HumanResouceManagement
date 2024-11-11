@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Text } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Text, RefreshControl } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
 import BackNav from '../../Compoment/BackNav';
 import { readPhongBan1Firestore } from '../../services/PhongBanDatabase';
 import { filterEmployeesByPhongBan, filterEmployeesByGender, filterEmployeesByStatus, searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function EmployeeList({ navigation }) {
   const [employeeData, setEmployeeData] = useState([]);
@@ -15,35 +16,42 @@ export default function EmployeeList({ navigation }) {
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [phongBanList, setPhongBanList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await readEmployeesFireStore();
-        if (data && typeof data === 'object') {
-          const employeeArray = Object.keys(data).map((key) => ({
-            ...data[key],
-            manv: data[key].employeeId,
-          }));
-          setEmployeeData(employeeArray);
-          setFilteredData(employeeArray);
-        } else {
-          console.warn('Dữ liệu nhân viên không hợp lệ:', data);
-        }
-
-        const phongBans = await readPhongBan1Firestore();
-        if (phongBans) {
-          setPhongBanList(phongBans);
-        } else {
-          console.warn('Dữ liệu phòng ban không hợp lệ:', phongBans);
-        }
-      } catch (error) {
-        console.error('Lỗi khi fetching dữ liệu:', error);
+  // Move fetchData outside useFocusEffect
+  const fetchData = async () => {
+    setRefreshing(true);
+    try {
+      const data = await readEmployeesFireStore();
+      if (data && typeof data === 'object') {
+        const employeeArray = Object.keys(data).map((key) => ({
+          ...data[key],
+          manv: data[key].employeeId,
+        }));
+        setEmployeeData(employeeArray);
+        setFilteredData(employeeArray);
+      } else {
+        console.warn('Dữ liệu nhân viên không hợp lệ:', data);
       }
-    };
 
-    fetchData();
-  }, []);
+      const phongBans = await readPhongBan1Firestore();
+      if (phongBans) {
+        setPhongBanList(phongBans);
+      } else {
+        console.warn('Dữ liệu phòng ban không hợp lệ:', phongBans);
+      }
+    } catch (error) {
+      console.error('Lỗi khi fetching dữ liệu:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData(); // Call fetchData when the screen is focused
+    }, [])
+  );
 
   useEffect(() => {
     const applyFilters = async () => {
@@ -69,7 +77,7 @@ export default function EmployeeList({ navigation }) {
   }, [selectedPhongBan, selectedGender, selectedStatus, employeeData]);
 
   const handlePress = (item) => {
-    navigation.navigate('EmployeeDetail', { manv: item.manv, key : "inf" });
+    navigation.navigate('EmployeeDetail', { manv: item.manv, key: "inf" });
   };
 
   const handleAddEmployee = () => {
@@ -87,6 +95,10 @@ export default function EmployeeList({ navigation }) {
       }));
       setFilteredData(employeeArray);
     }
+  };
+
+  const onRefresh = async () => {
+    await fetchData(); // Call fetchData on refresh
   };
 
   return (
@@ -164,6 +176,9 @@ export default function EmployeeList({ navigation }) {
             </TouchableOpacity>
           )}
           keyExtractor={(item) => item.manv}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       </View>
     </>
