@@ -18,7 +18,7 @@ export default function AddMember({ navigation }) {
     name: '',
     diachi: '',
     sdt: '',
-    gioitinh: 'Nam', // Giá trị mặc định
+    gioitinh: 'Nam', 
     phongbanId: '', 
     chucvuId: '', 
     luongcoban: '',

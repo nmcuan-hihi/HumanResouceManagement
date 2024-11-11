@@ -43,6 +43,7 @@ import CccdScreen from './app/Screen/EmployeeScreen/CccdScreen';
 import ListChucVu from './app/Screen/ChucVuScreen/ChucVu';
 import ChucVuDetail from './app/Screen/ChucVuScreen/ChucVuDetail';
 import AddChucVu from './app/Screen/ChucVuScreen/AddChucVu';
+import DangKyNghiScreen from './app/Screen/NghiPhepScreen/DangKyNghiScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -58,8 +59,8 @@ export default function App() {
   return (
     <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Test" component={TestScreen} options={{ headerShown: false }} />
+      <Stack.Navigator initialRouteName="DangKyNghi">
+        <Stack.Screen name="DangKyNghi" component={DangKyNghiScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="UserTabNav" component={TabNavigation} options={{ headerShown: false }} />
