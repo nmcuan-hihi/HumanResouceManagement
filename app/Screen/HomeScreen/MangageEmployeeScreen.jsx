@@ -10,45 +10,56 @@ import {
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import Dashboard from "../../Compoment/Dashboard";
 import { readEmployees, readPhongBan } from "../../services/database";
+import { ref, onValue } from "firebase/database";
+import { database } from "../../config/firebaseconfig"; // Đảm bảo bạn có cấu hình Firebase ở đây
 
 const EmployeeScreen = ({ navigation, route }) => {
   const { employee } = route.params;
   const [listEmployeeMyPB, setListEmployeeMyPB] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
-
   const [listPhongBan, setListPhongBan] = useState([]);
+  const [pendingLeaveCount, setPendingLeaveCount] = useState(0); // Thêm state cho nghỉ phép chưa xác nhận
   const date = new Date();
 
   const navigateTo = (screen) => {
     navigation.navigate(screen);
   };
 
-  //lấy ds nhân viên
-
+  // Lấy danh sách nhân viên
   const getListNV = async () => {
     const data = await readEmployees();
-
     const dataArr = Object.values(data);
     setListEmployee(dataArr);
-    const newData = dataArr.filter((nv) => {
-      return nv.phongbanId == employee.phongbanId;
-    });
-
+    const newData = dataArr.filter((nv) => nv.phongbanId == employee.phongbanId);
     setListEmployeeMyPB(newData);
     console.log(newData);
   };
 
-  // lấy danh sách pb
-
+  // Lấy danh sách phòng ban
   const getListPB = async () => {
     const data = await readPhongBan();
-
     setListPhongBan(Object.values(data));
+  };
+
+  // Lấy số lượng nghỉ phép chưa xác nhận
+  const getPendingLeaveCount = () => {
+    const nghiPhepRef = ref(database, 'nghiPhep');
+    onValue(nghiPhepRef, (snapshot) => {
+      let count = 0;
+      snapshot.forEach((childSnapshot) => {
+        const leaveData = childSnapshot.val();
+        if (leaveData.trangThai === "0") {
+          count++;
+        }
+      });
+      setPendingLeaveCount(count);
+    });
   };
 
   useEffect(() => {
     getListNV();
     getListPB();
+    getPendingLeaveCount();
   }, []);
 
   return (
@@ -81,8 +92,9 @@ const EmployeeScreen = ({ navigation, route }) => {
             <StatItem
               icon="calendar-times-o"
               color="#2196F3"
-              value="0"
+              value={pendingLeaveCount} // Hiển thị số lượng nghỉ phép chưa duyệt
               label="Nghỉ phép"
+              onPress={() => navigateTo("DuyetNghiPhep")}
             />
             <StatItem icon="money" color="#FFC107" value="0" label="Lương" />
             <StatItem
@@ -100,6 +112,7 @@ const EmployeeScreen = ({ navigation, route }) => {
     </SafeAreaView>
   );
 };
+
 
 const StatItem = ({
   icon,

@@ -15,12 +15,15 @@ import { getEmployeeById } from "../../services/EmployeeFireBase";
 const database = getDatabase(app);
 
 export default function LoginScreen({ navigation }) {
-  const [employeeId, setEmployeeId] = useState("");
+  const [employeeId, setEmployeeId] = useState("NV008");
   const [password, setPassword] = useState(""); // Mock password input
 
+  
 
   const handleLogin = async () => {
+   
     if (!employeeId) {
+      
         Alert.alert("Error", "Please enter your employee ID.");
         return;
     }
@@ -66,6 +69,7 @@ export default function LoginScreen({ navigation }) {
         style={styles.input}
         placeholder="Employee ID"
         value={employeeId}
+        
         onChangeText={setEmployeeId}
       />
       <TextInput

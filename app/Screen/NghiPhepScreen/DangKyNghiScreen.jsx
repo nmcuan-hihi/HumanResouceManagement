@@ -1,20 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, Alert } from 'react-native';
 import { CheckBox } from '@rneui/themed';
 import BackNav from '../../Compoment/BackNav';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { dangKyNghiPhep } from '../../services/NghiPhepDB';
+import firebase from 'firebase/app';
+import 'firebase/database'; // Or use Firestore if necessary
+import { getPhongBanById } from '../../services/InfoDataLogin';
 
-export default function DangKyNghiScreen() {
+export default function DangKyNghiScreen({ route, navigation }) {
+  const { employee } = route.params; // Get employee info from route.params
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedStartDate, setSelectedStartDate] = useState(new Date());
   const [selectedEndDate, setSelectedEndDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState({ start: false, end: false });
   const [title, setTitle] = useState('');
   const [reason, setReason] = useState('');
+  const [phongBan, setPhongBan] = useState('');
 
-  // Hàm xử lý hiển thị DatePicker
+  useEffect(() => {
+    const fetchPhongBan = async () => {
+      try {
+        // Giả sử bạn có một hàm `getPhongBanById` lấy thông tin phòng ban
+        const tenPhongBan = await getPhongBanById(employee.phongbanId);
+        console.log("--------" + tenPhongBan.tenPhongBan)
+        setPhongBan(tenPhongBan.tenPhongBan);
+      } catch (error) {
+        console.error("Lỗi khi lấy phòng ban:", error);
+      }
+    };
+  
+    if (employee && employee.phongbanId) {
+      fetchPhongBan(); // Gọi hàm lấy tên phòng ban khi có ID phòng ban
+    }
+  }, [employee]); // Cập nhật lại khi `employee` thay đổi
+
   const handleDatePickerVisibility = (type) => {
     setShowDatePicker({
       start: type === 'start',
@@ -22,7 +43,6 @@ export default function DangKyNghiScreen() {
     });
   };
 
-  // Hàm thay đổi ngày
   const handleDateChange = (event, selectedDate, type) => {
     const currentDate = selectedDate || (type === 'start' ? selectedStartDate : selectedEndDate);
     setShowDatePicker({ start: false, end: false });
@@ -34,21 +54,24 @@ export default function DangKyNghiScreen() {
     }
   };
 
-  // Hàm gửi đơn nghỉ phép
   const handleSubmit = async () => {
     if (!title || !reason) {
       Alert.alert("Lỗi", "Vui lòng điền đầy đủ tiêu đề và lý do");
       return;
     }
 
+   
+
     const nghiPhepData = {
-      employeeId: "12345", // Thay thế ID của nhân viên thực tế
-      startDate: "11/12/2222",
-      endDate: "11/12/2222",
+      employeeId: employee.employeeId,
+      employeeName: employee.name, // Add employee name
+      department: phongBan, // Add department info
+      startDate: selectedStartDate.toLocaleDateString(),
+      endDate: selectedEndDate.toLocaleDateString(),
       title: title,
       reason: reason,
       type: selectedIndex === 0 ? "Có lương" : "Không lương",
-      status: "Chưa duyệt",
+      status: "0",
     };
 
     try {
@@ -61,37 +84,28 @@ export default function DangKyNghiScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <BackNav btn={"Gửi"} name={"Đăng Ký Nghỉ Phép"} onEditPress={handleSubmit} />
       </View>
 
-      {/* Date Selection */}
       <View style={styles.dateContainer}>
         <View style={styles.timeInputs}>
           <Text style={styles.timeLabel}>Từ ngày</Text>
-          <TouchableOpacity
-            style={styles.dateSelector}
-            onPress={() => handleDatePickerVisibility('start')}
-          >
-            <Text>{selectedStartDate.toLocaleDateString([], { day: '2-digit', month: 'long', year: 'numeric' })}</Text>
+          <TouchableOpacity style={styles.dateSelector} onPress={() => handleDatePickerVisibility('start')}>
+            <Text>{selectedStartDate.toLocaleDateString()}</Text>
             <Icon name="arrow-drop-down" size={24} color="black" />
           </TouchableOpacity>
         </View>
 
         <View style={styles.timeInputs}>
           <Text style={styles.timeLabel}>Đến ngày</Text>
-          <TouchableOpacity
-            style={styles.dateSelector}
-            onPress={() => handleDatePickerVisibility('end')}
-          >
-            <Text>{selectedEndDate.toLocaleDateString([], { day: '2-digit', month: 'long', year: 'numeric' })}</Text>
+          <TouchableOpacity style={styles.dateSelector} onPress={() => handleDatePickerVisibility('end')}>
+            <Text>{selectedEndDate.toLocaleDateString()}</Text>
             <Icon name="arrow-drop-down" size={24} color="black" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* CheckBox Options */}
       <View style={styles.checkboxContainer}>
         <CheckBox
           checked={selectedIndex === 0}
@@ -113,14 +127,8 @@ export default function DangKyNghiScreen() {
         />
       </View>
 
-      {/* Title and Reason Fields */}
       <Text>Tiêu đề</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nhập tiêu đề"
-        value={title}
-        onChangeText={setTitle}
-      />
+      <TextInput style={styles.input} placeholder="Nhập tiêu đề" value={title} onChangeText={setTitle} />
       <Text>Lý Do</Text>
       <TextInput
         style={styles.textArea}
@@ -130,7 +138,6 @@ export default function DangKyNghiScreen() {
         onChangeText={setReason}
       />
 
-      {/* Date Pickers */}
       {showDatePicker.start && (
         <DateTimePicker
           value={selectedStartDate}
