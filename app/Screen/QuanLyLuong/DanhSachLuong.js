@@ -11,118 +11,33 @@ import { Ionicons } from "@expo/vector-icons";
 import RNPickerSelect from "react-native-picker-select";
 
 import MonthSelector from "../../Compoment/SelectMonth_DSLuong";
-import { readPhongBan } from "../../services/database";
+import { readChucVu, readPhongBan } from "../../services/database";
 import { readEmployeesFireStore } from "../../services/EmployeeFireBase";
-
+import {
+  getCongThucLuong,
+  getChamCongDetailsByMonth,
+  getAllChamCongDetails,
+} from "../../services/quanLyMucLuongFirebase";
+import LoadingModal from "../../Compoment/modalLodading";
+import dayjs from "dayjs";
 const DanhSachLuong = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [phongBans, setPhongBans] = useState([]);
   const [listNV, setListNV] = useState([]);
   const [listLuong, setListLuong] = useState([]);
+  const [chucVuData, setChucVuData] = useState([]);
+  const [congThucLuong, setCongThucLuong] = useState([]);
 
+  const [dsChamCong, setDSChamCong] = useState([]);
 
-  const duLieuChamCong = [
-    {
-      ma_cham_cong: "NV001-2024-11-01",
-      employeeId: "NV001",
-      ngay_lam_viec: "2024-11-01",
-      gio_vao: "08:00",
-      gio_ra: "19:00",
-      gio_tang_ca: 2,
-      di_muon: 0,
-      vang_mat: 0,
-    },
-    {
-      ma_cham_cong: "NV002-2024-11-01",
-      employeeId: "NV002",
-      ngay_lam_viec: "2024-11-01",
-      gio_vao: "08:00",
-      gio_ra: "17:00",
-      gio_tang_ca: 0,
-      di_muon: 1,
-      vang_mat: 0,
-    },
-    {
-      ma_cham_cong: "NV001-2024-11-02",
-      employeeId: "NV001",
-      ngay_lam_viec: "2024-11-02",
-      gio_vao: "08:00",
-      gio_ra: "17:00",
-      gio_tang_ca: 0,
-      di_muon: 0,
-      vang_mat: 1,
-    },
-    {
-      ma_cham_cong: "NV002-2024-11-02",
-      employeeId: "NV002",
-      ngay_lam_viec: "2024-11-02",
-      gio_vao: "08:00",
-      gio_ra: "18:00",
-      gio_tang_ca: 1,
-      di_muon: 0,
-      vang_mat: 0,
-    },
-    {
-      ma_cham_cong: "NV002-2024-11-03",
-      employeeId: "NV002",
-      ngay_lam_viec: "2024-11-03",
-      gio_vao: "08:00",
-      gio_ra: "17:00",
-      gio_tang_ca: 0,
-      di_muon: 0,
-      vang_mat: 1,
-    },
-  ];
-
-  const luongTamTinh = () => {
-    const temporarySalaryData = [];
-  
-    const groupedData = duLieuChamCong.reduce((acc, chamcong) => {
-      const employeeId = chamcong.employeeId;
-      const month = chamcong.ngay_lam_viec.slice(0, 7); 
-  
-      if (!acc[employeeId]) {
-        acc[employeeId] = {
-          employeeId,
-          month,
-          workDays: 0,
-          totalOvertime: 0,
-        };
-      }
-      acc[employeeId].workDays += 1; 
-      acc[employeeId].totalOvertime += chamcong.gio_tang_ca;
-  
-      return acc;
-    }, {});
-  
-    for (const employeeId in groupedData) {
-      const { month, workDays, totalOvertime } = groupedData[employeeId];
-      
-      const salaryEntry = {
-        employeeId,
-        thang: month,
-        thucnhan: (workDays * 1000000 + totalOvertime * 500000).toString(), 
-        coban: "4500000", 
-        tangca: (totalOvertime * 500000).toString(),
-        phucap: "300000",
-        chuyencan: "500000", 
-        thamnien: "0", 
-      };
-  
-      temporarySalaryData.push(salaryEntry);
-    }
-    return temporarySalaryData;
-  };
-
-
-
+  const [visibleLoad, setVisibleLoad] = useState(true);
 
   const salaryData = [
     {
       employeeId: "NV001",
-      thang: "2024-10",
+      thang: "10-2024",
       thucnhan: "5800000",
-      coban: "4500000",
+      luong: "4500000",
       tangca: "500000",
       phucap: "300000",
       chuyencan: "500000",
@@ -130,15 +45,14 @@ const DanhSachLuong = () => {
     },
     {
       employeeId: "NV002",
-      thang: "2024-10",
+      thang: "10-2024",
       thucnhan: "6300000",
-      coban: "4500000",
+      luong: "4500000",
       tangca: "500000",
       phucap: "300000",
       chuyencan: "500000",
       thamnien: "500000",
     },
-   
   ];
 
   const fetchNhanVien = async () => {
@@ -148,6 +62,23 @@ const DanhSachLuong = () => {
       setListNV(employeeArray);
     } else {
       console.warn("Dữ liệu nhân viên không hợp lệ:", data);
+    }
+  };
+
+  const fetchDataChucvu = async () => {
+    try {
+      const data = await readChucVu();
+      if (data) {
+        const chucVuArray = Object.keys(data).map((key) => ({
+          ...data[key],
+          id: key,
+        }));
+        setChucVuData(chucVuArray);
+      } else {
+        setChucVuData([]); // No data
+      }
+    } catch (error) {
+    } finally {
     }
   };
 
@@ -166,19 +97,43 @@ const DanhSachLuong = () => {
     }
   };
 
+  const getCTL = async () => {
+    const data = await getCongThucLuong();
+    setCongThucLuong(data);
+  };
+
   useEffect(() => {
-    fetchNhanVien();
-    fetchPhongBan();
+    const fetchData = async () => {
+      setVisibleLoad(true);
+      try {
+        await Promise.all([
+          fetchNhanVien(),
+          fetchDataChucvu(),
+          fetchPhongBan(),
+          getCTL(),
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setVisibleLoad(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const renderSalaryItem = ({ item, index }) => {
-    const employee = listNV.find(emp => emp.id === item.employeeId);
-    const employeeName = employee ? employee.name : "Tên không tìm thấy";
+    const employee = listNV.find((emp) => emp.id === item.employeeId);
+    const employeeName = employee ? employee.name : "";
 
-    const workDays = duLieuChamCong.filter(chamCong => chamCong.ma_nhan_vien === item.employeeId).length;
-    const totalOvertime = duLieuChamCong
-      .filter(chamCong => chamCong.ma_nhan_vien === item.employeeId)
-      .reduce((total, chamCong) => total + (chamCong.gio_tang_ca || 0), 0);
+    const phongBan = phongBans.find((pb) => pb.value === employee.phongbanId);
+
+    const ngayCong = dsChamCong.filter(
+      (chamCong) => chamCong.employeeId === item.employeeId
+    ).length;
+    const totalOvertime = dsChamCong
+      .filter((chamCong) => chamCong.employeeId === item.employeeId)
+      .reduce((total, chamCong) => total + (chamCong?.tangca || 0), 0);
 
     return (
       <View
@@ -187,16 +142,34 @@ const DanhSachLuong = () => {
           { backgroundColor: index % 2 === 0 ? "#E8F5E9" : "#FFF3E0" },
         ]}
       >
+        <LoadingModal visible={visibleLoad} />
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={styles.name}>{item.employeeId}</Text>
-          <Text style={styles.name}>{employeeName}</Text>
-          <Text style={styles.date}>IT</Text>
+          <View style={{ width: "50%" }}>
+            <Text style={styles.name}>{employeeName}</Text>
+          </View>
+
+          <View style={{ width: "20%", paddingLeft: 3 }}>
+            <Text style={styles.name}>{item.employeeId}</Text>
+          </View>
+
+          <View style={{ width: "27%", alignItems: "flex-end" }}>
+            <Text style={styles.date}>{phongBan?.label}</Text>
+          </View>
         </View>
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between", width: '80%', alignItems: 'center' }}>
-          <Text style={styles.name}>{item.thucnhan}</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "80%",
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.tongTien}>
+            {item.thucnhan.toLocaleString("vi-VN") + " vnđ"}
+          </Text>
           <View>
-            <Text style={styles.date}>Ngày công: {workDays}</Text>
+            <Text style={styles.date}>Ngày công: {ngayCong}</Text>
             <Text style={styles.date}>Tăng ca: {totalOvertime} giờ</Text>
           </View>
         </View>
@@ -204,24 +177,96 @@ const DanhSachLuong = () => {
     );
   };
 
-
   const formatDateToYYYYMM = (date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}`;
+
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${month}-${year}`;
+  };
+
+  const luongTamTinh = (duLieuChamCong) => {
+    const temporarySalaryData = [];
+
+    const groupedData = duLieuChamCong.reduce((acc, chamcong) => {
+      const employeeId = chamcong.employeeId;
+      const dateTep = new Date(chamcong.month);
+
+      const month = formatDateToYYYYMM(dateTep);
+
+      if (!acc[employeeId]) {
+        acc[employeeId] = {
+          employeeId,
+          month,
+          ngayCong: 0,
+          totalOvertime: 0,
+        };
+      }
+      acc[employeeId].ngayCong += 1;
+      acc[employeeId].totalOvertime += chamcong?.tangCa ? chamcong?.tangCa : 0;
+
+      return acc;
+    }, {});
+
+    for (const employeeId in groupedData) {
+      const { month, ngayCong, totalOvertime } = groupedData[employeeId];
+      const nhanVien = listNV.find((emp) => emp.employeeId === employeeId);
+      const chucVu = chucVuData.find(
+        (cv) => cv.chucvu_id === nhanVien.chucvuId
+      );
+
+      const luongCoban = parseInt(congThucLuong.luongcoban * chucVu?.hschucvu);
+      const luong1Ngay = parseInt(luongCoban / 26);
+      const chuyenCan = ngayCong >= 26 ? congThucLuong.chuyencan : 0;
+      const phuCap = luongCoban * congThucLuong.hs_phucap;
+      const tangCa =
+        ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca;
+
+      const thucNhan = luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa;
+      const salaryEntry = {
+        employeeId,
+        thang: month,
+        thucnhan: thucNhan,
+        luong: luongCoban,
+        tangca: tangCa,
+        phucap: phuCap,
+        chuyencan: chuyenCan,
+        thamnien: "0",
+      };
+
+      temporarySalaryData.push(salaryEntry);
+
+      console.log(temporarySalaryData, "----------");
+    }
+    return temporarySalaryData;
+  };
+
+  const getChiTietCC = async () => {
+    setVisibleLoad(true);
+    const dataLuong = salaryData.filter(
+      (item) => item.thang === formatDateToYYYYMM(currentDate)
+    );
+
+    const dataChamcong = await getChamCongDetailsByMonth(
+      currentDate.getFullYear(),
+      currentDate.getMonth()
+    );
+    setDSChamCong(dataChamcong);
+    // Nếu không có dữ liệu, lấy dữ liệu tạm tính
+    const luongs =
+      dataLuong.length > 0 ? dataLuong : luongTamTinh(dataChamcong);
+    setListLuong(luongs);
+    setVisibleLoad(false);
   };
 
   useEffect(() => {
-    const dataLuong1 = salaryData.filter(item => item.thang === formatDateToYYYYMM(currentDate));
-    // Nếu không có dữ liệu, lấy dữ liệu tạm tính
-    const luongs = dataLuong1.length > 0 ? dataLuong1 : luongTamTinh().filter(item => item.thang == formatDateToYYYYMM(currentDate));
-    setListLuong(luongs)
-  },[currentDate])
+    getChiTietCC();
+  }, [currentDate]);
 
   // Filter salary data by selected month
-  
+
   return (
     <SafeAreaView style={styles.container}>
+      <LoadingModal visible={visibleLoad} />
       <View style={styles.header}>
         <TouchableOpacity>
           <Ionicons name="arrow-back" size={24} color="black" />
@@ -233,9 +278,7 @@ const DanhSachLuong = () => {
 
       <View style={{ width: 200 }}>
         <RNPickerSelect
-          onValueChange={(value) => {
-            console.log(value, "----");
-          }}
+          onValueChange={(value) => {}}
           items={phongBans}
           style={pickerSelectStyles}
         />
@@ -324,6 +367,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "gray",
   },
+  tongTien: { fontSize: 18, fontWeight: "500", marginBottom: 4 },
   amount: {
     fontSize: 16,
     fontWeight: "500",

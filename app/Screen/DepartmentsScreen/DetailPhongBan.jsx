@@ -197,7 +197,7 @@ export default function DetailPB({ navigation, route }) {
 
             {isEditing ? (
               <SelectList
-                placeholder={truongPhong.name}
+                placeholder={truongPhong?.name}
                 setSelected={(val) => {
                   setEditedMaTP(val);
 
@@ -207,7 +207,7 @@ export default function DetailPB({ navigation, route }) {
                 save="key"
               />
             ) : (
-              <Text style={styles.sectionTitle1}>{truongPhong.name}</Text>
+              <Text style={styles.sectionTitle1}>{truongPhong?.name}</Text>
             )}
           </View>
 

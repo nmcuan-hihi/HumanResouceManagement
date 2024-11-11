@@ -23,6 +23,8 @@ import {
 import ItemDepartment from "../../Compoment/ItemDepartment";
 import { useFocusEffect } from "@react-navigation/native";
 
+import LoadingModal from "../../Compoment/modalLodading";
+
 export default function PhongBanScreen({ navigation }) {
   const [phongBanData, setPhongBanData] = useState([]);
   const [employeeData, setEmployeeData] = useState([]);
@@ -35,6 +37,8 @@ export default function PhongBanScreen({ navigation }) {
   const [maPhongBan, setMaPhongBan] = useState("");
   const [tenPhongBan, setTenPhongBan] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+
+  const [visibleLoad, setVisibleLoad] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -50,12 +54,16 @@ export default function PhongBanScreen({ navigation }) {
         employeeID: dataEmp[key].employeeId,
       }));
 
-      const dataNV = dataEmpArray.filter((nv) => nv.chucvuId !== "TP" && nv.chucvuId !== "GD");
+      const dataNV = dataEmpArray.filter(
+        (nv) => nv.chucvuId !== "TP" && nv.chucvuId !== "GD"
+      );
 
       setEmployeeData(dataNV);
 
       const newData = phongBanArray.map((phongBan) => {
-        const employee = dataEmpArray.find((emp) => emp.employeeId === phongBan.maQuanLy);
+        const employee = dataEmpArray.find(
+          (emp) => emp.employeeId === phongBan.maQuanLy
+        );
         return {
           ...phongBan,
           tenTp: employee ? employee.name : "",
@@ -63,6 +71,8 @@ export default function PhongBanScreen({ navigation }) {
       });
 
       setPhongBanData(newData);
+      setVisibleLoad(false);
+
     } catch (error) {
       console.error("Lỗi khi đọc dữ liệu:", error);
     }
@@ -122,6 +132,7 @@ export default function PhongBanScreen({ navigation }) {
 
   return (
     <>
+      <LoadingModal visible={visibleLoad} />
       <BackNav
         navigation={navigation}
         name="Phòng ban"
