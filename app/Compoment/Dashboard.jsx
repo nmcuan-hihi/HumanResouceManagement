@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Import icon
 
 import { getPhongBanById } from "../services/InfoDataLogin";
+import { useNavigation } from "@react-navigation/native";
 
 const Dashboard = ({ listEmployee, employee }) => {
   const [phongBan, setPhongBan] = useState(null);
   const phongbanId = employee?.phongbanId;
-
+  const navigation = useNavigation();
   useEffect(() => {
     const fetchPhongBan = async () => {
       if (phongbanId) {
@@ -68,11 +69,16 @@ const Dashboard = ({ listEmployee, employee }) => {
       </View>
 
       {/* Nút chức năng */}
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button}
+      
+      >
         <Text style={styles.buttonText}>Chấm công của bạn</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button}
+      onPress={()=>{
+        navigation.navigate("DangKyNghi", { employee: employee }); 
+      }}>
         <Text style={styles.buttonText}>Đăng ký nghỉ phép</Text>
       </TouchableOpacity>
     </View>
