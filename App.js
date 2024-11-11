@@ -29,6 +29,7 @@ import DashboardGD from './app/Compoment/DashboardGD';
 import HomeScreenGD from './app/Screen/HomeScreen/HomeScreenGD';
 import NotificeScreen from './app/Screen/NotificeScreen/NotificeScreen';
 import QuanLyMucLuong from './app/Screen/QuanLyLuong/QuanLyMucLuong';
+import ChiTietBangLuong from './app/Screen/QuanLyLuong/SalaryDetailScreen';
 import DanhSachSkill from './app/Screen/BangCapScreen/Skill';
 import DetailSkill from './app/Screen/BangCapScreen/DetailSkill';
 
@@ -70,7 +71,7 @@ export default function App() {
         <Stack.Screen name="DetailBangCap" component={DetailBangCap} options={{ headerShown: false }} />
 
         <Stack.Screen name="QuanLyMucLuong" component={QuanLyMucLuong} options={{ headerShown: false }} />
- 
+        <Stack.Screen name="ChiTietBangLuong" component={ChiTietBangLuong} options={{ headerShown: false }} />
 
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
         <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />

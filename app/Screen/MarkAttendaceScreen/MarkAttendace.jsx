@@ -20,7 +20,7 @@ export default function ChammCong({ navigation, route }) {
 
   const date = new Date();
   const handlePress = () => {
-    navigation.navigate("ChamCongNV"); // Điều hướng đến màn hình chấm công
+    navigation.navigate("ChiTietBangLuong"); // Điều hướng đến màn hình chấm công
   };
 
   //lấy ds nhân viên
