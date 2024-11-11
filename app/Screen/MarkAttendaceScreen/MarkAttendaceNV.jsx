@@ -7,6 +7,7 @@ import { Button } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { readPhongBan1Firestore } from '../../services/PhongBanDatabase';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
+import { addChiTietChamCongToFireStore } from '../../services/chamcong';  // Import your Firestore function for adding attendance
 
 export default function ChamCongNV() {
   const [timeIn, setTimeIn] = useState(new Date());
@@ -50,11 +51,13 @@ export default function ChamCongNV() {
     fetchEmployees();
     fetchPhongBan();
   }, []);
+
   useEffect(() => {
     if (valuePhongBan) {
       handleFilterEmployeesByPhongBan(valuePhongBan);
     }
   }, [valuePhongBan]);
+
   const handleFilterEmployeesByPhongBan = async (phongbanId) => {
     try {
       const filteredEmployees = await filterEmployeesByPhongBan(phongbanId);
@@ -114,6 +117,37 @@ export default function ChamCongNV() {
     value: pban.maPhongBan,
   }));
 
+  const handleSaveAttendance = async () => {
+    try {
+      // Lọc ra danh sách nhân viên đã được "check"
+      const selectedEmployees = employees.filter(employee => employee.trangthai === 'checked');
+  
+      // Nếu không có nhân viên nào được chọn, thông báo lỗi
+      if (selectedEmployees.length === 0) {
+        alert('Vui lòng chọn ít nhất một nhân viên để chấm công');
+        return;
+      }
+  
+      // Thêm thông tin chấm công cho những nhân viên đã được chọn
+      const attendanceData = selectedEmployees.map(employee => ({
+        employeeId: employee.employeeId,
+        timeIn,
+        timeOut,
+        status: valueStatus,  // Trạng thái công việc
+        month: selectedMonth,
+      }));
+  
+      // Lưu dữ liệu chấm công cho mỗi nhân viên
+      for (const data of attendanceData) {
+        await addChiTietChamCongToFireStore(data);  // Hàm lưu dữ liệu vào Firestore
+      }
+      alert('Chấm công thành công!');
+    } catch (error) {
+      console.error("Error saving attendance:", error);
+    }
+  };
+  
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header Section */}
@@ -122,7 +156,7 @@ export default function ChamCongNV() {
           <Icon name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chấm công</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleSaveAttendance}>
           <Text style={styles.saveButton}>Lưu</Text>
         </TouchableOpacity>
       </View>
@@ -217,7 +251,7 @@ export default function ChamCongNV() {
         <DateTimePicker
           value={timeIn}
           mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display="default"
           onChange={(event, date) => handleTimeChange(event, date, 'timeIn')}
         />
       )}
@@ -226,7 +260,7 @@ export default function ChamCongNV() {
         <DateTimePicker
           value={timeOut}
           mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display="default"
           onChange={(event, date) => handleTimeChange(event, date, 'timeOut')}
         />
       )}
@@ -235,13 +269,14 @@ export default function ChamCongNV() {
         <DateTimePicker
           value={selectedMonth}
           mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display="default"
           onChange={handleMonthChange}
         />
       )}
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -365,4 +400,3 @@ const styles = StyleSheet.create({
   },selectAllContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#e0e0e0' },
   selectAllText: { fontSize: 16 },
 });
-
