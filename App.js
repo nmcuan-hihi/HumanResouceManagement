@@ -45,6 +45,9 @@ import ChucVuDetail from './app/Screen/ChucVuScreen/ChucVuDetail';
 import AddChucVu from './app/Screen/ChucVuScreen/AddChucVu';
 import DetailBangCapNhanVien from './app/Screen/EmployeeScreen/BangCapNVDetail';
 
+import DanhSachLuong from './app/Screen/QuanLyLuong/DanhSachLuong'
+
+
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -59,7 +62,7 @@ export default function App() {
   return (
     <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="DanhSachLuong">
         <Stack.Screen name="Test" component={TestScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
@@ -97,8 +100,10 @@ export default function App() {
         <Stack.Screen name="EditMatKhau" component={EditMatKhau} options={{ headerShown: false }} />
         <Stack.Screen name="ThemBangCapNV" component={ThemBangCapNV} options={{ headerShown: false }} />
         <Stack.Screen name="ThemSkillNV" component={ThemSkillNV} options={{ headerShown: false }} />
-        <Stack.Screen name="DetailBangCapNV" component={DetailBangCapNhanVien} options={{ headerShown: false }} />
+        <Stack.Screen name="DetailBangCapNV" component={DetailBangCapNhanVien} options={{ headerShown: false }}/>
      
+        <Stack.Screen name="DanhSachLuong" component={DanhSachLuong} options={{ headerShown: false }}/>
+
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />
