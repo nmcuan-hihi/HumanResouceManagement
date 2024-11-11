@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableO
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
-import TimeChamCong from '../../Compoment/Time';
 
 export default function ChamCongNV() {
   const [timeIn, setTimeIn] = useState(new Date());
@@ -33,6 +32,11 @@ export default function ChamCongNV() {
     type === 'timeIn' ? setTimeIn(currentDate) : setTimeOut(currentDate);
   };
 
+  const handleMonthChange = (event, selectedDate) => {
+    const currentDate = selectedDate || selectedMonth;
+    setShowTimePicker(prev => ({ ...prev, month: Platform.OS === 'ios' && false }));
+    setSelectedMonth(currentDate);
+  };
   const handleTimePickerVisibility = (type) => {
     setShowTimePicker({
       timeIn: type === 'timeIn',
@@ -57,7 +61,10 @@ export default function ChamCongNV() {
       <View style={styles.timeSection}>
         <View style={styles.timeInputs} >
           <Text style={styles.timeLabel}>Thời gian</Text>
-         <TimeChamCong/>
+          <TouchableOpacity style={styles.monthSelector} onPress={() => handleTimePickerVisibility('month')}>
+            <Text>{selectedMonth.toLocaleDateString([], { day: '2-digit', month: 'long', year: 'numeric' })}</Text>
+            <Icon name="arrow-drop-down" size={24} color="black" />
+          </TouchableOpacity>
 
         </View>
         <View style={styles.timeInputs}>
