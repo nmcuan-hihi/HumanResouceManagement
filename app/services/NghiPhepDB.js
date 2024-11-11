@@ -1,6 +1,6 @@
 // app/services/NghiPhepDB.js
 import { database } from '../config/firebaseconfig';
-import { ref, push, set, get } from 'firebase/database';
+import { ref, push, set, get, update } from 'firebase/database';
 
 // Hàm để đăng ký nghỉ phép
 export async function dangKyNghiPhep(nghiPhepData) {
@@ -61,5 +61,22 @@ export async function layDanhSachNghiPhep() {
   } catch (error) {
     console.error('Lỗi khi lấy dữ liệu nghỉ phép:', error);
     return { success: false, message: 'Lỗi khi lấy dữ liệu nghỉ phép.', error };
+  }
+}
+
+
+// Hàm để duyệt hoặc hủy yêu cầu nghỉ phép
+export async function duyetNghiPhep(id, status) {
+  try {
+    // Tạo reference đến yêu cầu nghỉ phép cụ thể trong database
+    const nghiPhepRef = ref(database, `nghiPhep/${id}`);
+
+    // Cập nhật trạng thái của yêu cầu nghỉ phép
+    await update(nghiPhepRef, { trangThai: status });
+
+    return { success: true, message: 'Cập nhật trạng thái thành công!' };
+  } catch (error) {
+    console.error('Lỗi khi cập nhật trạng thái nghỉ phép:', error);
+    return { success: false, message: 'Cập nhật trạng thái thất bại.', error };
   }
 }

@@ -8,6 +8,7 @@ import { ref, onValue } from "firebase/database"; // Import các phương thức
 export default function DuyetNghiPhep({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [nghiPhepData, setNghiPhepData] = useState([]);
+  const [filter, setFilter] = useState(0); // State to manage the filter
 
   // Hàm lấy dữ liệu nghỉ phép
   const fetchData = async () => {
@@ -48,17 +49,31 @@ export default function DuyetNghiPhep({ navigation }) {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
 
+  const filteredData = nghiPhepData.filter(item => item.trangThai == filter);
+
   return (
     <>
       <BackNav navigation={navigation} name="Duyệt Nghỉ Phép" />
       <View style={styles.container}>
+        <View style={styles.filterContainer}>
+          <TouchableOpacity style={[styles.filterButton, filter === 0 && styles.activeNewButton]} onPress={() => setFilter(0)}>
+            <Text style={styles.filterText}>Mới</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.filterButton, filter === 1 && styles.activeApprovedButton]} onPress={() => setFilter(1)}>
+            <Text style={styles.filterText}>Đã duyệt</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.filterButton, filter === -1 && styles.activeCancelledButton]} onPress={() => setFilter(-1)}>
+            <Text style={styles.filterText}>Hủy</Text>
+          </TouchableOpacity>
+        </View>
         <FlatList
-          data={nghiPhepData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))} // Sắp xếp dữ liệu theo thứ tự ngược lại
+          data={filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))} // Sắp xếp dữ liệu theo thứ tự ngược lại
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => {
             const numberOfDaysOff = calculateDaysOff(item.ngayBatDau, item.ngayKetThuc);
+            const itemStyle = item.trangThai == "1" ? styles.approvedItem : item.trangThai === "-1" ? styles.cancelledItem : styles.newItem;
             return (
-              <TouchableOpacity style={styles.itemContainer}
+              <TouchableOpacity style={[styles.itemContainer, itemStyle]}
               onPress={()=>{
                 navigation.navigate("ChiTietNghiPhep", {nghiPhepData: item})
               }}
@@ -83,11 +98,44 @@ const styles = StyleSheet.create({
     flex: 13,
     backgroundColor: '#fff',
   },
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+  },
+  filterButton: {
+    width: "25%",
+    alignItems: "center",
+    padding: 5,
+    borderRadius: 5,
+    backgroundColor: '#d3d3d3',
+  },
+  activeNewButton: {
+    backgroundColor: '#4682b4',
+  },
+  activeApprovedButton: {
+    backgroundColor: '#90ee90', // Light green for approved
+  },
+  activeCancelledButton: {
+    backgroundColor: '#ffd700', // Yellow for cancelled
+  },
+  filterText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   itemContainer: {
-    backgroundColor: '#f0f8ff',
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
+  },
+  newItem: {
+    backgroundColor: '#f0f8ff',
+  },
+  approvedItem: {
+    backgroundColor: '#90ee90', // Light green for approved
+  },
+  cancelledItem: {
+    backgroundColor: '#ffd300', // Yellow for cancelled
   },
   textEmployeeName: {
     fontSize: 16,
