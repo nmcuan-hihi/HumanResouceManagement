@@ -45,8 +45,12 @@ export const addChiTietChamCongToFireStore = async (attendanceData) => {
 
     // Lấy mã lương tháng từ tháng của thời gian chấm công
     const maLuongThang = new Date(timeIn).getMonth() + 1;  // Lấy tháng từ timeIn (0-indexed)
+    console.log('timein', month);
     console.log('Mã lương tháng:', maLuongThang);
-
+    const yea = new Date(month).getFullYear();
+    console.log('Năm', yea);
+    const day = new Date(month).getDate();
+    console.log('ngay', day);
     // Lấy mã chấm công tự động tăng
     const maChamCong = await getNextChamCongCode();
     if (!maChamCong) {
@@ -56,7 +60,7 @@ export const addChiTietChamCongToFireStore = async (attendanceData) => {
     console.log('Mã chấm công:', maChamCong);
 
     // Thêm chi tiết chấm công vào Firestore
-    await setDoc(doc(firestore, "chitietchamcong", maChamCong), {
+    await setDoc(doc(firestore, "chitietchamcong", employeeId+"-"+day+"-"+maLuongThang+"-"+yea), {
       employeeId: employeeId,
       timeIn: Timestamp.fromDate(new Date(timeIn)),  // Chuyển đổi thời gian vào thành Timestamp
       timeOut: Timestamp.fromDate(new Date(timeOut)),
