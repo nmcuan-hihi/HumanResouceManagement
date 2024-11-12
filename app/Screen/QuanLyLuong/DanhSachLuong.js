@@ -10,6 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
+import DropDownPicker from "react-native-dropdown-picker";
 
 import RNPickerSelect from "react-native-picker-select";
 
@@ -46,6 +47,10 @@ const DanhSachLuong = ({ navigation }) => {
   const [searchPB, setSearchPB] = useState();
   const [listSearchByPb, setListSearchByPb] = useState([]);
   const [listSearch, setListSearch] = useState([]);
+
+  const [open, setOpen] = useState(false);
+
+  const [itemsPB, setItemsPV] = useState([]);
 
   const fetchNhanVien = async () => {
     const data = await readEmployeesFireStore();
@@ -424,23 +429,25 @@ const DanhSachLuong = ({ navigation }) => {
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
+          margin: 16,
           alignItems: "center",
         }}
       >
         <View style={{ width: 200 }}>
-          <RNPickerSelect
-            onValueChange={(value) => {
-              setSearchPB(value);
-            }}
+          <DropDownPicker
+            open={open}
+            value={searchPB}
             items={[{ label: "Tất cả", value: "all" }, ...phongBans]}
-            style={pickerSelectStyles}
+            setOpen={setOpen}
+            setValue={setSearchPB}
+            placeholder={"Chọn phòng ban"}
           />
         </View>
         <TouchableOpacity
           onPress={() => {
             xuatBangLuongExcel(listSearch);
           }}
-          style={{ padding: 10, marginBottom: 10, marginRight: 20 }}
+          style={{ padding: 10, marginRight: 20 }}
         >
           <AntDesign name="exclefile1" size={30} color="orange" />
         </TouchableOpacity>
@@ -514,7 +521,6 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: "#F5F5F5",
     borderRadius: 8,
-    marginTop: -10,
     marginBottom: 10,
   },
   searchPlaceholder: {
