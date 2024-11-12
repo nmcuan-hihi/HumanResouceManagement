@@ -5,8 +5,6 @@ import BackNav from '../../Compoment/BackNav';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { dangKyNghiPhep } from '../../services/NghiPhepDB';
-import firebase from 'firebase/app';
-import 'firebase/database'; // Or use Firestore if necessary
 import { getPhongBanById } from '../../services/InfoDataLogin';
 
 export default function DangKyNghiScreen({ route, navigation }) {
@@ -22,9 +20,7 @@ export default function DangKyNghiScreen({ route, navigation }) {
   useEffect(() => {
     const fetchPhongBan = async () => {
       try {
-        // Giả sử bạn có một hàm `getPhongBanById` lấy thông tin phòng ban
         const tenPhongBan = await getPhongBanById(employee.phongbanId);
-        console.log("--------" + tenPhongBan.tenPhongBan)
         setPhongBan(tenPhongBan.tenPhongBan);
       } catch (error) {
         console.error("Lỗi khi lấy phòng ban:", error);
@@ -32,9 +28,9 @@ export default function DangKyNghiScreen({ route, navigation }) {
     };
   
     if (employee && employee.phongbanId) {
-      fetchPhongBan(); // Gọi hàm lấy tên phòng ban khi có ID phòng ban
+      fetchPhongBan();
     }
-  }, [employee]); // Cập nhật lại khi `employee` thay đổi
+  }, [employee]);
 
   const handleDatePickerVisibility = (type) => {
     setShowDatePicker({
@@ -43,14 +39,43 @@ export default function DangKyNghiScreen({ route, navigation }) {
     });
   };
 
+  const validateDates = (startDate, endDate) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Đặt thời gian của ngày hôm nay về 0:00:00
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0); // Đặt thời gian của ngày bắt đầu về 0:00:00
+    const end = new Date(endDate);
+    end.setHours(0, 0, 0, 0); // Đặt thời gian của ngày kết thúc về 0:00:00
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    if (start < today) {
+      Alert.alert("Lỗi", "Ngày bắt đầu phải lớn hơn hoặc bằng hôm nay");
+      return false;
+    }
+    if (end < start) {
+      Alert.alert("Lỗi", "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu");
+      return false;
+    }
+    if (diffDays > 30) {
+      Alert.alert("Lỗi", "Tổng số ngày nghỉ không được quá 30 ngày");
+      return false;
+    }
+    return true;
+  };
+
   const handleDateChange = (event, selectedDate, type) => {
     const currentDate = selectedDate || (type === 'start' ? selectedStartDate : selectedEndDate);
     setShowDatePicker({ start: false, end: false });
-    
+
     if (type === 'start') {
-      setSelectedStartDate(currentDate);
+      if (validateDates(currentDate, selectedEndDate)) {
+        setSelectedStartDate(currentDate);
+      }
     } else {
-      setSelectedEndDate(currentDate);
+      if (validateDates(selectedStartDate, currentDate)) {
+        setSelectedEndDate(currentDate);
+      }
     }
   };
 
@@ -60,12 +85,14 @@ export default function DangKyNghiScreen({ route, navigation }) {
       return;
     }
 
-   
+    if (!validateDates(selectedStartDate, selectedEndDate)) {
+      return;
+    }
 
     const nghiPhepData = {
       employeeId: employee.employeeId,
-      employeeName: employee.name, // Add employee name
-      department: phongBan, // Add department info
+      employeeName: employee.name,
+      department: phongBan,
       startDate: selectedStartDate.toLocaleDateString(),
       endDate: selectedEndDate.toLocaleDateString(),
       title: title,

@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
     width: "25%",
     alignItems: "center",
     padding: 5,
-    borderRadius: 5,
     backgroundColor: '#d3d3d3',
   },
   activeNewButton: {
@@ -120,12 +119,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffd700', // Yellow for cancelled
   },
   filterText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: 'bold',
   },
   itemContainer: {
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 4,
     marginBottom: 10,
   },
   newItem: {
