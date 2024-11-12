@@ -3,23 +3,26 @@ import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity } from
 import { Ionicons } from '@expo/vector-icons';
 
 const MonthSelector = ({ currentDate, onChangeMonth }) => {
+  // Ensure currentDate is a valid Date object
+  const validDate = currentDate instanceof Date && !isNaN(currentDate) ? currentDate : new Date();
+
   const handlePreviousMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(currentDate.getMonth() - 1);
+    const newDate = new Date(validDate);
+    newDate.setMonth(validDate.getMonth() - 1);
     onChangeMonth(newDate);
   };
 
   const handleNextMonth = () => {
-    const newDate = new Date(currentDate);
+    const newDate = new Date(validDate);
     if (newDate.getMonth() < new Date().getMonth() || newDate.getFullYear() < new Date().getFullYear()) {
-      newDate.setMonth(currentDate.getMonth() + 1);
+      newDate.setMonth(validDate.getMonth() + 1);
       onChangeMonth(newDate);
     }
   };
 
   const getCurrentMonthYear = () => {
     const options = { month: 'long', year: 'numeric' };
-    return currentDate.toLocaleDateString('vi-VN', options);
+    return validDate.toLocaleDateString('vi-VN', options);
   };
 
   return (
@@ -35,27 +38,23 @@ const MonthSelector = ({ currentDate, onChangeMonth }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
-  
-    monthSelector: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 10,
-      borderRadius: 10,
-      marginHorizontal: 15,
-      backgroundColor: '#FFC727',
-    },
-    chevronIcon: {
-      marginHorizontal: 20,
-    },
-    monthText: {
-      fontSize: 16,
-      fontWeight: '500',
-    },
-  
-  });
-
+  monthSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 10,
+    marginHorizontal: 15,
+    backgroundColor: '#FFC727',
+  },
+  chevronIcon: {
+    marginHorizontal: 20,
+  },
+  monthText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+});
 
 export default MonthSelector;

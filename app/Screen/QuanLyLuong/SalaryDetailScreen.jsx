@@ -1,26 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Platform, View, Text, Image, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import MonthSelector from '../../Compoment/SelectMonth_DSLuong';
-export default function SalaryDetailScreen({ navigation }) {
-  const [currentMonth, setCurrentMonth] = useState(new Date()); // May 2024
-  const [salaryData] = useState({
-    employeeId: 'E002',
-    employeeName: 'Rahul Kumar',
-    totalIncome: 10000000,
-    deductions: 500000,
-    netIncome: 9500000,
-  });
-  
-  // Sample timekeeping data
-  const [timekeepingData] = useState([
-    { date: '2024-05-01', checkIn: '09:00', checkOut: '18:00', hours: 8 },
-    { date: '2024-05-02', checkIn: '09:00', checkOut: '17:30', hours: 7.5 },
-    { date: '2024-05-03', checkIn: '09:15', checkOut: '18:00', hours: 7.75 },
-    // Additional entries as needed
-  ]);
+import { getEmployeeById } from '../../services/EmployeeFireBase';
+
+const SalaryDetailScreen = ({ route, navigation }) => {
+  const { salaryData, timekeepingData } = route.params;
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [employeeName, setEmployeeName] = useState(salaryData?.name || ''); // Sử dụng tên mặc định nếu không có
+
+  useEffect(() => {
+    // Fetch employee data if employeeId is provided and salaryData is valid
+    if (salaryData?.employeeId) {
+      getEmployeeById(salaryData.employeeId)
+        .then((employee) => {
+          if (employee) {
+            setEmployeeName(employee.name); // Update the name with data from Firestore
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching employee name:", error);
+        });
+    }
+  }, [salaryData?.employeeId]);
 
   const formatCurrency = (amount) => {
+    if (amount === undefined || amount === null) return '0 đ';
     return amount.toLocaleString('vi-VN') + ' đ';
   };
 
@@ -42,11 +47,15 @@ export default function SalaryDetailScreen({ navigation }) {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chi tiết BL</Text>
         </View>
-        <View  style={styles.headerLogo} />
       </View>
 
       {/* Month Selector */}
-      <MonthSelector currentDate={currentMonth} onChangeMonth={setCurrentMonth} />
+      <MonthSelector
+        currentMonth={currentMonth}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+      />
+
       {/* Employee Info */}
       <View style={styles.employeeCard}>
         <View style={styles.employeeInfo}>
@@ -54,8 +63,8 @@ export default function SalaryDetailScreen({ navigation }) {
             <Image source={{ uri: 'https://via.placeholder.com/40' }} style={styles.avatar} />
           </View>
           <View>
-            <Text style={styles.employeeId}>{salaryData.employeeId}</Text>
-            <Text style={styles.employeeName}>{salaryData.employeeName}</Text>
+            <Text style={styles.employeeId}>{salaryData?.employeeId}</Text>
+            <Text style={styles.employeeName}>{employeeName}</Text>
           </View>
         </View>
       </View>
@@ -65,40 +74,42 @@ export default function SalaryDetailScreen({ navigation }) {
         <View style={styles.salarySection}>
           <View style={styles.salaryRow}>
             <Text style={styles.labelText}>Tổng thu nhập</Text>
-            <Text style={styles.valueText}>{formatCurrency(salaryData.totalIncome)}</Text>
+            <Text style={styles.valueText}>{formatCurrency(salaryData.luong)}</Text>
           </View>
           <View style={styles.salaryRow}>
             <Text style={styles.labelText}>Khấu trừ</Text>
-            <Text style={styles.deductionText}>-{formatCurrency(salaryData.deductions)}</Text>
+            <Text style={styles.deductionText}>-{formatCurrency(salaryData.phucap)}</Text>
           </View>
           <View style={styles.salaryRow}>
             <Text style={styles.labelText}>Thực nhận</Text>
-            <Text style={styles.netIncomeText}>{formatCurrency(salaryData.netIncome)}</Text>
+            <Text style={styles.netIncomeText}>{formatCurrency(salaryData.luongthuc)}</Text>
           </View>
         </View>
 
         {/* Timekeeping Table */}
-        <View style={styles.timekeepingSection}>
-          <Text style={styles.sectionTitle}>Giờ chấm công</Text>
-          <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderText}>Ngày</Text>
-            <Text style={styles.tableHeaderText}>Giờ vào</Text>
-            <Text style={styles.tableHeaderText}>Giờ ra</Text>
-            <Text style={styles.tableHeaderText}>Số giờ</Text>
-          </View>
-          {timekeepingData.map((entry, index) => (
-            <View key={index} style={styles.tableRow}>
-              <Text style={styles.tableCell}>{entry.date}</Text>
-              <Text style={styles.tableCell}>{entry.checkIn}</Text>
-              <Text style={styles.tableCell}>{entry.checkOut}</Text>
-              <Text style={styles.tableCell}>{entry.hours}</Text>
+        {timekeepingData?.length > 0 && (
+          <View style={styles.timekeepingSection}>
+            <Text style={styles.sectionTitle}>Giờ chấm công</Text>
+            <View style={styles.tableHeader}>
+              <Text style={styles.tableHeaderText}>Ngày</Text>
+              <Text style={styles.tableHeaderText}>Giờ vào</Text>
+              <Text style={styles.tableHeaderText}>Giờ ra</Text>
+              <Text style={styles.tableHeaderText}>Số giờ</Text>
             </View>
-          ))}
-        </View>
+            {timekeepingData.map((entry, index) => (
+              <View key={index} style={styles.tableRow}>
+                <Text style={styles.tableCell}>{entry.date}</Text>
+                <Text style={styles.tableCell}>{entry.checkIn}</Text>
+                <Text style={styles.tableCell}>{entry.checkOut}</Text>
+                <Text style={styles.tableCell}>{entry.hours}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -123,44 +134,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
   },
-  headerLogo: {
-    width: 24,
-    height: 24,
-    backgroundColor: '#2563EB',
-    borderRadius: 2,
-  },
-  monthSelectorContainer: {
-    margin: 16,
-  },
-  monthSelector: {
-    backgroundColor: '#FCD34D',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  monthText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
   employeeCard: {
     marginHorizontal: 16,
     marginBottom: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
   },
   employeeInfo: {
     flexDirection: 'row',
@@ -190,17 +168,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
   },
   salarySection: {
     padding: 16,
@@ -226,25 +193,6 @@ const styles = StyleSheet.create({
   netIncomeText: {
     fontWeight: '500',
     color: '#059669',
-  },
-  deductionSection: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontWeight: '500',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  deductionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-  },
-  deductionLabel: {
-    color: '#4B5563',
-  },
-  deductionAmount: {
-    color: '#111827',
   },
   timekeepingSection: {
     padding: 16,
@@ -279,3 +227,4 @@ const styles = StyleSheet.create({
   },
 });
 
+export default SalaryDetailScreen;

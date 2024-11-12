@@ -16,20 +16,17 @@ import { readEmployeesFireStore } from "../../services/EmployeeFireBase";
 import {
   getCongThucLuong,
   getChamCongDetailsByMonth,
-  getAllChamCongDetails,
 } from "../../services/quanLyMucLuongFirebase";
-import LoadingModal from "../../Compoment/ViewLoading";
-import dayjs from "dayjs";
-const DanhSachLuong = () => {
+import LoadingModal from "../../Compoment/LoadingModal";
+
+const DanhSachLuong = ({ navigation }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [phongBans, setPhongBans] = useState([]);
   const [listNV, setListNV] = useState([]);
   const [listLuong, setListLuong] = useState([]);
   const [chucVuData, setChucVuData] = useState([]);
   const [congThucLuong, setCongThucLuong] = useState([]);
-
   const [dsChamCong, setDSChamCong] = useState([]);
-
   const [visibleLoad, setVisibleLoad] = useState(true);
 
   const salaryData = [
@@ -58,29 +55,33 @@ const DanhSachLuong = () => {
   const fetchNhanVien = async () => {
     const data = await readEmployeesFireStore();
     if (data) {
-      const employeeArray = Object.values(data);
-      setListNV(employeeArray);
+       const employeeArray = Object.values(data).map((emp) => ({
+          id: emp.employeeId, // Ensure there's an id or employeeId field
+          name: emp.name,
+          phongbanId: emp.phongbanId, // Assuming this field exists
+       }));
+       setListNV(employeeArray);
     } else {
-      console.warn("Dữ liệu nhân viên không hợp lệ:", data);
+       console.warn("Dữ liệu nhân viên không hợp lệ:", data);
     }
-  };
+ };
 
-  const fetchDataChucvu = async () => {
-    try {
-      const data = await readChucVu();
-      if (data) {
-        const chucVuArray = Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }));
-        setChucVuData(chucVuArray);
-      } else {
-        setChucVuData([]); // No data
-      }
-    } catch (error) {
-    } finally {
+ const fetchDataChucvu = async () => {
+  try {
+    const data = await readChucVu();
+    if (data) {
+      const chucVuArray = Object.keys(data).map((key) => ({
+        ...data[key],
+        id: key,
+      }));
+      setChucVuData(chucVuArray);
+    } else {
+      setChucVuData([]); // No data
     }
-  };
+  } catch (error) {
+  } finally {
+  }
+};
 
   const fetchPhongBan = async () => {
     try {
@@ -136,50 +137,53 @@ const DanhSachLuong = () => {
       .reduce((total, chamCong) => total + (chamCong?.tangca || 0), 0);
 
     return (
-      <View
-        style={[
-          styles.salaryItem,
-          { backgroundColor: index % 2 === 0 ? "#E8F5E9" : "#FFF3E0" },
-        ]}
+      <TouchableOpacity
+        onPress={() => navigation.navigate("ChiTietBangLuong", { item })}
       >
-        <LoadingModal visible={visibleLoad} />
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <View style={{ width: "50%" }}>
-            <Text style={styles.name}>{employeeName}</Text>
-          </View>
-
-          <View style={{ width: "20%", paddingLeft: 3 }}>
-            <Text style={styles.name}>{item.employeeId}</Text>
-          </View>
-
-          <View style={{ width: "27%", alignItems: "flex-end" }}>
-            <Text style={styles.date}>{phongBan?.label}</Text>
-          </View>
-        </View>
-
         <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: "80%",
-            alignItems: "center",
-          }}
+          style={[
+            styles.salaryItem,
+            { backgroundColor: index % 2 === 0 ? "#E8F5E9" : "#FFF3E0" },
+          ]}
         >
-          <Text style={styles.tongTien}>
-            {item.thucnhan.toLocaleString("vi-VN") + " vnđ"}
-          </Text>
-          <View>
-            <Text style={styles.date}>Ngày công: {ngayCong}</Text>
-            <Text style={styles.date}>Tăng ca: {totalOvertime} giờ</Text>
+          <LoadingModal visible={visibleLoad} />
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <View style={{ width: "50%" }}>
+              <Text style={styles.name}>{employeeName}</Text>
+            </View>
+
+            <View style={{ width: "20%", paddingLeft: 3 }}>
+              <Text style={styles.name}>{item.employeeId}</Text>
+            </View>
+
+            <View style={{ width: "27%", alignItems: "flex-end" }}>
+              <Text style={styles.date}>{phongBan?.label}</Text>
+            </View>
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              width: "80%",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.tongTien}>
+              {item.thucnhan.toLocaleString("vi-VN") + " vnđ"}
+            </Text>
+            <View>
+              <Text style={styles.date}>Ngày công: {ngayCong}</Text>
+              <Text style={styles.date}>Tăng ca: {totalOvertime} giờ</Text>
+            </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   const formatDateToYYYYMM = (date) => {
     const year = date.getFullYear();
-
     const month = String(date.getMonth() + 1).padStart(2, "0");
     return `${month}-${year}`;
   };
@@ -207,12 +211,16 @@ const DanhSachLuong = () => {
       return acc;
     }, {});
 
+    
+    
     for (const employeeId in groupedData) {
       const { month, ngayCong, totalOvertime } = groupedData[employeeId];
       const nhanVien = listNV.find((emp) => emp.employeeId === employeeId);
       const chucVu = chucVuData.find(
         (cv) => cv.chucvu_id === nhanVien.chucvuId
       );
+
+
 
       const luongCoban = parseInt(congThucLuong.luongcoban * chucVu?.hschucvu);
       const luong1Ngay = parseInt(luongCoban / 26);
@@ -234,8 +242,6 @@ const DanhSachLuong = () => {
       };
 
       temporarySalaryData.push(salaryEntry);
-
-      console.log(temporarySalaryData, "----------");
     }
     return temporarySalaryData;
   };
@@ -251,7 +257,6 @@ const DanhSachLuong = () => {
       currentDate.getMonth()
     );
     setDSChamCong(dataChamcong);
-    // Nếu không có dữ liệu, lấy dữ liệu tạm tính
     const luongs =
       dataLuong.length > 0 ? dataLuong : luongTamTinh(dataChamcong);
     setListLuong(luongs);
@@ -261,8 +266,6 @@ const DanhSachLuong = () => {
   useEffect(() => {
     getChiTietCC();
   }, [currentDate]);
-
-  // Filter salary data by selected month
 
   return (
     <SafeAreaView style={styles.container}>

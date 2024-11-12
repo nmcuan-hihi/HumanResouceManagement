@@ -66,6 +66,50 @@ import {
     }
   }
   
+  export async function getBangLuongByEmployeeId(employeeId) {
+    try {
+      const bangLuongCollection = collection(firestore, "bangluongnhanvien");
+      
+      // Query to get documents where employeeId matches the provided one
+      const employeeQuery = query(
+        bangLuongCollection,
+        where("employeeId", "==", employeeId)
+      );
+      
+      // Fetch documents matching the query
+      const querySnapshot = await getDocs(employeeQuery);
+  
+      // If there are no documents, return an empty array
+      if (querySnapshot.empty) {
+        console.log("No salary details found for this employee.");
+        return [];
+      }
+  
+      // Map through documents and format the month field
+      const data = querySnapshot.docs.map((doc) => {
+        const docData = doc.data();
+        
+        // Convert 'month' field from Timestamp to desired format
+        let formattedMonth = null;
+        if (docData.month) {
+          const monthDate = docData.month.toDate(); // Convert Timestamp to Date
+          formattedMonth = dayjs(monthDate).format("YYYY-MM-DD"); // Format date
+        }
+  
+        return {
+          id: doc.id, // Document ID
+          ...docData,
+          month: formattedMonth,
+        };
+      });
+  
+      return data;
+    } catch (error) {
+      console.error("Error fetching salary details:", error);
+      throw error;
+    }
+  }
+  
   export async function getChamCongDetailsByMonth(year, month) {
     try {
       // Reference to the 'chitietchamcong' collection
