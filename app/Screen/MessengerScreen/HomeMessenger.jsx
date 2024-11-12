@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getEmployeeById, readEmployeesFireStore } from '../../services/EmployeeFireBase';
-import { getChatList } from '../../services/MessengerDB';
+import { ref, onValue } from 'firebase/database';
+import { database } from '../../config/firebaseconfig'; 
 
 export default function HomeMessenger({ navigation, route }) {
   const [visibleModal, setVisibleModal] = useState(false);
@@ -16,17 +17,32 @@ export default function HomeMessenger({ navigation, route }) {
   const fetchData = async () => {
     try {
       const dataEmp = await readEmployeesFireStore();
-      const dataChat = await getChatList(employee.employeeId);
       const dataEmpArray = Object.keys(dataEmp).map((key) => ({
         ...dataEmp[key],
         employeeID: dataEmp[key].employeeId,
       }));
 
       setEmployeeData(dataEmpArray);
-      setChatList(dataChat);
+      // Listen to real-time changes in chat list
+      listenToChatList(employee.employeeId);
     } catch (error) {
       console.error('Error fetching employees:', error);
     }
+  };
+
+  // Function to listen to the chat list in real-time
+  const listenToChatList = (employeeID) => {
+    const chatsRef = ref(database, 'chats');
+    onValue(chatsRef, (snapshot) => {
+      const chatList = [];
+      snapshot.forEach((childSnapshot) => {
+        const chat = childSnapshot.val();
+        if (chat.participants.includes(employeeID)) {
+          chatList.push({ id: childSnapshot.key, ...chat });
+        }
+      });
+      setChatList(chatList); // Update chat list with real-time data
+    });
   };
 
   useEffect(() => {
