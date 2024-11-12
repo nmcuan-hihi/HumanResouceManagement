@@ -10,7 +10,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { app } from "../config/firebaseconfig"; // Để đảm bảo bạn đã cấu hình đúng
-
+import { Timestamp } from 'firebase/firestore';
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
 const firestore = getFirestore(app);
 
@@ -39,6 +39,41 @@ export async function updateCongThucLuong(newData) {
     console.error("Error updating document:", error);
   }
 }
+export async function getChamCongDetailsByEmployeeId(employeeId) {
+  try {
+    const chamCongCollection = collection(firestore, "chitietchamcong");
+    const q = query(chamCongCollection, where("employeeId", "==", employeeId));
+    const querySnapshot = await getDocs(q);
+
+    const data = querySnapshot.docs.map((doc) => {
+      const docData = doc.data();
+      const checkIn = docData.timeIn; // Assuming timeIn is the field name
+      const checkOut = docData.timeOut; // Assuming timeOut is the field name
+
+      // Convert timeIn and timeOut to Date if they are Timestamps
+      const checkInDate = checkIn instanceof Timestamp ? checkIn.toDate() : new Date(checkIn);
+      const checkOutDate = checkOut instanceof Timestamp ? checkOut.toDate() : new Date(checkOut);
+
+      // Calculate the hours worked
+      const hoursWorked = (checkOutDate - checkInDate) / (1000 * 60 * 60); // Convert milliseconds to hours
+
+      return {
+        id: doc.id,
+        date: dayjs(checkInDate).format("YYYY-MM-DD"),
+        checkIn: dayjs(checkInDate).format("HH:mm"),
+        checkOut: dayjs(checkOutDate).format("HH:mm"),
+        hoursWorked: hoursWorked.toFixed(2), // Hours worked rounded to two decimal places
+      };
+    });
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching timekeeping data:", error);
+    throw error;
+  }
+}
+
+
 
 export async function getAllChamCongDetails() {
   try {
@@ -60,6 +95,37 @@ export async function getAllChamCongDetails() {
         id: doc.id, // Lấy ID của document
         ...docData, // Lấy dữ liệu của document
         month: formattedMonth, // Thêm trường đã định dạng vào kết quả
+      };
+    });
+
+    return data;
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu từ collection:", error);
+    throw error;
+  }
+}
+export async function getBangLuong() {
+  try {
+    // Tham chiếu đến collection 'bangluongnhanvien'
+    const bangluongCollection = collection(firestore, "bangluongnhanvien");
+
+    // Lấy các tài liệu từ collection
+    const querySnapshot = await getDocs(bangluongCollection);
+
+    // Duyệt qua từng tài liệu và trả về dữ liệu
+    const data = querySnapshot.docs.map((doc) => {
+      const docData = doc.data();
+      return {
+        id: doc.id,
+        chuyencan: docData.chuyencan,
+        employeeId: docData.employeeId,
+        luong: docData.luong,
+        ngaycong: docData.ngaycong,
+        phucap: docData.phucap,
+        tangca: docData.tangca,
+        thamnien: docData.thamnien,
+        thang: docData.thang,
+        thucnhan: docData.thucnhan,
       };
     });
 

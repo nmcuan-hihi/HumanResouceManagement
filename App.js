@@ -29,6 +29,8 @@ import DashboardGD from './app/Compoment/DashboardGD';
 import HomeScreenGD from './app/Screen/HomeScreen/HomeScreenGD';
 import NotificeScreen from './app/Screen/NotificeScreen/NotificeScreen';
 import QuanLyMucLuong from './app/Screen/QuanLyLuong/QuanLyMucLuong';
+import ChiTietBangLuong from './app/Screen/QuanLyLuong/ChiTietBangLuong';
+import DanhSachLuong from './app/Screen/QuanLyLuong/DanhSachLuong';
 import DanhSachSkill from './app/Screen/BangCapScreen/Skill';
 import DetailSkill from './app/Screen/BangCapScreen/DetailSkill';
 
@@ -45,9 +47,6 @@ import ChucVuDetail from './app/Screen/ChucVuScreen/ChucVuDetail';
 import AddChucVu from './app/Screen/ChucVuScreen/AddChucVu';
 import DetailBangCapNhanVien from './app/Screen/EmployeeScreen/BangCapNVDetail';
 
-import DanhSachLuong from './app/Screen/QuanLyLuong/DanhSachLuong'
-
-
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -62,8 +61,7 @@ export default function App() {
   return (
     <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="DanhSachLuong">
-
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Test" component={TestScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
@@ -74,7 +72,8 @@ export default function App() {
         <Stack.Screen name="DetailBangCap" component={DetailBangCap} options={{ headerShown: false }} />
 
         <Stack.Screen name="QuanLyMucLuong" component={QuanLyMucLuong} options={{ headerShown: false }} />
- 
+        <Stack.Screen name="ChiTietBangLuong" component={ChiTietBangLuong} options={{ headerShown: false }} />
+        <Stack.Screen name="DanhSachLuong" component={DanhSachLuong} options={{ headerShown: false }} />
 
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
         <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />
@@ -101,10 +100,8 @@ export default function App() {
         <Stack.Screen name="EditMatKhau" component={EditMatKhau} options={{ headerShown: false }} />
         <Stack.Screen name="ThemBangCapNV" component={ThemBangCapNV} options={{ headerShown: false }} />
         <Stack.Screen name="ThemSkillNV" component={ThemSkillNV} options={{ headerShown: false }} />
-        <Stack.Screen name="DetailBangCapNV" component={DetailBangCapNhanVien} options={{ headerShown: false }}/>
+        <Stack.Screen name="DetailBangCapNV" component={DetailBangCapNhanVien} options={{ headerShown: false }} />
      
-        <Stack.Screen name="DanhSachLuong" component={DanhSachLuong} options={{ headerShown: false }}/>
-
       </Stack.Navigator>  
     </NavigationContainer>
     <StatusBar style="auto" />
