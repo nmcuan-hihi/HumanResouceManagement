@@ -23,6 +23,10 @@ export default function ChammCong({ navigation, route }) {
     navigation.navigate("ChiTietBangLuong"); // Điều hướng đến màn hình chấm công
   };
 
+  const DanhSachLuong = () => {
+    navigation.navigate("DanhSachLuong"); // Điều hướng đến màn hình chấm công
+  };
+
   //lấy ds nhân viên
 
   const getListNV = async () => {
@@ -92,11 +96,11 @@ export default function ChammCong({ navigation, route }) {
             <Text style={styles.statValue}>0</Text>
             <Text style={styles.statLabel}>Nghỉ phép</Text>
           </View>
-          <View style={styles.statItem}>
+          <TouchableOpacity  onPress={DanhSachLuong} style={styles.statItem}>
             <Icon name="attach-money" size={24} color="#FFC107" />
             <Text style={styles.statValue}>0</Text>
             <Text style={styles.statLabel}>Lương</Text>
-          </View>
+          </TouchableOpacity>
 
           <TouchableOpacity onPress={handlePress} style={styles.statItem}>
             <Icon name="fingerprint" size={24} color="#9C27B0" />
