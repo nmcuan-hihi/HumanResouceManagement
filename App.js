@@ -63,6 +63,7 @@ export default function App() {
     <View style={styles.container}>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="DanhSachLuong">
+
         <Stack.Screen name="Test" component={TestScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />

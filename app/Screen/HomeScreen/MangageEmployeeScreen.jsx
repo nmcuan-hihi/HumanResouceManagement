@@ -84,7 +84,13 @@ const EmployeeScreen = ({ navigation, route }) => {
               value="0"
               label="Nghỉ phép"
             />
-            <StatItem icon="money" color="#FFC107" value="0" label="Lương" />
+            <StatItem
+              icon="money"
+              color="#FFC107"
+              value="0"
+              label="Lương"
+              onPress={() => navigation.navigate("DanhSachLuong")}
+            />
             <StatItem
               icon="fingerprint"
               component={MaterialIcons}

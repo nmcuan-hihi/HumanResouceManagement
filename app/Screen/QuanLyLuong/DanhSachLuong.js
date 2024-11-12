@@ -6,8 +6,11 @@ import {
   SafeAreaView,
   FlatList,
   TouchableOpacity,
+  Alert,
+  TextInput,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
+
 import RNPickerSelect from "react-native-picker-select";
 
 import MonthSelector from "../../Compoment/SelectMonth_DSLuong";
@@ -17,43 +20,32 @@ import {
   getCongThucLuong,
   getChamCongDetailsByMonth,
   getAllChamCongDetails,
+  luuDanhSachLuongFirebase,
+  layDanhSachBangLuongTheoThang,
 } from "../../services/quanLyMucLuongFirebase";
 import LoadingModal from "../../Compoment/modalLodading";
 import dayjs from "dayjs";
-const DanhSachLuong = () => {
+import BackNav from "../../Compoment/BackNav";
+
+import * as XLSX from "xlsx";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+
+const DanhSachLuong = ({ navigation }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [phongBans, setPhongBans] = useState([]);
   const [listNV, setListNV] = useState([]);
   const [listLuong, setListLuong] = useState([]);
+  const [listLuongGetDB, setListLuongGetDB] = useState([]);
   const [chucVuData, setChucVuData] = useState([]);
   const [congThucLuong, setCongThucLuong] = useState([]);
-
   const [dsChamCong, setDSChamCong] = useState([]);
-
   const [visibleLoad, setVisibleLoad] = useState(true);
-
-  const salaryData = [
-    {
-      employeeId: "NV001",
-      thang: "10-2024",
-      thucnhan: "5800000",
-      luong: "4500000",
-      tangca: "500000",
-      phucap: "300000",
-      chuyencan: "500000",
-      thamnien: "0",
-    },
-    {
-      employeeId: "NV002",
-      thang: "10-2024",
-      thucnhan: "6300000",
-      luong: "4500000",
-      tangca: "500000",
-      phucap: "300000",
-      chuyencan: "500000",
-      thamnien: "500000",
-    },
-  ];
+  const [checkLoad, setCheckLoad] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchPB, setSearchPB] = useState();
+  const [listSearchByPb, setListSearchByPb] = useState([]);
+  const [listSearch, setListSearch] = useState([]);
 
   const fetchNhanVien = async () => {
     const data = await readEmployeesFireStore();
@@ -112,6 +104,7 @@ const DanhSachLuong = () => {
           fetchPhongBan(),
           getCTL(),
         ]);
+        setCheckLoad(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -121,61 +114,6 @@ const DanhSachLuong = () => {
 
     fetchData();
   }, []);
-
-  const renderSalaryItem = ({ item, index }) => {
-    const employee = listNV.find((emp) => emp.id === item.employeeId);
-    const employeeName = employee ? employee.name : "";
-
-    const phongBan = phongBans.find((pb) => pb.value === employee.phongbanId);
-
-    const ngayCong = dsChamCong.filter(
-      (chamCong) => chamCong.employeeId === item.employeeId
-    ).length;
-    const totalOvertime = dsChamCong
-      .filter((chamCong) => chamCong.employeeId === item.employeeId)
-      .reduce((total, chamCong) => total + (chamCong?.tangca || 0), 0);
-
-    return (
-      <View
-        style={[
-          styles.salaryItem,
-          { backgroundColor: index % 2 === 0 ? "#E8F5E9" : "#FFF3E0" },
-        ]}
-      >
-        <LoadingModal visible={visibleLoad} />
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <View style={{ width: "50%" }}>
-            <Text style={styles.name}>{employeeName}</Text>
-          </View>
-
-          <View style={{ width: "20%", paddingLeft: 3 }}>
-            <Text style={styles.name}>{item.employeeId}</Text>
-          </View>
-
-          <View style={{ width: "27%", alignItems: "flex-end" }}>
-            <Text style={styles.date}>{phongBan?.label}</Text>
-          </View>
-        </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: "80%",
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.tongTien}>
-            {item.thucnhan.toLocaleString("vi-VN") + " vnđ"}
-          </Text>
-          <View>
-            <Text style={styles.date}>Ngày công: {ngayCong}</Text>
-            <Text style={styles.date}>Tăng ca: {totalOvertime} giờ</Text>
-          </View>
-        </View>
-      </View>
-    );
-  };
 
   const formatDateToYYYYMM = (date) => {
     const year = date.getFullYear();
@@ -210,87 +148,315 @@ const DanhSachLuong = () => {
     for (const employeeId in groupedData) {
       const { month, ngayCong, totalOvertime } = groupedData[employeeId];
       const nhanVien = listNV.find((emp) => emp.employeeId === employeeId);
+
       const chucVu = chucVuData.find(
         (cv) => cv.chucvu_id === nhanVien.chucvuId
       );
 
+      const dateString = nhanVien.ngaybatdau;
+      const [ngay, thang, nam] = dateString.split("/").map(Number);
+      const dateObject = new Date(nam, thang - 1, ngay);
+      const today = new Date();
+
+      const diffMilliseconds = today - dateObject;
+
+      // Chuyển milliseconds sang năm
+      const namThamNien = Math.floor(
+        diffMilliseconds / (1000 * 60 * 60 * 24 * 365.25)
+      );
+
       const luongCoban = parseInt(congThucLuong.luongcoban * chucVu?.hschucvu);
       const luong1Ngay = parseInt(luongCoban / 26);
+      const luong = luong1Ngay * ngayCong;
       const chuyenCan = ngayCong >= 26 ? congThucLuong.chuyencan : 0;
-      const phuCap = luongCoban * congThucLuong.hs_phucap;
-      const tangCa =
-        ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca;
+      const phuCap = parseInt(luong * congThucLuong.hs_phucap);
+      const tangCa = parseInt(
+        ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca
+      );
 
       const thucNhan = luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa;
+      const luongThamNien = luong * congThucLuong.hs_thamnien;
       const salaryEntry = {
         employeeId,
-        thang: month,
-        thucnhan: thucNhan,
-        luong: luongCoban,
-        tangca: tangCa,
-        phucap: phuCap,
-        chuyencan: chuyenCan,
-        thamnien: "0",
+        thang: month + "",
+        ngaycong: ngayCong + "",
+        thucnhan: thucNhan + "",
+        luong: luong + "",
+        tangca: tangCa + "",
+        phucap: phuCap + "",
+        chuyencan: chuyenCan + "",
+        thamnien: luongThamNien + "",
       };
 
       temporarySalaryData.push(salaryEntry);
-
-      console.log(temporarySalaryData, "----------");
     }
     return temporarySalaryData;
   };
 
   const getChiTietCC = async () => {
     setVisibleLoad(true);
-    const dataLuong = salaryData.filter(
-      (item) => item.thang === formatDateToYYYYMM(currentDate)
+
+    const dataluong = await layDanhSachBangLuongTheoThang(
+      formatDateToYYYYMM(currentDate)
     );
 
     const dataChamcong = await getChamCongDetailsByMonth(
       currentDate.getFullYear(),
       currentDate.getMonth()
     );
+    setListLuongGetDB(dataluong);
     setDSChamCong(dataChamcong);
     // Nếu không có dữ liệu, lấy dữ liệu tạm tính
     const luongs =
-      dataLuong.length > 0 ? dataLuong : luongTamTinh(dataChamcong);
+      dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
     setListLuong(luongs);
-    setVisibleLoad(false);
+    setVisibleLoad(checkLoad);
   };
 
   useEffect(() => {
-    getChiTietCC();
-  }, [currentDate]);
+    if (!checkLoad) {
+      getChiTietCC();
+    }
+  }, [currentDate, checkLoad]);
 
-  // Filter salary data by selected month
+  const filterNVByPb = () => {
+    const listNVByPB = listNV.filter((nv) => {
+      if (!searchPB || searchPB == "all") {
+        return listNV;
+      } else {
+        return nv.phongbanId == searchPB;
+      }
+    });
+
+    const listLuongTheoNV = listLuong.filter((luong) => {
+      const listNhanVienIds = listNVByPB.map((nv) => nv.id);
+      return listNhanVienIds.includes(luong.employeeId);
+    });
+
+    setListSearchByPb(listLuongTheoNV);
+  };
+
+  const filterNV = () => {
+    const dataNV = listNV.filter((nv) => {
+      return (
+        nv.name
+          .toString()
+          .toLowerCase()
+          .includes(searchInput.toString().toLowerCase()) ||
+        nv.employeeId
+          .toString()
+          .toLowerCase()
+          .includes(searchInput.toString().toLowerCase())
+      );
+    });
+
+    const data = listSearchByPb.filter((luong) => {
+      const listNhanVienIds = dataNV.map((nv) => nv.id);
+      return listNhanVienIds.includes(luong.employeeId);
+    });
+
+    setListSearch(data);
+  };
+
+  useEffect(() => {
+    filterNVByPb();
+  }, [listLuong, searchPB]);
+
+  useEffect(() => {
+    filterNV();
+  }, [listSearchByPb, searchInput]);
+
+  const luuBangLuong = async () => {
+    try {
+      // Hiển thị cửa sổ thông báo xác nhận
+      Alert.alert(
+        "Xác nhận lưu thông tin",
+        `Bạn có chắc chắn muốn lưu thông tin bảng lương cho tháng ${formatDateToYYYYMM(
+          currentDate
+        )} `,
+        [
+          {
+            text: "Hủy",
+            onPress: () => console.log("Hủy lưu thông tin"),
+            style: "cancel",
+          },
+          {
+            text: "Lưu",
+            onPress: async () => {
+              setVisibleLoad(true);
+              await luuDanhSachLuongFirebase(luongTamTinh(dsChamCong));
+              setVisibleLoad(false);
+              Alert.alert("Thông báo", "Lưu thông tin thành công");
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      setVisibleLoad(false);
+      Alert.alert("Thông báo", "Không thể lưu");
+    }
+  };
+
+  const xuatBangLuongExcel = (dsLuong) => {
+    const newdata = dsLuong.map((d) => {
+      const nv = listNV.find((nv) => {
+        return nv.employeeId === d.employeeId;
+      });
+
+      return {
+        employeeId: d.employeeId,
+        name: nv.name,
+        thang: d.thang,
+        ngaycong: d.ngaycong,
+        luong: d.luong,
+        tangca: d.tangca,
+        phucap: d.phucap,
+        chuyencan: d.chuyencan,
+        thamnien: d.thamnien,
+        thucnhan: d.thucnhan,
+      };
+    });
+
+    let wb = XLSX.utils.book_new();
+
+    // Tạo sheet từ mảng dữ liệu dsLuong
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        employeeId: "Mã nhân viên",
+        name: "Tên nhân viên",
+        thang: "Tháng",
+        ngaycong: "Ngày công",
+        luong: "Lương",
+        tangca: "Tiền tăng ca",
+        phucap: "Phụ cấp",
+        chuyencan: "Chuyên cần",
+        thamnien: "Phụ cấp thâm niên",
+        thucnhan: "Lương thực nhận",
+      },
+      ...newdata,
+    ]);
+
+    // Đặt tên cho sheet
+    XLSX.utils.book_append_sheet(wb, ws, "BangLuong", true);
+
+    const base64 = XLSX.write(wb, { type: "base64" });
+    const filename =
+      FileSystem.documentDirectory +
+      `BangLuong${formatDateToYYYYMM(currentDate)}.xlsx`;
+
+    FileSystem.writeAsStringAsync(filename, base64, {
+      encoding: FileSystem.EncodingType.Base64,
+    }).then(() => {
+      Sharing.shareAsync(filename);
+    });
+  };
+
+  const renderSalaryItem = ({ item, index }) => {
+    const employee = listNV.find((emp) => emp.id === item.employeeId);
+    const employeeName = employee ? employee.name : "";
+
+    const phongBan = phongBans.find((pb) => pb.value === employee.phongbanId);
+
+    const totalOvertime = dsChamCong
+      .filter((chamCong) => chamCong.employeeId === item.employeeId)
+      .reduce((total, chamCong) => total + (chamCong?.tangca || 0), 0);
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.salaryItem,
+          { backgroundColor: index % 2 === 0 ? "#E8F5E9" : "#FFF3E0" },
+        ]}
+      >
+        <LoadingModal visible={visibleLoad} />
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ width: "50%" }}>
+            <Text style={styles.name}>{employeeName}</Text>
+          </View>
+
+          <View style={{ width: "20%", paddingLeft: 3 }}>
+            <Text style={styles.name}>{item.employeeId}</Text>
+          </View>
+
+          <View style={{ width: "27%", alignItems: "flex-end" }}>
+            <Text style={styles.date}>{phongBan?.label}</Text>
+          </View>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "80%",
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.tongTien}>
+            {item.thucnhan.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " vnđ"}
+          </Text>
+          <View>
+            <Text style={styles.date}>Ngày công: {item.ngaycong}</Text>
+            <Text style={styles.date}>Tăng ca: {totalOvertime} giờ</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <LoadingModal visible={visibleLoad} />
-      <View style={styles.header}>
-        <TouchableOpacity>
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Lương</Text>
-      </View>
-
-      <MonthSelector currentDate={currentDate} onChangeMonth={setCurrentDate} />
-
-      <View style={{ width: 200 }}>
-        <RNPickerSelect
-          onValueChange={(value) => {}}
-          items={phongBans}
-          style={pickerSelectStyles}
+      <View style={{ height: 100 }}>
+        <BackNav
+          navigation={navigation}
+          name={"Lương nhân viên"}
+          btn={"Lưu"}
+          onEditPress={luuBangLuong}
         />
+      </View>
+      <View style={{ marginTop: -30 }}>
+        <MonthSelector
+          currentDate={currentDate}
+          onChangeMonth={setCurrentDate}
+        />
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={{ width: 200 }}>
+          <RNPickerSelect
+            onValueChange={(value) => {
+              setSearchPB(value);
+            }}
+            items={[{ label: "Tất cả", value: "all" }, ...phongBans]}
+            style={pickerSelectStyles}
+          />
+        </View>
+        <TouchableOpacity
+          onPress={() => {
+            xuatBangLuongExcel(listSearch);
+          }}
+          style={{ padding: 10, marginBottom: 10, marginRight: 20 }}
+        >
+          <AntDesign name="exclefile1" size={30} color="orange" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.searchBox}>
         <Ionicons name="search" size={20} color="gray" />
-        <Text style={styles.searchPlaceholder}>Tìm kiếm theo tên</Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Tìm kiếm theo mã hoặc tên nhân viên"
+          onChangeText={(text) => setSearchInput(text)}
+          value={searchInput}
+        />
       </View>
-
       <FlatList
-        data={listLuong}
+        data={listSearch}
         renderItem={renderSalaryItem}
         keyExtractor={(item) => item.employeeId + item.thang}
         showsVerticalScrollIndicator={false}
@@ -334,6 +500,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#EEEEEE",
+    marginTop: -20,
   },
   headerTitle: {
     fontSize: 18,
@@ -343,10 +510,12 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    margin: 16,
+    marginHorizontal: 16,
     padding: 8,
     backgroundColor: "#F5F5F5",
     borderRadius: 8,
+    marginTop: -10,
+    marginBottom: 10,
   },
   searchPlaceholder: {
     marginLeft: 8,

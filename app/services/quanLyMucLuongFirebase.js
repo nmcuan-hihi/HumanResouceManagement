@@ -6,6 +6,8 @@ import {
   updateDoc,
   query,
   where,
+  addDoc,
+  setDoc,
 } from "firebase/firestore";
 import { app } from "../config/firebaseconfig"; // Để đảm bảo bạn đã cấu hình đúng
 
@@ -108,4 +110,37 @@ export async function getChamCongDetailsByMonth(year, month) {
     console.error("Lỗi khi lấy dữ liệu từ collection:", error);
     throw error;
   }
+}
+
+export async function luuDanhSachLuongFirebase(salaryList) {
+  const salaryCollection = collection(firestore, "bangluongnhanvien");
+
+  salaryList.forEach(async (salaryEntry) => {
+    const salaryData = salaryEntry;
+    const documentKey = `${salaryData.employeeId}-${salaryData.thang}`;
+
+    const docRef = doc(salaryCollection, documentKey);
+
+    try {
+      await setDoc(docRef, salaryData);
+      console.log("Document successfully written for key: ", documentKey);
+    } catch (error) {
+      console.error("Error writing document for key: ", documentKey, error);
+    }
+  });
+}
+
+export async function layDanhSachBangLuongTheoThang(thang) {
+  const salaryCollection = collection(firestore, "bangluongnhanvien");
+
+  const querySnapshot = await getDocs(
+    query(salaryCollection, where("thang", "==", thang))
+  );
+
+  const salaryList = [];
+  querySnapshot.forEach((doc) => {
+    salaryList.push({ id: doc.id, ...doc.data() });
+  });
+
+  return salaryList;
 }
