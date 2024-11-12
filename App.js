@@ -47,6 +47,7 @@ import DetailBangCapNhanVien from './app/Screen/EmployeeScreen/BangCapNVDetail';
 import DangKyNghiScreen from './app/Screen/NghiPhepScreen/DangKyNghiScreen';
 import DuyetNghiPhep from './app/Screen/NghiPhepScreen/DuyetNghiPhep';
 import ChiTietNghiPhep from './app/Screen/NghiPhepScreen/ChiTietNghiPhep';
+import MesengerDetails from './app/Screen/MessengerScreen/MesengerDetails';
 
 const Tab = createBottomTabNavigator();
 
@@ -66,6 +67,9 @@ export default function App() {
         <Stack.Screen name="DangKyNghi" component={DangKyNghiScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DuyetNghiPhep" component={DuyetNghiPhep} options={{ headerShown: false }} />
         <Stack.Screen name="ChiTietNghiPhep" component={ChiTietNghiPhep} options={{ headerShown: false }} />
+        <Stack.Screen name="MesengerDetails" component={MesengerDetails} options={{ headerShown: false }} />
+
+
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="UserTabNav" component={TabNavigation} options={{ headerShown: false }} />

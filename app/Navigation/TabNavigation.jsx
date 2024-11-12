@@ -1,7 +1,8 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { Text, View } from "react-native";
+import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { Badge } from "react-native-elements";
 
 // Import các màn hình
 import TestScreen from "../Screen/FolderTest/TestScreen";
@@ -12,6 +13,7 @@ import HomeScreenGD from "../Screen/HomeScreen/HomeScreenGD";
 import QuanLyMucLuong from "../Screen/QuanLyLuong/QuanLyMucLuong";
 import ChammCong from "../Screen/MarkAttendaceScreen/MarkAttendace";
 import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
+import HomeMessenger from "../Screen/MessengerScreen/HomeMessenger";
 
 const Tab = createBottomTabNavigator();
 
@@ -19,12 +21,34 @@ export default function TabNavigation({ route }) {
   const { employee } = route.params || {};
   const role = employee?.chucvuId; // Kiểm tra role từ params
 
+  // Example unread counts
+  const unreadNotifications = 1;
+  const unreadMessages = 3;
+
+  // Custom icon with badge
+  const IconWithBadge = ({ name, badgeCount, color, size, iconType }) => {
+    const IconComponent = iconType === "MaterialIcons" ? MaterialIcons : FontAwesome;
+    return (
+      <View style={{ width: 24, height: 24, margin: 5 }}>
+        <IconComponent name={name} size={size} color={color} />
+        {badgeCount > 0 && (
+          <Badge
+            value={badgeCount}
+            status="error"
+            containerStyle={{ position: 'absolute', top: -4, right: -4 }}
+          />
+        )}
+      </View>
+    );
+  };
+
   // Các tab dùng chung cho mọi role
   const CommonTabs = () => (
     <>
       <Tab.Screen
         name="Notifications"
         component={NotificeScreen}
+        initialParams={{ employee }}
         options={{
           tabBarLabel: ({ color }) => (
             <Text style={{ color, fontSize: 15, marginTop: -7 }}>
@@ -32,7 +56,22 @@ export default function TabNavigation({ route }) {
             </Text>
           ),
           tabBarIcon: ({ color }) => (
-            <FontAwesome name="bell" size={24} color={color} />
+            <IconWithBadge name="notifications" size={24} color={color} badgeCount={unreadNotifications} iconType="MaterialIcons" />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Mes"
+        component={HomeMessenger}
+        initialParams={{ employee }}
+        options={{
+          tabBarLabel: ({ color }) => (
+            <Text style={{ color, fontSize: 15, marginTop: -7 }}>
+              Messenger
+            </Text>
+          ),
+          tabBarIcon: ({ color }) => (
+            <IconWithBadge name="message" size={24} color={color} badgeCount={unreadMessages} iconType="MaterialIcons" />
           ),
         }}
       />

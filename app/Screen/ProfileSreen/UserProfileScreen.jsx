@@ -11,7 +11,7 @@ export default function UserProfileScreen({ navigation ,route}) {
   const handleLogOut = () => {
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Login' }], // Quay lại Login và xóa lịch sử điều hướng
+      routes: [{ name: 'Login' }],
     });
   };
   useEffect(() => {
