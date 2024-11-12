@@ -45,13 +45,15 @@ export const sendMessage = async (chatID, senderID, text) => {
   const messageData = {
     sender: senderID,
     text: text,
-    timestamp: Date.now()
+    timestamp: Date.now(),   
   };
 
   const updates = {};
   updates[`/messages/${chatID}/${messageID}`] = messageData;
   updates[`/chats/${chatID}/lastMessage`] = text;
   updates[`/chats/${chatID}/timestamp`] = Date.now();
+  updates[`/chats/${chatID}/status`] = "0";
+  updates[`/chats/${chatID}/lastSend`] = senderID;
 
   try {
     await update(ref(database), updates);

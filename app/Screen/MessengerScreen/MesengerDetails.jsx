@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { sendMessage, generateChatID } from '../../services/MessengerDB'; // Đảm bảo đường dẫn đúng
 import BackNav from '../../Compoment/BackNav';
 import { database } from '../../config/firebaseconfig'; // Đảm bảo đường dẫn đúng
@@ -10,8 +10,6 @@ export default function MesengerDetails({ navigation, route }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const chatID = generateChatID(empFrom.employeeId, empTo.employeeId);
-
-  const flatListRef = useRef(null); // Sử dụng ref để tham chiếu tới FlatList
 
   // Hàm lấy hoặc tạo cuộc trò chuyện
   const getMessenger = async (id1, id2) => {
@@ -35,7 +33,9 @@ export default function MesengerDetails({ navigation, route }) {
         await set(chatRef, {
           participants: [id1, id2],
           lastMessage: '',
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          status: false,
+          lastSend: id1,
         });
         return { chatID, messages: [] };
       }
@@ -78,7 +78,6 @@ export default function MesengerDetails({ navigation, route }) {
     fetchMessages();
   }, []);
 
-  // Hàm gửi tin nhắn
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       try {
@@ -90,22 +89,12 @@ export default function MesengerDetails({ navigation, route }) {
     }
   };
 
-  // Đảm bảo rằng khi tin nhắn mới được thêm vào, màn hình sẽ cuộn xuống cuối
-  useEffect(() => {
-    if (flatListRef.current) {
-      flatListRef.current.scrollToEnd({ animated: true });
-    }
-  }, [messages]); // Khi messages thay đổi, sẽ gọi scrollToEnd
-
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <View style={styles.container}>
       <BackNav name={empTo.name} />
       <Text style={styles.header}>Chat between {empFrom.name} and {empTo.name}</Text>
       <FlatList
-        ref={flatListRef} // Gắn ref cho FlatList
+        
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -125,13 +114,13 @@ export default function MesengerDetails({ navigation, route }) {
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 15,
     padding: 10,
     backgroundColor: '#fff',
   },
