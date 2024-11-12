@@ -37,38 +37,54 @@ export const addChiTietChamCongToFireStore = async (attendanceData) => {
   try {
     const { employeeId, timeIn, timeOut, status, month } = attendanceData;
 
-    // Kiểm tra xem các trường có bị undefined không
     if (!employeeId || !timeIn || !timeOut || !status || !month) {
       console.error('Dữ liệu không hợp lệ:', attendanceData);
-      return; // Dừng lại nếu có trường bị thiếu
+      return;
     }
 
-    // Lấy mã lương tháng từ tháng của thời gian chấm công
-    const maLuongThang = new Date(timeIn).getMonth() + 1;  // Lấy tháng từ timeIn (0-indexed)
-    console.log('timein', month);
-    console.log('Mã lương tháng:', maLuongThang);
+    // Định dạng `timeIn` và `timeOut` với giờ, phút và buổi
+    const formatTime = (date) => {
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const formattedHours = hours % 12 || 12; // Định dạng 12 giờ
+      return `${formattedHours}:${minutes} ${period}`;
+    };
+
+    const formattedTimeIn = formatTime(new Date(timeIn));
+    const formattedTimeOut = formatTime(new Date(timeOut));
+
+    // Định dạng `month` thành ngày/tháng/năm
+    const formattedMonth = new Date(month).toLocaleDateString('vi-VN');
+
+    const maLuongThang = new Date(timeIn).getMonth() + 1;
     const yea = new Date(month).getFullYear();
-    console.log('Năm', yea);
     const day = new Date(month).getDate();
-    console.log('ngay', day);
-    // Lấy mã chấm công tự động tăng
+
     const maChamCong = await getNextChamCongCode();
     if (!maChamCong) {
       console.error('Không thể tạo mã chấm công');
-      return; // Dừng lại nếu không tạo được mã chấm công
+      return;
     }
-    console.log('Mã chấm công:', maChamCong);
 
-    // Thêm chi tiết chấm công vào Firestore
-    await setDoc(doc(firestore, "chitietchamcong", employeeId+"-"+day+"-"+maLuongThang+"-"+yea), {
-      employeeId: employeeId,
-      timeIn: Timestamp.fromDate(new Date(timeIn)),  // Chuyển đổi thời gian vào thành Timestamp
-      timeOut: Timestamp.fromDate(new Date(timeOut)),
+    const gioVao = new Date(timeIn).getHours();
+    const gioRa = new Date(timeOut).getHours();
+    const diMuon = gioVao >= 9 && gioVao < 11;
+    const vangMat = gioVao >= 11;
+    const tangCa = gioRa >17;
+
+    await setDoc(doc(firestore, "chitietchamcong", `${employeeId}-${day}-${maLuongThang}-${yea}`), {
+      employeeId,
+      timeIn: formattedTimeIn,
+      timeOut: formattedTimeOut,
       status,
-      month,
-      maLuongThang: maLuongThang,  // Mã lương tháng lấy từ tháng của timeIn
-      maChamCong: maChamCong,
-      createdAt: serverTimestamp(),  // Thêm thời gian tạo
+      month: formattedMonth,
+      maLuongThang,
+      maChamCong,
+      diMuon,
+      vangMat,
+      tangCa,
+      createdAt: serverTimestamp(),
     });
 
     console.log('Chấm công thành công');
