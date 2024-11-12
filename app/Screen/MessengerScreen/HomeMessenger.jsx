@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { readEmployeesFireStore } from '../../services/EmployeeFireBase'; 
+import { getEmployeeById, readEmployeesFireStore } from '../../services/EmployeeFireBase';
 import { getChatList } from '../../services/MessengerDB';
 
 export default function HomeMessenger({ navigation, route }) {
@@ -12,10 +12,11 @@ export default function HomeMessenger({ navigation, route }) {
   const [refreshing, setRefreshing] = useState(false);
   const { employee } = route.params;
   const [chatList, setChatList] = useState([]);
+
   const fetchData = async () => {
     try {
       const dataEmp = await readEmployeesFireStore();
-      const dataChat = await getChatList(employee.employeeId)
+      const dataChat = await getChatList(employee.employeeId);
       const dataEmpArray = Object.keys(dataEmp).map((key) => ({
         ...dataEmp[key],
         employeeID: dataEmp[key].employeeId,
@@ -23,7 +24,6 @@ export default function HomeMessenger({ navigation, route }) {
 
       setEmployeeData(dataEmpArray);
       setChatList(dataChat);
-    
     } catch (error) {
       console.error('Error fetching employees:', error);
     }
@@ -45,6 +45,17 @@ export default function HomeMessenger({ navigation, route }) {
     navigation.navigate('MesengerDetails', { empFrom: route.params.employee, empTo: employee });
   };
 
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  };
+
+  const handleChatItemPress = async (id) => {
+    const empToId = id.replace('_', '').replace(employee.employeeId, '');
+    const employeeTo = await getEmployeeById(empToId);
+    navigation.navigate('MesengerDetails', { empFrom: employee, empTo: employeeTo });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -54,10 +65,25 @@ export default function HomeMessenger({ navigation, route }) {
         </TouchableOpacity>
       </View>
 
-      {/* Nội dung chính của màn hình */}
-      <View style={styles.content}>
-        <Text style={styles.contentText}>HomeMessenger</Text>
-      </View>
+      {/* Danh sách các cuộc trò chuyện */}
+      <FlatList
+        style={styles.chatList}
+        data={chatList}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.chatItem}
+            onPress={() => handleChatItemPress(item.id)}
+          >
+            <Text style={styles.participantsText}>{item.participants.join(', ')}</Text>
+            <Text style={styles.lastMessageText}>{item.lastMessage}</Text>
+            <Text style={styles.timestampText}>{formatTimestamp(item.timestamp)}</Text>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item.chatId}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      />
 
       {/* Modal for adding a new chat */}
       <Modal visible={visibleModal} transparent={true} animationType="slide">
@@ -125,14 +151,27 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 8,
   },
-  content: {
+  chatList: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  contentText: {
-    fontSize: 18,
-    color: '#333',
+  chatItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+  },
+  participantsText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  lastMessageText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+  },
+  timestampText: {
+    fontSize: 12,
+    color: '#aaa',
+    marginTop: 5,
   },
   modalCtn: {
     flex: 1,
