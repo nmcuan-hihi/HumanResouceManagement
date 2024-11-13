@@ -154,6 +154,9 @@ export default function EmployeeDetailScreen({ route, navigation }) {
 
   return (
     <>
+      
+
+      <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <BackNav
           navigation={navigation}
@@ -161,8 +164,6 @@ export default function EmployeeDetailScreen({ route, navigation }) {
           {...(key === "inf" ? { btn: "Sửa", onEditPress: handlePress } : {})}
         />
       </View>
-
-      <SafeAreaView style={styles.container}>
         <ScrollView>
           {employeeData ? (
             <>

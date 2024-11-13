@@ -1,9 +1,9 @@
 import {
     getDatabase,
     get,
-    child,
     ref,
     set,
+    child,
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
 import {
@@ -14,60 +14,53 @@ import {
 } from "firebase/storage";
 
 const database = getDatabase(app);
-const storage = getStorage(app); // Khởi tạo Firebase Storage
+const storage = getStorage(app); // Initialize Firebase Storage
 
+// Function to upload CCCD images and save URLs to Realtime Database
 export async function writeInfoCCCD(employeeId, imgFront, imgBack) {
     try {
-        // Tạo tham chiếu tới nơi lưu trữ hình ảnh
         const frontImageRef = storageRef(storage, `cccd/${employeeId}/front.jpg`);
         const backImageRef = storageRef(storage, `cccd/${employeeId}/back.jpg`);
 
-        // Tải lên hình ảnh mặt trước
+        // Upload front image
         const frontBlob = await (await fetch(imgFront)).blob();
         await uploadBytes(frontImageRef, frontBlob);
 
-        // Tải lên hình ảnh mặt sau
+        // Upload back image
         const backBlob = await (await fetch(imgBack)).blob();
         await uploadBytes(backImageRef, backBlob);
 
-        // Lấy URL hình ảnh
+        // Get URLs for both images
         const frontImageURL = await getDownloadURL(frontImageRef);
         const backImageURL = await getDownloadURL(backImageRef);
 
-        // Ghi dữ liệu vào Realtime Database
+        // Save image URLs in Realtime Database
         await set(ref(database, `cccd/${employeeId}`), {
             frontImage: frontImageURL,
             backImage: backImageURL,
         });
 
-        console.log("Thông tin CCCD đã được lưu thành công.");
+        console.log("CCCD information has been successfully saved.");
     } catch (error) {
-        console.error("Lỗi khi thêm ảnh CCCD:", error);
+        console.error("Error saving CCCD images:", error);
     }
 }
 
+// Function to read CCCD image URLs from Realtime Database
 export async function readInfoCCCD(employeeId) {
     try {
-        // Tạo tham chiếu đến dữ liệu CCCD của nhân viên
-        const dbRef = ref(database);
-        const snapshot = await get(child(dbRef, `cccd/${employeeId}`));
+        const snapshot = await get(child(ref(database), `cccd/${employeeId}`));
 
         if (snapshot.exists()) {
             const data = snapshot.val();
-            const frontImage = data.frontImage;
-            const backImage = data.backImage;
-
-            console.log("Thông tin CCCD đã được đọc thành công:", data);
-            return {
-                frontImage,
-                backImage,
-            };
+            console.log("Successfully retrieved CCCD information:", data);
+            return data;
         } else {
-            console.log("Không tìm thấy dữ liệu cho employeeId:", employeeId);
-            return null; 
+            console.log("No data found for employeeId:", employeeId);
+            return null;
         }
     } catch (error) {
-        console.error("Lỗi khi đọc thông tin CCCD:", error);
-        throw error; 
+        console.error("Error reading CCCD information:", error);
+        throw error;
     }
 }

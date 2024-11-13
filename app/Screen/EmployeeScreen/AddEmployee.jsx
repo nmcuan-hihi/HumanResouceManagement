@@ -27,6 +27,7 @@ import {
   getNewEmployeeId,
 } from "../../services/EmployeeFireBase";
 import { validateEmployeeData } from "../../services/validate";
+import { Button } from "react-native-paper";
 
 export default function AddMember({ navigation }) {
   const [employeeId, setEmployeeId] = useState("");
@@ -173,16 +174,17 @@ export default function AddMember({ navigation }) {
   return (
     <>
       <BackNav
-        navigation={navigation}
-        name={"Add Member"}
-        btn={"Lưu"}
-        onEditPress={handleAddEmployee}
-      />
+      navigation={navigation}
+      name={"Add Member"}
+      btn={"Lưu"}
+      onEditPress={handleAddEmployee}
+    />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <SafeAreaView>
+          
           <ScrollView style={{ paddingHorizontal: 15 }}>
             <View style={styles.avatarContainer}>
               <TouchableOpacity onPress={pickImage}>
@@ -325,6 +327,7 @@ export default function AddMember({ navigation }) {
                 </View>
               </View>
             </Modal>
+            <Button onPress={handleAddEmployee}>Thêm</Button>
           </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>

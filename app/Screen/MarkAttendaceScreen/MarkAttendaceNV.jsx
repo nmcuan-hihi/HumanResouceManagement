@@ -5,11 +5,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { filterEmployeesByPhongBan } from '../../services/PhongBanDatabase';  // Hàm lọc nhân viên theo phòng ban
 import { Button } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { readPhongBan1Firestore } from '../../services/PhongBanDatabase';
+import { readPhongBanFromRealtime } from '../../services/PhongBanDatabase';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
-import { addChiTietChamCongToFireStore } from '../../services/chamcong';  // Import your Firestore function for adding attendance
+import { addChiTietChamCongToRealtime } from '../../services/chamcong';  // Import your Firestore function for adding attendance
 import { filterEmployeesByStatus } from '../../services/PhongBanDatabase';
-export default function ChamCongNV() {
+import BackNav from '../../Compoment/BackNav';
+export default function ChamCongNV({navigation}) {
   const [timeIn, setTimeIn] = useState(new Date());
   const [timeOut, setTimeOut] = useState(new Date());
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -39,7 +40,7 @@ export default function ChamCongNV() {
 
     async function fetchPhongBan() {
       try {
-        const phongBanData = await readPhongBan1Firestore();
+        const phongBanData = await readPhongBanFromRealtime();
         if (phongBanData) {
           setPhongBan(phongBanData);
         }
@@ -56,7 +57,7 @@ export default function ChamCongNV() {
     if (valuePhongBan) {
       handleFilterEmployeesByPhongBan(valuePhongBan);
     }
-  }, [valuePhongBan]);
+  }, []);
 
   const handleFilterEmployeesByPhongBan = async (phongbanId) => {
     try {
@@ -108,8 +109,8 @@ export default function ChamCongNV() {
   };
 
   const items = [
-    { label: 'Đi làm', value: 'di_lam' },
-    { label: 'Nghỉ làm', value: 'nghi_lam' },
+    { label: 'Nghỉ có lương', value: '0' },
+    { label: 'Nghỉ không luong', value: '1' },
   ];
 
   const phongBanItems = phongBan.map(pban => ({
@@ -136,7 +137,7 @@ export default function ChamCongNV() {
       }));
 
       for (const data of attendanceData) {
-        await addChiTietChamCongToFireStore(data);
+        await addChiTietChamCongToRealtime(data);
       }
       alert('Chấm công thành công!');
     } catch (error) {
@@ -149,17 +150,11 @@ export default function ChamCongNV() {
   
 
   return (
+    <>
+    <BackNav navigation={navigation} name={"Chấm công"} btn={"Lưu"} onEditPress={handleSaveAttendance} />
+
     <SafeAreaView style={styles.container}>
       {/* Header Section */}
-      <View style={styles.header}>
-        <TouchableOpacity>
-          <Icon name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chấm công</Text>
-        <TouchableOpacity onPress={handleSaveAttendance}>
-          <Text style={styles.saveButton}>Lưu</Text>
-        </TouchableOpacity>
-      </View>
 
       {/* Time Section */}
       <View style={styles.timeSection}>
@@ -174,7 +169,7 @@ export default function ChamCongNV() {
           <View style={styles.timeInputContainer}>
             <Text style={styles.timeLabel}>Vào</Text>
             <TouchableOpacity onPress={() => handleTimePickerVisibility('timeIn')}>
-<Text style={styles.timeText}>{timeIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+              <Text style={styles.timeText}>{timeIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.timeInputContainer}>
@@ -197,8 +192,7 @@ export default function ChamCongNV() {
             setOpen={setOpenStatus}
             setValue={setValueStatus}
             placeholder="Chọn trạng thái"
-            style={styles.dropdown}
-          />
+            style={styles.dropdown} />
         </View>
 
         <View style={styles.dropdownWrapper}>
@@ -210,8 +204,7 @@ export default function ChamCongNV() {
             setOpen={setOpenPhongBan}
             setValue={setValuePhongBan}
             placeholder="Chọn phòng ban"
-            style={styles.dropdown}
-          />
+            style={styles.dropdown} />
         </View>
       </View>
 
@@ -222,8 +215,7 @@ export default function ChamCongNV() {
           <Icon
             name={selectAll ? "check-box" : "check-box-outline-blank"}
             size={24}
-            color={selectAll ? 'green' : 'gray'}
-          />
+            color={selectAll ? 'green' : 'gray'} />
         </TouchableOpacity>
       </View>
 
@@ -239,8 +231,7 @@ export default function ChamCongNV() {
               <Icon
                 name={employee.trangthai === 'checked' ? "check-box" : "check-box-outline-blank"}
                 size={24}
-                color={employee.trangthai === 'checked' ? 'green' : 'gray'}
-              />
+                color={employee.trangthai === 'checked' ? 'green' : 'gray'} />
             </TouchableOpacity>
           </View>
         ))}
@@ -264,8 +255,7 @@ export default function ChamCongNV() {
           value={timeIn}
           mode="time"
           display="default"
-          onChange={(event, date) => handleTimeChange(event, date, 'timeIn')}
-        />
+          onChange={(event, date) => handleTimeChange(event, date, 'timeIn')} />
       )}
 
       {showTimePicker.timeOut && (
@@ -273,8 +263,7 @@ export default function ChamCongNV() {
           value={timeOut}
           mode="time"
           display="default"
-          onChange={(event, date) => handleTimeChange(event, date, 'timeOut')}
-        />
+          onChange={(event, date) => handleTimeChange(event, date, 'timeOut')} />
       )}
 
       {showTimePicker.month && (
@@ -282,10 +271,9 @@ export default function ChamCongNV() {
           value={selectedMonth}
           mode="date"
           display="default"
-          onChange={handleMonthChange}
-        />
+          onChange={handleMonthChange} />
       )}
-    </SafeAreaView>
+    </SafeAreaView></>
   );
 }
 
@@ -310,7 +298,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   container: {
-    flex: 1,
+    flex: 9,
     backgroundColor: '#f5f5f5',
   },
   header: {

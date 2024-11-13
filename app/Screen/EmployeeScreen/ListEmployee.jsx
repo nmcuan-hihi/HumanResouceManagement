@@ -3,7 +3,7 @@ import { View, FlatList, StyleSheet, TouchableOpacity, TextInput, Text, RefreshC
 import RNPickerSelect from 'react-native-picker-select';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
 import BackNav from '../../Compoment/BackNav';
-import { readPhongBan1Firestore } from '../../services/PhongBanDatabase';
+import { readPhongBanFromRealtime } from '../../services/PhongBanDatabase';
 import { filterEmployeesByPhongBan, filterEmployeesByGender, filterEmployeesByStatus, searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
 import { useFocusEffect } from '@react-navigation/native';
@@ -34,7 +34,7 @@ export default function EmployeeList({ navigation }) {
         console.warn('Dữ liệu nhân viên không hợp lệ:', data);
       }
 
-      const phongBans = await readPhongBan1Firestore();
+      const phongBans = await readPhongBanFromRealtime();
       if (phongBans) {
         setPhongBanList(phongBans);
       } else {
@@ -66,8 +66,7 @@ export default function EmployeeList({ navigation }) {
       }
 
       if (selectedStatus) {
-        const statusToCompare = selectedStatus === 'true' ? 'true' : 'false';
-        filteredResults = await filterEmployeesByStatus(statusToCompare);
+        filteredResults = await filterEmployeesByStatus(selectedStatus);
       }
 
       setFilteredData(filteredResults);

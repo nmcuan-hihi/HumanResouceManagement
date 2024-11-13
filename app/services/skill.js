@@ -1,4 +1,3 @@
-
 import {
   getDatabase,
   ref,
@@ -7,74 +6,60 @@ import {
   child,
   update,
   remove,
+  push
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
-import { firestore } from "../config/firebaseconfig";
+import { getStorage } from "firebase/storage";
 
-import { initializeApp } from "firebase/app";
-import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
-
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  getDocs,
-  setDoc,
-  doc,
-  getDoc,
-  updateDoc,
-  deleteDoc,
-} from "firebase/firestore";
 const database = getDatabase(app);
 const storage = getStorage(app); // Khởi tạo Firebase Storage
 
+// Thêm kỹ năng
 export const addSkill = async (skill) => {
   const skillId = skill.mask; // Sử dụng mask làm ID
   try {
-    await setDoc(doc(firestore, `skills/${skillId}`), skill); // Thêm kỹ năng vào Firestore
+    await set(ref(database, `skills/${skillId}`), skill); // Thêm kỹ năng vào Realtime Database
     console.log(`Skill ${skillId} added successfully!`);
   } catch (error) {
     console.error(`Error adding skill ${skillId}:`, error);
   }
 };
 
+// Cập nhật kỹ năng
 export const updateSkill = async (mask, updatedData) => {
   try {
-    const skillRef = doc(firestore, `skills/${mask}`); // Tham chiếu đến kỹ năng theo mask
-    await updateDoc(skillRef, updatedData); // Cập nhật kỹ năng
+    const skillRef = ref(database, `skills/${mask}`);
+    await update(skillRef, updatedData); // Cập nhật kỹ năng
     console.log(`Skill ${mask} updated successfully!`);
   } catch (error) {
     console.error(`Error updating skill ${mask}:`, error);
-    throw error; // Ném lỗi để xử lý ở component
+    throw error;
   }
 };
 
+// Xóa kỹ năng
 export const deleteSkill = async (mask) => {
   try {
-    const skillRef = doc(firestore, `skills/${mask}`); // Tham chiếu đến kỹ năng theo mask
-    await deleteDoc(skillRef); // Xóa kỹ năng
+    const skillRef = ref(database, `skills/${mask}`);
+    await remove(skillRef); // Xóa kỹ năng
     console.log(`Skill ${mask} deleted successfully!`);
   } catch (error) {
     console.error(`Error deleting skill ${mask}:`, error);
-    throw error; // Ném lỗi để xử lý ở component
+    throw error;
   }
 };
 
+// Đọc tất cả kỹ năng
 export const readSkills = async () => {
   try {
-    const skillsRef = collection(firestore, "skills"); // Tham chiếu đến collection 'skills'
-    const snapshot = await getDocs(skillsRef); // Lấy dữ liệu từ collection
+    const skillsRef = ref(database, "skills");
+    const snapshot = await get(skillsRef); // Lấy dữ liệu từ Realtime Database
 
-    if (!snapshot.empty) {
-      return snapshot.docs.map((doc) => ({
-        mask: doc.id, // Mã kỹ năng
-        tensk: doc.data().tensk, // Tên kỹ năng
+    if (snapshot.exists()) {
+      const skills = snapshot.val();
+      return Object.keys(skills).map((key) => ({
+        mask: key, // Mã kỹ năng
+        tensk: skills[key].tensk, // Tên kỹ năng
       }));
     } else {
       console.log("No skills available");
@@ -82,59 +67,59 @@ export const readSkills = async () => {
     }
   } catch (error) {
     console.error("Error reading skills:", error);
-    return []; // Trả về mảng rỗng nếu có lỗi
+    return [];
   }
 };
 
-// Hàm để đọc thông tin của một kỹ năng cụ thể từ Firebase bằng mask
-
+// Đọc thông tin một kỹ năng cụ thể
 export const readSkill1 = async (mask) => {
   try {
-    const skillRef = doc(firestore, `skills/${mask}`); // Tham chiếu đến kỹ năng theo mask
-    const snapshot = await getDoc(skillRef); // Lấy dữ liệu từ Firestore
+    const skillRef = ref(database, `skills/${mask}`);
+    const snapshot = await get(skillRef); // Lấy dữ liệu từ Realtime Database
 
     if (snapshot.exists()) {
-      const skillData = snapshot.data(); // Lấy dữ liệu kỹ năng
-      return { mask, tensk: skillData.tensk }; // Giả sử 'tensk' là tên kỹ năng trong dữ liệu
+      const skillData = snapshot.val();
+      return { mask, tensk: skillData.tensk }; // Giả sử 'tensk' là tên kỹ năng
     } else {
       console.log("Kỹ năng không tồn tại");
-      return null; // Nếu không tìm thấy kỹ năng, trả về null
+      return null;
     }
   } catch (error) {
     console.error("Lỗi khi đọc kỹ năng:", error);
-    return null; // Nếu có lỗi, trả về null
+    return null;
   }
 };
 
-export async function addSkillNV(Skill) {
+// Thêm kỹ năng nhân viên
+export const addSkillNV = async (Skill) => {
   try {
-    // Ghi dữ liệu nhân viên vào Firestore
-    await setDoc(doc(firestore, "skillnhanvien", `${Skill.employeeId}-${Skill.mask}`), Skill);
+    const skillRef = ref(database, `skillnhanvien/${Skill.employeeId}-${Skill.mask}`);
+    await set(skillRef, Skill); // Thêm kỹ năng nhân viên
     console.log(`Employee ${Skill.employeeId} added successfully!`);
   } catch (error) {
     console.error("Error adding employee:", error);
   }
-}
+};
 
-
-// Lấy danh sách bằng cấp của nhân viên
-export async function readSkillNhanVien() {
+// Lấy danh sách kỹ năng của nhân viên
+export const readSkillNhanVien = async () => {
   try {
-    const bangCapCollection = collection(firestore, "skillnhanvien");
-    const snapshot = await getDocs(bangCapCollection);
+    const skillNhanVienRef = ref(database, "skillnhanvien");
+    const snapshot = await get(skillNhanVienRef); // Lấy dữ liệu từ Realtime Database
 
-    if (!snapshot.empty) {
-      const skillnhanvien = {};
-      snapshot.forEach(doc => {
-        console.log("Document data:", doc.data()); // Log dữ liệu tài liệu để kiểm tra cấu trúc
-        skillnhanvien[doc.id] = doc.data();
+    if (snapshot.exists()) {
+      const skillnhanvien = snapshot.val();
+      const result = {};
+      Object.keys(skillnhanvien).forEach((key) => {
+        result[key] = skillnhanvien[key];
       });
-      return skillnhanvien; 
+      return result;
     } else {
       console.log("No data available");
       return null;
     }
   } catch (error) {
     console.error("Error reading employees:", error);
+    return null;
   }
-}
+};

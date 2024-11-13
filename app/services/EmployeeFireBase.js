@@ -1,159 +1,143 @@
 import {
-    getDatabase,ref,set,get,child,update,remove,
-  } from "firebase/database";
-  import { app } from "../config/firebaseconfig";
-  import { firestore } from '../config/firebaseconfig';
-  
-  import { initializeApp } from "firebase/app";
-  import {
-    getStorage,
-    ref as storageRef,
-    uploadBytes,
-    getDownloadURL,
-  } from "firebase/storage";
-  
-  import { collection, query, orderBy, limit, getDocs, setDoc, doc, getDoc } from "firebase/firestore";
-  
-  const database = getDatabase(app);
-  const storage = getStorage(app); // Khởi tạo Firebase Storage
-  
-  
-  export const editEmployeeFireStore = async (updatedData, newProfileImage = null) => {
-    const employeeId = updatedData.employeeId;
-  
-    console.log('Employee ID:', employeeId);
-    console.log('Updated Data:', updatedData);
-    
-    try {
-      const employeeDocRef = doc(firestore, "employees", employeeId);
-      console.log('Employee Document Reference:', employeeDocRef.path);
-  
-      // Kiểm tra nếu có ảnh mới cần cập nhật
-      let imageUrl = updatedData.imageUrl;
-      if (newProfileImage) {
-        const imageRef = storageRef(storage, `employee/${employeeId}.jpg`);
-        const response = await fetch(newProfileImage);
-        if (!response.ok) throw new Error('Failed to fetch new image');
-        
-        const blob = await response.blob();
-        await uploadBytes(imageRef, blob);
-        imageUrl = await getDownloadURL(imageRef);
-      }
-  
-      const updatedEmployee = { ...updatedData, imageUrl };
+  getDatabase, ref, set, get, child, update, remove
+} from "firebase/database";
+import { app } from "../config/firebaseconfig";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+
+const database = getDatabase(app);
+const storage = getStorage(app);
+
+// Function to edit employee in Realtime Database
+export const editEmployeeFireStore = async (updatedData, newProfileImage = null) => {
+  const employeeId = updatedData.employeeId;
+
+  console.log('Employee ID:', employeeId);
+  console.log('Updated Data:', updatedData);
+
+  try {
+    const employeeRef = ref(database, `employees/${employeeId}`);
+
+    // Check if a new image is provided
+    let imageUrl = updatedData.imageUrl;
+    if (newProfileImage) {
+      const imageRef = storageRef(storage, `employee/${employeeId}.jpg`);
+      const response = await fetch(newProfileImage);
+      if (!response.ok) throw new Error('Failed to fetch new image');
       
-      console.log('Updated Employee Data:', updatedEmployee);
-  
-      // Sử dụng set với merge
-      await setDoc(employeeDocRef, updatedEmployee, { merge: true });
-  
-      console.log(`Employee ${employeeId} updated successfully!`);
-    } catch (error) {
-      console.error(`Error updating employee ${employeeId}:`, error);
-      throw new Error("Failed to update employee!");
-    }
-  };
-  
-  
-  export const addEmployeeFireStore = async (employee,profileImage) => {
-    try {
-      employee.employeeId = await getNewEmployeeId();
-      employee.matKhau = employee.employeeId; 
-      
-      // Tạo tham chiếu tới nơi lưu trữ hình ảnh
-    const imageRef = storageRef(
-        storage,
-        `employee/${employee.employeeId}.jpg`
-      );
-  
-      // Tải lên hình ảnh
-      const response = await fetch(profileImage);
       const blob = await response.blob();
       await uploadBytes(imageRef, blob);
-  
-      // Lấy URL hình ảnh
-      const imageUrl = await getDownloadURL(imageRef);
-  
-      // Cập nhật imageUrl vào employeeData
-      const emp = { ...employee, imageUrl };
-  
-      // Thêm nhân viên vào Firestore với employeeId làm ID
-      await setDoc(doc(firestore, "employees", employee.employeeId), emp);
-      console.log("Employee successfully added to Firestore!");
-    } catch (error) {
-      console.error("Error adding employee:", error);
+      imageUrl = await getDownloadURL(imageRef);
     }
-  };
-  
-  // Hàm đọc danh sách nhân viên từ Firestore
+
+    const updatedEmployee = { ...updatedData, imageUrl };
+    
+    console.log('Updated Employee Data:', updatedEmployee);
+
+    // Update the employee data in Realtime Database
+    await update(employeeRef, updatedEmployee);
+
+    console.log(`Employee ${employeeId} updated successfully!`);
+  } catch (error) {
+    console.error(`Error updating employee ${employeeId}:`, error);
+    throw new Error("Failed to update employee!");
+  }
+};
+
+// Function to add a new employee in Realtime Database
+export const addEmployeeFireStore = async (employee, profileImage) => {
+  try {
+    employee.employeeId = await getNewEmployeeId();
+    employee.matKhau = employee.employeeId; 
+
+    // Reference for the image in storage
+    const imageRef = storageRef(storage, `employee/${employee.employeeId}.jpg`);
+
+    // Upload image
+    const response = await fetch(profileImage);
+    const blob = await response.blob();
+    await uploadBytes(imageRef, blob);
+
+    // Get image URL
+    const imageUrl = await getDownloadURL(imageRef);
+
+    // Update employee data with image URL
+    const emp = { ...employee, imageUrl };
+
+    // Add employee to Realtime Database
+    await set(ref(database, `employees/${employee.employeeId}`), emp);
+    console.log("Employee successfully added to Realtime Database!");
+  } catch (error) {
+    console.error("Error adding employee:", error);
+  }
+};
+
+// Function to read all employees from Realtime Database
 export async function readEmployeesFireStore() {
-    try {
-      const employeeCollection = collection(firestore, "employees"); 
-      const employeeSnapshot = await getDocs(employeeCollection); 
-  
-      if (!employeeSnapshot.empty) {
-        const employees = employeeSnapshot.docs.map(doc => ({
-          id: doc.id, // Thêm id của tài liệu
-          ...doc.data(), // Thêm dữ liệu của tài liệu
-        }));
-  
-        return employees; // Trả về danh sách nhân viên
-      } else {
-        console.log("No data available");
-        return null; // Không có dữ liệu
-      }
-    } catch (error) {
-      console.error("Error reading employees:", error);
-      throw error; // Ném lỗi nếu có
-    }
-  }
+  try {
+    const employeeRef = ref(database, "employees");
+    const snapshot = await get(employeeRef);
 
-// Hàm lấy thông tin nhân viên theo ID
+    if (snapshot.exists()) {
+      const employees = [];
+      snapshot.forEach((childSnapshot) => {
+        employees.push({ id: childSnapshot.key, ...childSnapshot.val() });
+      });
+
+      return employees;
+    } else {
+      console.log("No data available");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error reading employees:", error);
+    throw error;
+  }
+}
+
+// Function to get employee by ID from Realtime Database
 export async function getEmployeeById(employeeId) {
-    try {
-      const employeeDocRef = doc(firestore, "employees", employeeId); // Tham chiếu đến tài liệu nhân viên theo ID
-      const employeeDoc = await getDoc(employeeDocRef); // Lấy tài liệu
-  
-      if (employeeDoc.exists()) {
-        return {
-          id: employeeDoc.id, 
-          ...employeeDoc.data(), 
-        };
-      } else {
-        console.log("No such employee!");
-        return null; // Không tìm thấy nhân viên
-      }
-    } catch (error) {
-      console.error("Error getting employee by ID:", error);
-      throw error; // Ném lỗi nếu có
+  try {
+    const employeeRef = ref(database, `employees/${employeeId}`);
+    const snapshot = await get(employeeRef);
+
+    if (snapshot.exists()) {
+      return { id: employeeId, ...snapshot.val() };
+    } else {
+      console.log("No such employee!");
+      return null;
     }
+  } catch (error) {
+    console.error("Error getting employee by ID:", error);
+    throw error;
   }
+}
 
-
-
-  // Hàm lấy mã nhân viên mới với +1
+// Function to generate new employee ID
 export async function getNewEmployeeId() {
-    try {
-      const q = query(
-        collection(firestore, "employees"),
-        orderBy("employeeId", "desc"), // Sắp xếp theo mã giảm dần
-        limit(1) // Lấy nhân viên có mã lớn nhất
-      );
-  
-      const querySnapshot = await getDocs(q);
-  
-      let newId;
-      if (!querySnapshot.empty) {
-        const latestEmployee = querySnapshot.docs[0].data();
-        const latestId = parseInt(latestEmployee.employeeId.slice(2)); 
-        newId = `NV${(latestId + 1).toString().padStart(3, '0')}`;
-      } else {
-        // Trường hợp chưa có nhân viên nào
-        newId = "NV000";
-      }
-      return newId;
-    } catch (error) {
-      console.error("Error fetching latest employee ID:", error);
-      throw error;
+  try {
+    const employeeRef = ref(database, "employees");
+    const snapshot = await get(employeeRef);
+
+    let newId;
+    if (snapshot.exists()) {
+      const employees = [];
+      snapshot.forEach((childSnapshot) => {
+        employees.push(childSnapshot.key);
+      });
+
+      const latestId = Math.max(...employees.map(id => parseInt(id.slice(2)))) || 0;
+      newId = `NV${(latestId + 1).toString().padStart(3, '0')}`;
+    } else {
+      newId = "NV000";
     }
+    return newId;
+  } catch (error) {
+    console.error("Error fetching latest employee ID:", error);
+    throw error;
   }
+}
