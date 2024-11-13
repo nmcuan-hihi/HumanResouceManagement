@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform , Modal,ActivityIndicator} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { filterEmployeesByPhongBan } from '../../services/PhongBanDatabase';  // Hàm lọc nhân viên theo phòng ban
@@ -8,7 +8,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { readPhongBan1Firestore } from '../../services/PhongBanDatabase';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
 import { addChiTietChamCongToFireStore } from '../../services/chamcong';  // Import your Firestore function for adding attendance
-
+import { filterEmployeesByStatus } from '../../services/PhongBanDatabase';
 export default function ChamCongNV() {
   const [timeIn, setTimeIn] = useState(new Date());
   const [timeOut, setTimeOut] = useState(new Date());
@@ -21,14 +21,14 @@ export default function ChamCongNV() {
   const [selectAll, setSelectAll] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
-
+  const [loading, setLoading] = useState(false); // State for loading modal
   const [openStatus, setOpenStatus] = useState(false);
   const [valueStatus, setValueStatus] = useState(null);
 
   useEffect(() => {
     async function fetchEmployees() {
       try {
-        const employeesData = await readEmployeesFireStore();
+        const employeesData = await filterEmployeesByStatus("true");
         if (employeesData) {
           setEmployees(employeesData);
         }
@@ -118,32 +118,32 @@ export default function ChamCongNV() {
   }));
 
   const handleSaveAttendance = async () => {
+    setLoading(true);  // Show loading modal
     try {
-      // Lọc ra danh sách nhân viên đã được "check"
       const selectedEmployees = employees.filter(employee => employee.trangthai === 'checked');
-  
-      // Nếu không có nhân viên nào được chọn, thông báo lỗi
       if (selectedEmployees.length === 0) {
         alert('Vui lòng chọn ít nhất một nhân viên để chấm công');
+        setLoading(false); // Hide loading modal
         return;
       }
-  
-      // Thêm thông tin chấm công cho những nhân viên đã được chọn
+
       const attendanceData = selectedEmployees.map(employee => ({
         employeeId: employee.employeeId,
         timeIn,
         timeOut,
-        status: valueStatus,  // Trạng thái công việc
+        status: valueStatus,
         month: selectedMonth,
       }));
-  
-      // Lưu dữ liệu chấm công cho mỗi nhân viên
+
       for (const data of attendanceData) {
-        await addChiTietChamCongToFireStore(data);  // Hàm lưu dữ liệu vào Firestore
+        await addChiTietChamCongToFireStore(data);
       }
       alert('Chấm công thành công!');
     } catch (error) {
       console.error("Error saving attendance:", error);
+      alert('Đã xảy ra lỗi khi chấm công.');
+    } finally {
+      setLoading(false); // Hide loading modal
     }
   };
   
@@ -245,7 +245,19 @@ export default function ChamCongNV() {
           </View>
         ))}
       </ScrollView>
-
+      <Modal
+        transparent={true}
+        visible={loading}
+        animationType="fade"
+        onRequestClose={() => setLoading(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <ActivityIndicator size="large" color="#007BFF" />
+            <Text style={styles.loadingText}>Đang chấm công...</Text>
+          </View>
+        </View>
+      </Modal>
       {/* Time Pickers */}
       {showTimePicker.timeIn && (
         <DateTimePicker
@@ -279,6 +291,24 @@ export default function ChamCongNV() {
 
 
 const styles = StyleSheet.create({
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: 150,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#333',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

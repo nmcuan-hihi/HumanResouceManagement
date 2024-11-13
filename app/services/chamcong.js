@@ -84,6 +84,7 @@ export const addChiTietChamCongToFireStore = async (attendanceData) => {
       diMuon,
       vangMat,
       tangCa,
+      loaiChamCong: "0",
       createdAt: serverTimestamp(),
     });
 
