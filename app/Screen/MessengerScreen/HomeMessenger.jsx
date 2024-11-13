@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, RefreshControl } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons,FontAwesome5  } from '@expo/vector-icons';
 import { getEmployeeById, readEmployeesFireStore } from '../../services/EmployeeFireBase';
 import { ref, onValue, update } from 'firebase/database';
 import { database } from '../../config/firebaseconfig';
@@ -80,15 +80,18 @@ export default function HomeMessenger({ navigation, route }) {
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   };
 
-  const handleChatItemPress = async (id) => {
+  const handleChatItemPress = async (id, lastSend) => {
     const empToId = id.replace('_', '').replace(employee.employeeId, '');
     const employeeTo = await getEmployeeById(empToId);
   
-    // Cập nhật trạng thái "Đã đọc" trong Firebase
+    if(empToId == lastSend){
+       // Cập nhật trạng thái "Đã đọc" trong Firebase
     const chatRef = ref(database, `chats/${id}`);
     await update(chatRef, {
       status: '1', // 1 = Đã đọc
     });
+    }
+   
   
     // Điều hướng đến màn hình chi tiết trò chuyện
     navigation.navigate('MesengerDetails', { empFrom: employee, empTo: employeeTo });
@@ -98,9 +101,12 @@ export default function HomeMessenger({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Messenger</Text>
+        <View>
+           <Text style={styles.title}>Messenger</Text>
+
+        </View>
         <TouchableOpacity style={styles.addButton} onPress={() => setVisibleModal(true)}>
-          <Ionicons name="add" size={24} color="white" />
+        <FontAwesome5 name="facebook-messenger" size={24} color="blue" />
         </TouchableOpacity>
       </View>
 
@@ -111,7 +117,7 @@ export default function HomeMessenger({ navigation, route }) {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.chatItem}
-            onPress={() => handleChatItemPress(item.id)}
+            onPress={() => handleChatItemPress(item.id, item.lastSend)}
           >
             <View style={styles.chatItemContent}>
               <View>
@@ -207,14 +213,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
   },
-  title: {
+  title: {    
+    
     fontSize: 20,
-    color: 'black',
+    color: 'blue',
     fontWeight: 'bold',
   },
   addButton: {
-    backgroundColor: '#1E88E5',
-    borderRadius: 50,
+    // backgroundColor: '#1E88E5',
+    // borderRadius: 50,
     padding: 8,
   },
   chatList: {
@@ -275,7 +282,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 40,
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 5,
     padding: 8,
     marginBottom: 10,
   },

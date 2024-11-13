@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { sendMessage, generateChatID } from '../../services/MessengerDB'; // Đảm bảo đường dẫn đúng
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { sendMessage, generateChatID } from '../../services/MessengerDB';
 import BackNav from '../../Compoment/BackNav';
-import { database } from '../../config/firebaseconfig'; // Đảm bảo đường dẫn đúng
-import { ref, get, set, onValue } from 'firebase/database'; // Lấy các hàm của Firebase Realtime Database
+import { database } from '../../config/firebaseconfig';
+import { ref, get, set, onValue } from 'firebase/database';
+import moment from 'moment';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function MesengerDetails({ navigation, route }) {
   const { empFrom, empTo } = route.params;
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const flatListRef = useRef(null);
   const chatID = generateChatID(empFrom.employeeId, empTo.employeeId);
 
-  // Hàm lấy hoặc tạo cuộc trò chuyện
   const getMessenger = async (id1, id2) => {
     const chatID = generateChatID(id1, id2);
     const chatRef = ref(database, `chats/${chatID}`);
     const messagesRef = ref(database, `messages/${chatID}`);
 
     try {
-      // Kiểm tra xem cuộc trò chuyện có tồn tại không
       const chatSnapshot = await get(chatRef);
       if (chatSnapshot.exists()) {
-        // Cuộc trò chuyện tồn tại, lấy tin nhắn
         const messagesSnapshot = await get(messagesRef);
         const messages = [];
         messagesSnapshot.forEach(childSnapshot => {
@@ -29,7 +29,6 @@ export default function MesengerDetails({ navigation, route }) {
         });
         return { chatID, messages };
       } else {
-        // Cuộc trò chuyện không tồn tại, tạo cuộc trò chuyện mới
         await set(chatRef, {
           participants: [id1, id2],
           lastMessage: '',
@@ -46,13 +45,11 @@ export default function MesengerDetails({ navigation, route }) {
   };
 
   useEffect(() => {
-    // Lấy tin nhắn và tạo cuộc trò chuyện nếu cần
     const fetchMessages = async () => {
       try {
         const { messages } = await getMessenger(empFrom.employeeId, empTo.employeeId);
         setMessages(messages);
 
-        // Lắng nghe thay đổi tin nhắn trong thời gian thực
         const messagesRef = ref(database, 'messages/' + chatID);
         const unsubscribe = onValue(messagesRef, (snapshot) => {
           const data = snapshot.val();
@@ -61,6 +58,7 @@ export default function MesengerDetails({ navigation, route }) {
               id: key,
               sender: data[key].sender,
               text: data[key].text,
+              timestamp: data[key].timestamp,
             }));
             setMessages(messageList);
           } else {
@@ -68,7 +66,6 @@ export default function MesengerDetails({ navigation, route }) {
           }
         });
 
-        // Dọn dẹp khi component bị unmount
         return () => unsubscribe();
       } catch (error) {
         console.error('Lỗi khi lấy tin nhắn:', error);
@@ -89,20 +86,38 @@ export default function MesengerDetails({ navigation, route }) {
     }
   };
 
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
       <BackNav name={empTo.name} />
-      <Text style={styles.header}>Chat between {empFrom.name} and {empTo.name}</Text>
-      <FlatList
-        
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.messageItem}>
-            <Text>{item.sender === empFrom.employeeId ? empFrom.name : empTo.name}: {item.text}</Text>
-          </View>
-        )}
-      />
+      <View style={{ flex: 14 }}>
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.timestamp}
+          renderItem={({ item }) => (
+            <View
+              style={[
+                styles.messageItem,
+                item.sender === empFrom.employeeId ? styles.messageFrom : styles.messageTo,
+              ]}
+            >
+              <Text style={styles.messageText}>{item.text}</Text>
+              <Text style={styles.timestamp}>{moment(item.timestamp).format('HH:mm DD/MM')}</Text>
+            </View>
+          )}
+          onContentSizeChange={() => flatListRef.current.scrollToEnd({ animated: true })}
+        />
+      </View>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -111,10 +126,10 @@ export default function MesengerDetails({ navigation, route }) {
           onChangeText={setNewMessage}
         />
         <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-          <Text style={styles.sendButtonText}>Send</Text>
+        <FontAwesome name="send-o" size={20} color="white" />
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -124,22 +139,35 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#fff',
   },
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
   messageItem: {
+    maxWidth: '70%',
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    marginVertical: 5,
+    borderRadius: 10,
+  },
+  messageFrom: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#DCF8C6',
+  },
+  messageTo: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E5E5EA',
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  timestamp: {
+    fontSize: 8,
+    color: '#888',
+    alignSelf: 'flex-end',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
+  
   },
   input: {
     flex: 1,
@@ -150,6 +178,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   sendButton: {
+
+    alignItems: "center",
+    width: "17%",
     marginLeft: 10,
     backgroundColor: '#1E88E5',
     borderRadius: 5,

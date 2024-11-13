@@ -34,11 +34,13 @@ export default function BackNav({ name, soLuong, btn, onEditPress }) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
+   
     flex: 1,
     backgroundColor: '#ffff',
   },
   header: {
+    paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
