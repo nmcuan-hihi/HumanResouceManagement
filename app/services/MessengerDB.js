@@ -7,7 +7,7 @@ export const generateChatID = (id1, id2) => {
   return [id1, id2].sort().join('_');
 };
 
-// Hàm lấy hoặc tạo cuộc trò chuyện giữa hai nhân viên
+// Hàm lấy hoặc tạo cuộc trò chuyện
 export const getMessenger = async (id1, id2) => {
   const chatID = generateChatID(id1, id2);
   const chatRef = ref(database, `chats/${chatID}`);
@@ -29,7 +29,9 @@ export const getMessenger = async (id1, id2) => {
       await set(chatRef, {
         participants: [id1, id2],
         lastMessage: '',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        status: false,
+        lastSend: id1,
       });
       return { chatID, messages: [] };
     }
@@ -38,6 +40,7 @@ export const getMessenger = async (id1, id2) => {
     throw error;
   }
 };
+
 
 // Hàm gửi tin nhắn
 export const sendMessage = async (chatID, senderID, text) => {

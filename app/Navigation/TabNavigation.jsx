@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
-import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { Badge } from "react-native-elements";
-
+import { useEffect } from 'react';
+import { ref, onValue } from 'firebase/database';
 // Import các màn hình
 import TestScreen from "../Screen/FolderTest/TestScreen";
 import HomeScreen from "../Screen/HomeScreen/HomeScreen";
@@ -14,20 +15,48 @@ import QuanLyMucLuong from "../Screen/QuanLyLuong/QuanLyMucLuong";
 import ChammCong from "../Screen/MarkAttendaceScreen/MarkAttendace";
 import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
 import HomeMessenger from "../Screen/MessengerScreen/HomeMessenger";
+import { database } from "../config/firebaseconfig";
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigation({ route }) {
   const { employee } = route.params || {};
   const role = employee?.chucvuId; // Kiểm tra role từ params
+  const userID = employee.employeeId;
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Example unread counts
+
   const unreadNotifications = 1;
-  const unreadMessages = 3;
+  useEffect(() => {
+    // Set up a listener for changes in the "chats" node
+    const chatsRef = ref(database, "chats");
+    const unsubscribe = onValue(chatsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        let count = 0;
+        snapshot.forEach((childSnapshot) => {
+          const chatData = childSnapshot.val();
+          const { lastSend, status, participants } = chatData; 
+          if ( participants.includes(userID)) {
+          
+            if (lastSend !== userID && status === "0") {
+              count += 1; // Increment unread count
+            }
+          }
+        });
+        setUnreadCount(count);
+      } else {
+        setUnreadCount(0); 
+      }
+    });
+  
+    return () => unsubscribe(); 
+  }, [userID]);
+  
 
-  // Custom icon with badge
+
+
   const IconWithBadge = ({ name, badgeCount, color, size, iconType }) => {
-    const IconComponent = iconType === "MaterialIcons" ? MaterialIcons : FontAwesome;
+    const IconComponent = iconType === "MaterialIcons" ? MaterialIcons : AntDesign;
     return (
       <View style={{ width: 24, height: 24, margin: 5 }}>
         <IconComponent name={name} size={size} color={color} />
@@ -71,7 +100,7 @@ export default function TabNavigation({ route }) {
             </Text>
           ),
           tabBarIcon: ({ color }) => (
-            <IconWithBadge name="message" size={24} color={color} badgeCount={unreadMessages} iconType="MaterialIcons" />
+            <IconWithBadge name="message1" size={24} color={color} badgeCount={unreadCount} iconType="AntDesign" />
           ),
         }}
       />
