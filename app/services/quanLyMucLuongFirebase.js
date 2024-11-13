@@ -1,101 +1,85 @@
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  query,
-  where,
-  addDoc,
-  setDoc,
-} from "firebase/firestore";
-import { app } from "../config/firebaseconfig"; // Để đảm bảo bạn đã cấu hình đúng
-import { Timestamp } from 'firebase/firestore';
+import { getDatabase, ref, get, update, query, orderByChild, equalTo, push } from "firebase/database";
+import { app } from "../config/firebaseconfig"; // Đảm bảo bạn đã cấu hình đúng
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
-const firestore = getFirestore(app);
 
+const db = getDatabase(app);
+
+// Lấy công thức lương từ Realtime Database
 export async function getCongThucLuong() {
   try {
-    const querySnapshot = await getDocs(collection(firestore, "congthucluong"));
+    const congThucLuongRef = ref(db, "congthucluong");
+    const snapshot = await get(congThucLuongRef);
 
-    if (!querySnapshot.empty) {
-      const firstDoc = querySnapshot.docs[0]; // Lấy document đầu tiên
-      return firstDoc.data();
-      return;
+    if (snapshot.exists()) {
+      return snapshot.val();
     } else {
-      console.log("Collection rỗng!");
+      console.log("Không tìm thấy dữ liệu công thức lương!");
     }
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error);
   }
 }
 
+// Cập nhật công thức lương
 export async function updateCongThucLuong(newData) {
   try {
-    const docRef = doc(firestore, "congthucluong", "ctl1");
-    await updateDoc(docRef, newData);
+    const congThucLuongRef = ref(db, "congthucluong/ctl1");
+    await update(congThucLuongRef, newData);
     console.log("Document successfully updated!");
   } catch (error) {
     console.error("Error updating document:", error);
   }
 }
+
+// Lấy chi tiết chấm công theo employeeId
 export async function getChamCongDetailsByEmployeeId(employeeId) {
   try {
-    const chamCongCollection = collection(firestore, "chitietchamcong");
-    const q = query(chamCongCollection, where("employeeId", "==", employeeId));
-    const querySnapshot = await getDocs(q);
+    const chamCongRef = query(ref(db, "chitietchamcong"), orderByChild("employeeId"), equalTo(employeeId));
+    const snapshot = await get(chamCongRef);
 
-    const data = querySnapshot.docs.map((doc) => {
-      const docData = doc.data();
-      const checkIn = docData.timeIn; // Assuming timeIn is the field name
-      const checkOut = docData.timeOut; // Assuming timeOut is the field name
+    const data = [];
+    snapshot.forEach((doc) => {
+      const docData = doc.val();
+      const checkInDate = new Date(docData.timeIn * 1000);
+      const checkOutDate = new Date(docData.timeOut * 1000);
+      const hoursWorked = (checkOutDate - checkInDate) / (1000 * 60 * 60);
 
-      // Convert timeIn and timeOut to Date if they are Timestamps
-      const checkInDate = checkIn instanceof Timestamp ? checkIn.toDate() : new Date(checkIn);
-      const checkOutDate = checkOut instanceof Timestamp ? checkOut.toDate() : new Date(checkOut);
-
-      // Calculate the hours worked
-      const hoursWorked = (checkOutDate - checkInDate) / (1000 * 60 * 60); // Convert milliseconds to hours
-
-      return {
-        id: doc.id,
+      data.push({
+        id: doc.key,
         date: dayjs(checkInDate).format("YYYY-MM-DD"),
         checkIn: dayjs(checkInDate).format("HH:mm"),
         checkOut: dayjs(checkOutDate).format("HH:mm"),
-        hoursWorked: hoursWorked.toFixed(2), // Hours worked rounded to two decimal places
-      };
+        hoursWorked: hoursWorked.toFixed(2),
+      });
     });
 
     return data;
   } catch (error) {
-    console.error("Error fetching timekeeping data:", error);
+    console.error("Lỗi khi lấy dữ liệu chấm công:", error);
     throw error;
   }
 }
 
-
-
+// Lấy tất cả chi tiết chấm công
 export async function getAllChamCongDetails() {
   try {
-    const chamCongCollection = collection(firestore, "chitietchamcong");
+    const chamCongRef = ref(db, "chitietchamcong");
+    const snapshot = await get(chamCongRef);
 
-    const querySnapshot = await getDocs(chamCongCollection);
-
-    const data = querySnapshot.docs.map((doc) => {
-      const docData = doc.data();
-
-      // Kiểm tra và chuyển đổi trường 'month' từ Timestamp sang định dạng mong muốn
+    const data = [];
+    snapshot.forEach((doc) => {
+      const docData = doc.val();
       let formattedMonth = null;
       if (docData.month) {
-        const monthDate = docData.month.toDate(); // Chuyển đổi từ Timestamp sang Date
-        formattedMonth = dayjs(monthDate).format("YYYY-MM-DD"); // Định dạng ngày theo ý muốn
+        const monthDate = new Date(docData.month * 1000);
+        formattedMonth = dayjs(monthDate).format("YYYY-MM-DD");
       }
 
-      return {
-        id: doc.id, // Lấy ID của document
-        ...docData, // Lấy dữ liệu của document
-        month: formattedMonth, // Thêm trường đã định dạng vào kết quả
-      };
+      data.push({
+        id: doc.key,
+        ...docData,
+        month: formattedMonth,
+      });
     });
 
     return data;
@@ -104,29 +88,20 @@ export async function getAllChamCongDetails() {
     throw error;
   }
 }
+
+// Lấy bảng lương
 export async function getBangLuong() {
   try {
-    // Tham chiếu đến collection 'bangluongnhanvien'
-    const bangluongCollection = collection(firestore, "bangluongnhanvien");
+    const bangLuongRef = ref(db, "bangluongnhanvien");
+    const snapshot = await get(bangLuongRef);
 
-    // Lấy các tài liệu từ collection
-    const querySnapshot = await getDocs(bangluongCollection);
-
-    // Duyệt qua từng tài liệu và trả về dữ liệu
-    const data = querySnapshot.docs.map((doc) => {
-      const docData = doc.data();
-      return {
-        id: doc.id,
-        chuyencan: docData.chuyencan,
-        employeeId: docData.employeeId,
-        luong: docData.luong,
-        ngaycong: docData.ngaycong,
-        phucap: docData.phucap,
-        tangca: docData.tangca,
-        thamnien: docData.thamnien,
-        thang: docData.thang,
-        thucnhan: docData.thucnhan,
-      };
+    const data = [];
+    snapshot.forEach((doc) => {
+      const docData = doc.val();
+      data.push({
+        id: doc.key,
+        ...docData,
+      });
     });
 
     return data;
@@ -135,40 +110,29 @@ export async function getBangLuong() {
     throw error;
   }
 }
+
+// Lấy chi tiết chấm công theo tháng
 export async function getChamCongDetailsByMonth(year, month) {
   try {
-    // Tham chiếu đến collection 'chitietchamcong'
-    const chamCongCollection = collection(firestore, "chitietchamcong");
+    const chamCongRef = ref(db, "chitietchamcong");
+    const snapshot = await get(chamCongRef);
 
-    // Tạo mốc thời gian bắt đầu và kết thúc cho tháng cần tìm
-    const startOfMonth = dayjs(`${year}-${month + 1}-01`).toDate();
-    const endOfMonth = dayjs(`${year}-${month + 2}-01`).toDate();
-
-    // Tạo truy vấn để lấy các tài liệu có 'month' trong khoảng thời gian trên
-    const monthQuery = query(
-      chamCongCollection,
-      where("month", ">=", startOfMonth),
-      where("month", "<", endOfMonth)
-    );
-
-    // Lấy các tài liệu phù hợp với truy vấn
-    const querySnapshot = await getDocs(monthQuery);
-
-    // Duyệt qua từng tài liệu và xử lý dữ liệu của trường 'month'
-    const data = querySnapshot.docs.map((doc) => {
-      const docData = doc.data();
-
-      // Chuyển 'month' từ Timestamp sang Date
-      const monthDate = docData.month.toDate();
-
-      // Chuyển đổi sang định dạng chuỗi mong muốn, ví dụ: 'YYYY-MM-DD'
+    const data = [];
+    snapshot.forEach((doc) => {
+      const docData = doc.val();
+      const monthDate = new Date(docData.month * 1000);
       const formattedMonth = dayjs(monthDate).format("YYYY-MM-DD");
 
-      return {
-        id: doc.id,
-        ...docData,
-        month: formattedMonth, // Thêm trường đã định dạng vào kết quả
-      };
+      if (
+        monthDate.getFullYear() === year &&
+        monthDate.getMonth() === month
+      ) {
+        data.push({
+          id: doc.key,
+          ...docData,
+          month: formattedMonth,
+        });
+      }
     });
 
     return data;
@@ -178,35 +142,38 @@ export async function getChamCongDetailsByMonth(year, month) {
   }
 }
 
+// Lưu danh sách lương vào Realtime Database
 export async function luuDanhSachLuongFirebase(salaryList) {
-  const salaryCollection = collection(firestore, "bangluongnhanvien");
+  try {
+    for (const salaryEntry of salaryList) {
+      const documentKey = `${salaryEntry.employeeId}-${salaryEntry.thang}`;
+      const salaryRef = ref(db, `bangluongnhanvien/${documentKey}`);
 
-  salaryList.forEach(async (salaryEntry) => {
-    const salaryData = salaryEntry;
-    const documentKey = `${salaryData.employeeId}-${salaryData.thang}`;
-
-    const docRef = doc(salaryCollection, documentKey);
-
-    try {
-      await setDoc(docRef, salaryData);
-      console.log("Document successfully written for key: ", documentKey);
-    } catch (error) {
-      console.error("Error writing document for key: ", documentKey, error);
+      await update(salaryRef, salaryEntry);
+      console.log("Document successfully written for key:", documentKey);
     }
-  });
+  } catch (error) {
+    console.error("Error writing document:", error);
+  }
 }
 
+// Lấy danh sách bảng lương theo tháng
 export async function layDanhSachBangLuongTheoThang(thang) {
-  const salaryCollection = collection(firestore, "bangluongnhanvien");
+  try {
+    const bangLuongRef = query(ref(db, "bangluongnhanvien"), orderByChild("thang"), equalTo(thang));
+    const snapshot = await get(bangLuongRef);
 
-  const querySnapshot = await getDocs(
-    query(salaryCollection, where("thang", "==", thang))
-  );
+    const salaryList = [];
+    snapshot.forEach((doc) => {
+      salaryList.push({
+        id: doc.key,
+        ...doc.val(),
+      });
+    });
 
-  const salaryList = [];
-  querySnapshot.forEach((doc) => {
-    salaryList.push({ id: doc.id, ...doc.data() });
-  });
-
-  return salaryList;
+    return salaryList;
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu từ collection:", error);
+    throw error;
+  }
 }

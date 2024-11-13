@@ -1,27 +1,14 @@
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore"; // Import các hàm Firestore
-import { app } from "../config/firebaseconfig"; // Giả sử bạn đã cấu hình firebase ở đây
+import { getDatabase, ref, set, get, update, child, push, query, orderByChild, equalTo, onValue } from "firebase/database";
+import { app } from "../config/firebaseconfig"; // Firebase configuration here
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const firestore = getFirestore(app);
-const storage = getStorage(app); // Khởi tạo Firebase Storage
+const database = getDatabase(app);
+const storage = getStorage(app); // Initialize Firebase Storage
 
-import { updateDoc,query, where } from "firebase/firestore"; // Đảm bảo đã import hàm này
-
-
-
-
-
+// Function to add a qualification for an employee, with image upload
 export async function addBangCapNV(bangCap, image) {
   function random(length) {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * characters.length);
@@ -32,98 +19,114 @@ export async function addBangCapNV(bangCap, image) {
 
   const randomImg = random(20);
   try {
-    // Tạo tham chiếu tới nơi lưu trữ hình ảnh
+    // Create a reference to the image storage location
     const imageRef = storageRef(storage, `bangcap/${randomImg}.jpg`);
 
-    // Tải lên hình ảnh
+    // Upload the image
     const response = await fetch(image);
     const blob = await response.blob();
     await uploadBytes(imageRef, blob);
 
-    // Lấy URL hình ảnh
+    // Get the image URL
     const imageUrl = await getDownloadURL(imageRef);
 
-    // Cập nhật imageUrl vào employeeData
+    // Add imageUrl to the data
     const data = { ...bangCap, imageUrl };
 
-    // Ghi dữ liệu nhân viên vào Firestore
-    await setDoc(doc(firestore, "bangcapnhanvien", `${bangCap.employeeId}-${bangCap.bangcap_id}`), data);
+    // Write employee qualification data to Realtime Database
+    await set(ref(database, `bangcapnhanvien/${bangCap.employeeId}-${bangCap.bangcap_id}`), data);
     console.log(`Employee ${bangCap.employeeId} added successfully!`);
   } catch (error) {
     console.error("Error adding employee:", error);
   }
 }
 
-// Hàm lấy chi tiết bằng cấp của nhân viên dựa trên bangcap_id và employeeId
+// Function to get qualification details of an employee based on bangcap_id and employeeId
 export async function readBangCapNhanVien1(bangcap_id, employeeId) {
   try {
-    const bangCapRef = collection(firestore, "bangcapnhanvien");
-    const q = query(
-      bangCapRef,
-      where("bangcap_id", "==", bangcap_id),
-      where("employeeId", "==", employeeId)
+    const bangCapRef = query(
+      ref(database, "bangcapnhanvien"),
+      orderByChild("bangcap_id"),
+      equalTo(bangcap_id)
     );
 
-    const querySnapshot = await getDocs(q);
+    const snapshot = await get(bangCapRef);
 
-    if (!querySnapshot.empty) {
-      const bangCapDetail = querySnapshot.docs[0].data(); // Lấy tài liệu đầu tiên khớp với điều kiện
-      return bangCapDetail;
+    if (snapshot.exists()) {
+      let bangCapDetail = null;
+      snapshot.forEach((childSnapshot) => {
+        if (childSnapshot.val().employeeId === employeeId) {
+          bangCapDetail = childSnapshot.val();
+        }
+      });
+      return bangCapDetail ? bangCapDetail : {}; // Return found document or empty object
     } else {
       console.log("No document found with the provided bangcap_id and employeeId");
-      return {}; // Trả về đối tượng rỗng nếu không tìm thấy dữ liệu
+      return {}; // Return an empty object if no data found
     }
   } catch (error) {
     console.error("Error reading qualification by bangcap_id and employeeId:", error);
-    return {}; // Trả về đối tượng rỗng nếu xảy ra lỗi
+    return {}; // Return an empty object if an error occurs
   }
 }
 
-
-
-// Lấy danh sách bằng cấp của nhân viên
+// Function to get all employee qualifications
 export async function readBangCapNhanVien() {
   try {
-    const bangCapCollection = collection(firestore, "bangcapnhanvien");
-    const snapshot = await getDocs(bangCapCollection);
+    const bangCapRef = ref(database, "bangcapnhanvien");
+    const snapshot = await get(bangCapRef);
 
-    if (!snapshot.empty) {
+    if (snapshot.exists()) {
       const bangcapnhanvien = {};
-      snapshot.forEach(doc => {
-        bangcapnhanvien[doc.id] = doc.data(); // Giả sử bạn muốn giữ id của document làm key
+      snapshot.forEach((childSnapshot) => {
+        bangcapnhanvien[childSnapshot.key] = childSnapshot.val();
       });
-      return bangcapnhanvien; 
+      return bangcapnhanvien;
     } else {
       console.log("No data available");
-      return null; // Không có dữ liệu
+      return null; // Return null if no data is available
     }
   } catch (error) {
     console.error("Error reading employees:", error);
   }
 }
 
-// Cập nhật trạng thái xác thực bằng cấp
+// Real-time listener for employee qualifications
+export function listenToBangCapNhanVienUpdates(callback) {
+  const bangCapRef = ref(database, "bangcapnhanvien");
+
+  onValue(bangCapRef, (snapshot) => {
+    const bangcapnhanvien = {};
+    snapshot.forEach((childSnapshot) => {
+      bangcapnhanvien[childSnapshot.key] = childSnapshot.val();
+    });
+    callback(bangcapnhanvien);
+  }, (error) => {
+    console.error("Error listening to bangcapnhanvien updates:", error);
+  });
+}
+
+// Function to toggle the verification status of a qualification
 export async function toggleXacthuc(employeeId, bangcapId) {
   try {
-    // Kiểm tra đường dẫn đến bộ sưu tập bằng cấp của nhân viên
-    const docRef = doc(firestore, "bangcapnhanvien", `${employeeId}-${bangcapId}`);
-    const docSnapshot = await getDoc(docRef);
+    const bangCapRef = ref(database, `bangcapnhanvien/${employeeId}-${bangcapId}`);
+    const snapshot = await get(bangCapRef);
 
-    if (docSnapshot.exists()) {
-      const currentXacthuc = docSnapshot.data().xacthuc;
+    if (snapshot.exists()) {
+      const currentXacthuc = snapshot.val().xacthuc;
 
-      // Cập nhật giá trị xacthuc
+      // Update the xacthuc value
       const newXacthuc = currentXacthuc === "0" ? "1" : "0";
-      await updateDoc(docRef, { xacthuc: newXacthuc });
+      await update(bangCapRef, { xacthuc: newXacthuc });
 
-      console.log(`Cập nhật xacthuc thành công cho ${employeeId} - ${bangcapId}:`, newXacthuc);
+      console.log(`Successfully updated xacthuc for ${employeeId} - ${bangcapId}:`, newXacthuc);
       return newXacthuc;
     } else {
-      console.log("Không tìm thấy tài liệu để cập nhật!");
+      console.log("No document found to update!");
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi cập nhật xacthuc:", error);
+    console.error("Error updating xacthuc:", error);
     return null;
   }
 }
