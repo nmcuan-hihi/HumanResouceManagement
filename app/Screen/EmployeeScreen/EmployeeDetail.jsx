@@ -100,7 +100,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
       setSkillNV(newData);
       console.log(newData, "-----------");
     } catch (error) {
-      console.error("Lỗi lấy data bc:", error);
+      console.error("Lỗi lấy data sk:", error);
     }
   };
 
