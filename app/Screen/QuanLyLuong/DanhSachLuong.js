@@ -10,6 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
+import DropDownPicker from "react-native-dropdown-picker";
 
 import RNPickerSelect from "react-native-picker-select";
 
@@ -46,6 +47,10 @@ const DanhSachLuong = ({ navigation }) => {
   const [searchPB, setSearchPB] = useState();
   const [listSearchByPb, setListSearchByPb] = useState([]);
   const [listSearch, setListSearch] = useState([]);
+
+  const [open, setOpen] = useState(false);
+
+  const [itemsPB, setItemsPV] = useState([]);
 
   const fetchNhanVien = async () => {
     const data = await readEmployeesFireStore();
@@ -118,7 +123,9 @@ const DanhSachLuong = ({ navigation }) => {
   const formatDateToYYYYMM = (date) => {
     const year = date.getFullYear();
 
-    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const month = String(date.getMonth() + 1);
+
+    console.log(month,'---------------')
     return `${month}-${year}`;
   };
 
@@ -127,9 +134,12 @@ const DanhSachLuong = ({ navigation }) => {
 
     const groupedData = duLieuChamCong.reduce((acc, chamcong) => {
       const employeeId = chamcong.employeeId;
-      const dateTep = new Date(chamcong.month);
 
-      const month = formatDateToYYYYMM(dateTep);
+
+      console.log(chamcong.month)
+      const [dayPart, monthPart, yearPart] = chamcong.month.split("/");
+
+      const month = `${monthPart}-${yearPart}`;
 
       if (!acc[employeeId]) {
         acc[employeeId] = {
@@ -173,14 +183,15 @@ const DanhSachLuong = ({ navigation }) => {
       // const tangCa = parseInt(
       //   ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca
       // );
-
-      const luongThamNien = 0;
       const tangCa = 0;
 
-      const thucNhan = luong1Ngay;
-      console.log("1312312");
+      const hs_thamnien = congThucLuong?.hs_thamnien || 0;
+      const luongThamNien =parseInt( luong * hs_thamnien);
 
-      // const thucNhan = luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa;
+      const thucNhan =
+        luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa + luongThamNien;
+
+
       const salaryEntry = {
         employeeId,
         thang: month + "",
@@ -192,36 +203,29 @@ const DanhSachLuong = ({ navigation }) => {
         chuyencan: chuyenCan + "",
         thamnien: luongThamNien + "",
       };
-      console.log(salaryEntry, "----");
+
       temporarySalaryData.push(salaryEntry);
     }
-
     return temporarySalaryData;
   };
 
   const getChiTietCC = async () => {
     setVisibleLoad(true);
 
-    try {
-      const dataluong = await layDanhSachBangLuongTheoThang(
-        formatDateToYYYYMM(currentDate)
-      );
+    const dataluong = await layDanhSachBangLuongTheoThang(
+      formatDateToYYYYMM(currentDate)
+    );
 
-      const dataChamcong = await getChamCongDetailsByMonth(
-        formatDateToYYYYMM(currentDate)
-      );
-
-      setListLuongGetDB(dataluong);
-      setDSChamCong(dataChamcong);
-
-      const luongs = luongTamTinh(dataChamcong);
-
-      //   // dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
-      // setListLuong(luongs);
-      setVisibleLoad(checkLoad);
-    } catch (error) {
-      setVisibleLoad(checkLoad);
-    }
+    const dataChamcong = await getChamCongDetailsByMonth(
+      formatDateToYYYYMM(currentDate)
+    );
+    setListLuongGetDB(dataluong);
+    setDSChamCong(dataChamcong);
+    // Nếu không có dữ liệu, lấy dữ liệu tạm tính
+    const luongs =
+      dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
+    setListLuong(luongs);
+    setVisibleLoad(checkLoad);
   };
 
   useEffect(() => {
@@ -296,6 +300,7 @@ const DanhSachLuong = ({ navigation }) => {
             onPress: async () => {
               setVisibleLoad(true);
               await luuDanhSachLuongFirebase(luongTamTinh(dsChamCong));
+              getChiTietCC();
               setVisibleLoad(false);
               Alert.alert("Thông báo", "Lưu thông tin thành công");
             },
@@ -435,23 +440,25 @@ const DanhSachLuong = ({ navigation }) => {
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
+          margin: 16,
           alignItems: "center",
         }}
       >
         <View style={{ width: 200 }}>
-          <RNPickerSelect
-            onValueChange={(value) => {
-              setSearchPB(value);
-            }}
+          <DropDownPicker
+            open={open}
+            value={searchPB}
             items={[{ label: "Tất cả", value: "all" }, ...phongBans]}
-            style={pickerSelectStyles}
+            setOpen={setOpen}
+            setValue={setSearchPB}
+            placeholder={"Chọn phòng ban"}
           />
         </View>
         <TouchableOpacity
           onPress={() => {
             xuatBangLuongExcel(listSearch);
           }}
-          style={{ padding: 10, marginBottom: 10, marginRight: 20 }}
+          style={{ padding: 10, marginRight: 20 }}
         >
           <AntDesign name="exclefile1" size={30} color="orange" />
         </TouchableOpacity>
@@ -474,30 +481,6 @@ const DanhSachLuong = ({ navigation }) => {
       />
     </SafeAreaView>
   );
-};
-
-// Styles for RNPickerSelect
-const pickerSelectStyles = {
-  inputIOS: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    color: "black",
-    marginBottom: 15,
-  },
-  inputAndroid: {
-    fontSize: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    color: "black",
-    marginBottom: 15,
-  },
 };
 
 const styles = StyleSheet.create({
@@ -525,7 +508,6 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: "#F5F5F5",
     borderRadius: 8,
-    marginTop: -10,
     marginBottom: 10,
   },
   searchPlaceholder: {

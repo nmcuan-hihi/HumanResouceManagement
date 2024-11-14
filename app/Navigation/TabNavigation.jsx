@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
@@ -14,6 +14,7 @@ import QuanLyMucLuong from "../Screen/QuanLyLuong/QuanLyMucLuong";
 import ChammCong from "../Screen/MarkAttendaceScreen/MarkAttendace";
 import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
 import HomeMessenger from "../Screen/MessengerScreen/HomeMessenger";
+import { listenForNotifications } from "../services/thongBaoFirebase";
 
 const Tab = createBottomTabNavigator();
 
@@ -21,8 +22,25 @@ export default function TabNavigation({ route }) {
   const { employee } = route.params || {};
   const role = employee?.chucvuId; // Kiểm tra role từ params
 
+
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  useEffect(() => {
+    const callback = (danhSachThongBao) => {
+      const count = danhSachThongBao.filter(thongBao => !thongBao.trangThai).length;
+   
+        setUnreadNotifications(count);
+  
+    };
+
+    listenForNotifications(employee.employeeId, callback);
+    
+    return () => {
+    };
+  }, [employee.employeeId]);
+
+
   // Example unread counts
-  const unreadNotifications = 1;
   const unreadMessages = 3;
 
   // Custom icon with badge

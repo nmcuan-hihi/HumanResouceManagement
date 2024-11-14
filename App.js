@@ -50,6 +50,7 @@ import ChiTietNghiPhep from './app/Screen/NghiPhepScreen/ChiTietNghiPhep';
 import MesengerDetails from './app/Screen/MessengerScreen/MesengerDetails';
 
 import DanhSachLuong from './app/Screen/QuanLyLuong/DanhSachLuong';
+import AddThongBao from './app/Screen/NotificeScreen/AddThongBao';
 
 
 const Tab = createBottomTabNavigator();
@@ -83,6 +84,9 @@ export default function App() {
 
         <Stack.Screen name="QuanLyMucLuong" component={QuanLyMucLuong} options={{ headerShown: false }} />
         <Stack.Screen name="DanhSachLuong" component={DanhSachLuong} options={{ headerShown: false }} />
+
+        <Stack.Screen name="AddThongBao" component={AddThongBao} options={{ headerShown: false }} />
+
  
 
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />

@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DashboardGD from "../../Compoment/DashboardGD";
@@ -65,10 +59,10 @@ export default function HomeScreenGD({ navigation, route }) {
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'first', title: 'Tab 1' },
-    { key: 'second', title: 'Tab 2' },
-    { key: 'third', title: 'Tab 3' },
-    { key: 'fourth', title: 'Tab 4' },
+    { key: "first", title: "Tab 1" },
+    { key: "second", title: "Tab 2" },
+    { key: "third", title: "Tab 3" },
+    { key: "fourth", title: "Tab 4" },
   ]);
 
   const renderScene = SceneMap({
@@ -78,7 +72,7 @@ export default function HomeScreenGD({ navigation, route }) {
     fourth: () => <FourthRoute data={listPhongBan} />,
   });
 
-  const renderTabBar = props => (
+  const renderTabBar = (props) => (
     <TabBar
       {...props}
       style={styles.tabBar}
@@ -89,10 +83,7 @@ export default function HomeScreenGD({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-       showsVerticalScrollIndicator={false}
-
-      >
+      <ScrollView showsVerticalScrollIndicator={false}>
         <DashboardGD listEmployee={listEmployee} listPhongBan={listPhongBan} />
         <Text style={styles.dateText}>
           Hôm nay, {date.toLocaleDateString("vi-VN")}
@@ -102,7 +93,7 @@ export default function HomeScreenGD({ navigation, route }) {
             <Chart />
           </View>
         </View>
-      
+
         <View style={styles.statsContainer}>
           <TouchableOpacity
             style={styles.statItem}
@@ -114,7 +105,7 @@ export default function HomeScreenGD({ navigation, route }) {
           <TouchableOpacity
             style={styles.statItem}
             onPress={() => {
-              navigation.navigate("NotificeScreen");
+              navigation.navigate("AddThongBao", { employee });
             }}
           >
             <Icon name="notifications" size={24} color="#4CAF50" />
@@ -129,7 +120,12 @@ export default function HomeScreenGD({ navigation, route }) {
             <Icon name="house" size={24} color="#FFC107" />
             <Text style={styles.statValue}>Phòng ban</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statItem} onPress={() => {navigation.navigate('ListChucVu')}}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => {
+              navigation.navigate("ListChucVu");
+            }}
+          >
             <Icon name="badge" size={24} color="#F44336" />
             <Text style={styles.statValue}>Chức Vụ</Text>
           </TouchableOpacity>
@@ -195,7 +191,7 @@ const styles = StyleSheet.create({
   },
   scene: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   tabBar: {
     backgroundColor: "#E3F2FD",
