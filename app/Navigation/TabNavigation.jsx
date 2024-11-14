@@ -15,6 +15,7 @@ import ChammCong from "../Screen/MarkAttendaceScreen/MarkAttendace";
 import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
 import HomeMessenger from "../Screen/MessengerScreen/HomeMessenger";
 import { listenForNotifications } from "../services/thongBaoFirebase";
+import { database } from "../config/firebaseconfig";
 
 const Tab = createBottomTabNavigator();
 
@@ -22,7 +23,6 @@ export default function TabNavigation({ route }) {
   const { employee } = route.params || {};
   const role = employee?.chucvuId; // Kiểm tra role từ params
   const userID = employee.employeeId;
-
   const [unreadCount, setUnreadCount] = useState(0);
 
   const [unreadNotifications, setUnreadNotifications] = useState(0);
