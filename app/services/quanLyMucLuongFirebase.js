@@ -1,4 +1,13 @@
-import { getDatabase, ref, get, update, query, orderByChild, equalTo, push } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  get,
+  update,
+  query,
+  orderByChild,
+  equalTo,
+  push,
+} from "firebase/database";
 import { app } from "../config/firebaseconfig"; // Đảm bảo bạn đã cấu hình đúng
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
 
@@ -7,9 +16,8 @@ const db = getDatabase(app);
 // Lấy công thức lương từ Realtime Database
 export async function getCongThucLuong() {
   try {
-    const congThucLuongRef = ref(db, "congthucluong");
+    const congThucLuongRef = ref(db, "congthucluong/ctl1");
     const snapshot = await get(congThucLuongRef);
-
     if (snapshot.exists()) {
       return snapshot.val();
     } else {
@@ -34,7 +42,11 @@ export async function updateCongThucLuong(newData) {
 // Lấy chi tiết chấm công theo employeeId
 export async function getChamCongDetailsByEmployeeId(employeeId) {
   try {
-    const chamCongRef = query(ref(db, "chitietchamcong"), orderByChild("employeeId"), equalTo(employeeId));
+    const chamCongRef = query(
+      ref(db, "chitietchamcong"),
+      orderByChild("employeeId"),
+      equalTo(employeeId)
+    );
     const snapshot = await get(chamCongRef);
 
     const data = [];
@@ -112,33 +124,25 @@ export async function getBangLuong() {
 }
 
 // Lấy chi tiết chấm công theo tháng
-export async function getChamCongDetailsByMonth(year, month) {
+export async function getChamCongDetailsByMonth(thang) {
   try {
     const chamCongRef = ref(db, "chitietchamcong");
     const snapshot = await get(chamCongRef);
 
     const data = [];
     snapshot.forEach((doc) => {
-      const docData = doc.val();
-      const monthDate = new Date(docData.month * 1000);
-      const formattedMonth = dayjs(monthDate).format("YYYY-MM-DD");
+      const key = doc.key;
+      const [employeeId, day, month, year] = key.split("-");
 
-      if (
-        monthDate.getFullYear() === year &&
-        monthDate.getMonth() === month
-      ) {
-        data.push({
-          id: doc.key,
-          ...docData,
-          month: formattedMonth,
-        });
+      if (`${month}-${year}` === thang) {
+        data.push(doc.val());
       }
     });
 
     return data;
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ collection:", error);
-    throw error;
+    console.error("Lỗi khi lấy dữ liệu từ Realtime Database:", error);
+    throw new Error("Không thể lấy dữ liệu chấm công.");
   }
 }
 
@@ -158,17 +162,20 @@ export async function luuDanhSachLuongFirebase(salaryList) {
 }
 
 // Lấy danh sách bảng lương theo tháng
+
 export async function layDanhSachBangLuongTheoThang(thang) {
   try {
-    const bangLuongRef = query(ref(db, "bangluongnhanvien"), orderByChild("thang"), equalTo(thang));
+    const bangLuongRef = query(ref(db, "bangluongnhanvien"));
     const snapshot = await get(bangLuongRef);
 
     const salaryList = [];
     snapshot.forEach((doc) => {
-      salaryList.push({
-        id: doc.key,
-        ...doc.val(),
-      });
+      const key = doc.key;
+      const [employeeId, month, year] = key.split("-");
+
+      if (`${month}-${year}` === thang) {
+        salaryList.push(doc.val());
+      }
     });
 
     return salaryList;

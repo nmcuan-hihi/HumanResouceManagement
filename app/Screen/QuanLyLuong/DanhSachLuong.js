@@ -170,12 +170,17 @@ const DanhSachLuong = ({ navigation }) => {
       const luong = luong1Ngay * ngayCong;
       const chuyenCan = ngayCong >= 26 ? congThucLuong.chuyencan : 0;
       const phuCap = parseInt(luong * congThucLuong.hs_phucap);
-      const tangCa = parseInt(
-        ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca
-      );
+      // const tangCa = parseInt(
+      //   ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca
+      // );
 
-      const thucNhan = luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa;
-      const luongThamNien = luong * congThucLuong.hs_thamnien;
+      const luongThamNien = 0;
+      const tangCa = 0;
+
+      const thucNhan = luong1Ngay;
+      console.log("1312312");
+
+      // const thucNhan = luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa;
       const salaryEntry = {
         employeeId,
         thang: month + "",
@@ -187,30 +192,36 @@ const DanhSachLuong = ({ navigation }) => {
         chuyencan: chuyenCan + "",
         thamnien: luongThamNien + "",
       };
-
+      console.log(salaryEntry, "----");
       temporarySalaryData.push(salaryEntry);
     }
+
     return temporarySalaryData;
   };
 
   const getChiTietCC = async () => {
     setVisibleLoad(true);
 
-    const dataluong = await layDanhSachBangLuongTheoThang(
-      formatDateToYYYYMM(currentDate)
-    );
+    try {
+      const dataluong = await layDanhSachBangLuongTheoThang(
+        formatDateToYYYYMM(currentDate)
+      );
 
-    const dataChamcong = await getChamCongDetailsByMonth(
-      currentDate.getFullYear(),
-      currentDate.getMonth()
-    );
-    setListLuongGetDB(dataluong);
-    setDSChamCong(dataChamcong);
-    // Nếu không có dữ liệu, lấy dữ liệu tạm tính
-    const luongs =
-      dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
-    setListLuong(luongs);
-    setVisibleLoad(checkLoad);
+      const dataChamcong = await getChamCongDetailsByMonth(
+        formatDateToYYYYMM(currentDate)
+      );
+
+      setListLuongGetDB(dataluong);
+      setDSChamCong(dataChamcong);
+
+      const luongs = luongTamTinh(dataChamcong);
+
+      //   // dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
+      // setListLuong(luongs);
+      setVisibleLoad(checkLoad);
+    } catch (error) {
+      setVisibleLoad(checkLoad);
+    }
   };
 
   useEffect(() => {
