@@ -27,7 +27,96 @@ export async function getCongThucLuong() {
     console.error("Lỗi khi lấy dữ liệu:", error);
   }
 }
+export async function getEmployeeSalaryAndAttendance(employeeId, month) {
+  try {
+    // Validate input
+    if (!employeeId || !month) {
+      throw new Error("employeeId và month là bắt buộc");
+    }
 
+    // Parse month string to Date object
+    const targetMonth = dayjs(month, "M-YYYY");
+    if (!targetMonth.isValid()) {
+      throw new Error("Định dạng tháng không hợp lệ. Sử dụng định dạng MM-YYYY");
+    }
+
+    // 1. Lấy bảng lương
+    const bangLuongRef = query(ref(db, "bangluongnhanvien"));
+    const bangLuongSnapshot = await get(bangLuongRef);
+    
+    let salaryData = null;
+    bangLuongSnapshot.forEach((doc) => {
+      const data = doc.val();
+      if (data.employeeId === employeeId && data.thang === month) {
+        salaryData = {
+          id: doc.key,
+          ...data,
+          // Đảm bảo các giá trị số được parse đúng
+          luong: String(data.luong) || "",
+          phucap: String(data.phucap) || "",
+          thucnhan: String(data.thucnhan) || "",
+        };
+      }
+    });
+
+   // 2. Lấy chi tiết chấm công
+const chamCongRef = query(ref(db, "chitietchamcong"));
+const chamCongSnapshot = await get(chamCongRef);
+
+const attendanceData = [];
+chamCongSnapshot.forEach((doc) => {
+  const docData = doc.val();
+  const docMonth = dayjs(docData.month);
+
+  if (
+    docData.employeeId === employeeId &&
+    docMonth.format("YYYY-M-D") === targetMonth.format("YYYY-M-D")
+  ) {
+    // Lấy thời gian vào và ra, giữ dưới dạng chuỗi mà không định dạng
+    const checkIn = docData.timeIn ? String(docData.timeIn) : "";
+    const checkOut = docData.timeOut ? String(docData.timeOut) : "";
+
+    // Tính số giờ làm việc
+    let hoursWorked = 0;
+    if (checkIn && checkOut) {
+      const checkInDate = dayjs(checkIn * 1000);
+      const checkOutDate = dayjs(checkOut * 1000);
+      hoursWorked = checkOutDate.diff(checkInDate, 'hour', true);
+    }
+console.log(`Checking attendance for employee: ${docData.employeeId}, month: ${docMonth.format("YYYY-M-D")}`);
+    attendanceData.push({
+      id: doc.key,
+      date: docMonth.format("YYYY-M-D"),
+      timeIn: checkIn,  // Giữ dưới dạng chuỗi
+      timeOut: checkOut,  // Giữ dưới dạng chuỗi
+      hoursWorked: hoursWorked.toFixed(2),
+      status: docData.status || "unknown",
+      maChamCong: docData.maChamCong
+    });
+  }
+});
+
+// 3. Tổng hợp thông tin
+const summary = {
+  totalDays: attendanceData.length,
+  workingDays: attendanceData.filter(d => d.status === "di_lam").length,
+  totalHours: attendanceData.reduce((sum, curr) => sum + parseFloat(curr.hoursWorked), 0),
+  month: month,
+  employeeId: employeeId
+};
+
+// 4. Trả về kết quả tổng hợp
+return {
+  salary: salaryData,
+  attendance: attendanceData.sort((a, b) => new Date(a.date) - new Date(b.date)),
+  summary: summary
+};
+
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu:", error);
+    throw error;
+  }
+}
 // Cập nhật công thức lương
 export async function updateCongThucLuong(newData) {
   try {
@@ -52,17 +141,18 @@ export async function getChamCongDetailsByEmployeeId(employeeId) {
     const data = [];
     snapshot.forEach((doc) => {
       const docData = doc.val();
-      const checkInDate = new Date(docData.timeIn * 1000);
-      const checkOutDate = new Date(docData.timeOut * 1000);
-      const hoursWorked = (checkOutDate - checkInDate) / (1000 * 60 * 60);
 
-      data.push({
-        id: doc.key,
-        date: dayjs(checkInDate).format("YYYY-MM-DD"),
-        checkIn: dayjs(checkInDate).format("HH:mm"),
-        checkOut: dayjs(checkOutDate).format("HH:mm"),
-        hoursWorked: hoursWorked.toFixed(2),
-      });
+        const checkIn = new Date(docData.timeIn);
+        const checkOut = new Date(docData.timeOut);
+        const hoursWorked = (checkOut - checkIn) / (1000 * 60 * 60);
+        data.push({
+          id: doc.key,
+          month: dayjs().format("YYYY-M-D"),
+          checkIn: dayjs().format("HH:mm"),
+          checkOut: dayjs().format("HH:mm"),
+          hoursWorked: hoursWorked.toFixed(2),
+        });
+      
     });
 
     return data;
@@ -71,35 +161,43 @@ export async function getChamCongDetailsByEmployeeId(employeeId) {
     throw error;
   }
 }
-
-// Lấy tất cả chi tiết chấm công
-export async function getAllChamCongDetails() {
+// Lấy chi tiết chấm công theo tháng
+export async function getChamCongDetailsByMonth(employeeId, thang) {
   try {
     const chamCongRef = ref(db, "chitietchamcong");
     const snapshot = await get(chamCongRef);
 
     const data = [];
     snapshot.forEach((doc) => {
-      const docData = doc.val();
-      let formattedMonth = null;
-      if (docData.month) {
-        const monthDate = new Date(docData.month * 1000);
-        formattedMonth = dayjs(monthDate).format("YYYY-MM-DD");
-      }
+      const key = doc.key;
+      const [employeeIdFromDB, day, month, year] = key.split("-");
 
-      data.push({
-        id: doc.key,
-        ...docData,
-        month: formattedMonth,
-      });
+      // Filter by employeeId and month-year
+      if (employeeIdFromDB === employeeId && `${month}-${year}` === thang) {
+        const record = doc.val();
+        
+        // Add other fields like status, diMuon, etc., if needed
+        data.push({
+          ...record,
+          id: doc.key,
+          date: day,
+          month,
+          year,
+        });
+      }
     });
 
     return data;
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ collection:", error);
-    throw error;
+    console.error("Lỗi khi lấy dữ liệu từ Realtime Database:", error);
+    throw new Error("Không thể lấy dữ liệu chấm công.");
   }
 }
+
+
+
+
+
 
 // Lấy bảng lương
 export async function getBangLuong() {
@@ -123,28 +221,7 @@ export async function getBangLuong() {
   }
 }
 
-// Lấy chi tiết chấm công theo tháng
-export async function getChamCongDetailsByMonth(thang) {
-  try {
-    const chamCongRef = ref(db, "chitietchamcong");
-    const snapshot = await get(chamCongRef);
 
-    const data = [];
-    snapshot.forEach((doc) => {
-      const key = doc.key;
-      const [employeeId, day, month, year] = key.split("-");
-
-      if (`${month}-${year}` === thang) {
-        data.push(doc.val());
-      }
-    });
-
-    return data;
-  } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ Realtime Database:", error);
-    throw new Error("Không thể lấy dữ liệu chấm công.");
-  }
-}
 
 // Lưu danh sách lương vào Realtime Database
 export async function luuDanhSachLuongFirebase(salaryList) {

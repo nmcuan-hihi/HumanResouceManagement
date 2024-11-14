@@ -1,209 +1,234 @@
 import React, { useState, useEffect } from 'react';
-import { Platform, View, Text, Image, TouchableOpacity, SafeAreaView, StyleSheet, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  Platform,
+  Image,
+} from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
-import MonthSelector from '../../Compoment/SelectMonth_DSLuong';
-import { getBangLuong } from '../../services/quanLyMucLuongFirebase'; // Import the function
+import dayjs from 'dayjs';
+import { getEmployeeSalaryAndAttendance, getCongThucLuong } from '../../services/quanLyMucLuongFirebase';
 import { getEmployeeById } from '../../services/EmployeeFireBase';
-import { getChamCongDetailsByEmployeeId } from '../../services/quanLyMucLuongFirebase'; // Import the timekeeping function
+import { getChamCongDetailsByMonth } from '../../services/quanLyMucLuongFirebase'; // Import the function
 
-export default function SalaryDetailScreen({ navigation }) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [salaryData, setSalaryData] = useState(null); // Store salary data here
-  const [employeeName, setEmployeeName] = useState('');
-  const [employeeImage, setEmployeeImage] = useState('');
-  const [timekeepingData, setTimekeepingData] = useState([]); // Store timekeeping data here
+const SalaryDetailScreen = ({ navigation, route }) => {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [loading, setLoading] = useState(true);
+  const [employeeData, setEmployeeData] = useState(null);
+  const [salaryData, setSalaryData] = useState({});
+  const [attendanceData, setAttendanceData] = useState([]);
+  const employeeId = route.params?.employeeId || 'NV001';
 
-  useEffect(() => {
-    const fetchSalaryData = async () => {
-      try {
-        const data = await getBangLuong("NV001"); // Fetch data for employee 'NV001'
-        setSalaryData(data[1]); // Assuming you get one result, set it
-      } catch (error) {
-        console.error("Error fetching salary details:", error);
-      }
+  const MonthYearPicker = ({ currentDate, onChangeMonth }) => {
+    const handlePrevMonth = () => {
+      const newDate = dayjs(currentDate).subtract(1, 'month');
+      onChangeMonth(newDate.toDate());
     };
 
-    const fetchEmployeeName = async () => {
-      try {
-        if (salaryData && salaryData.employeeId) {
-          const employeeData = await getEmployeeById(salaryData.employeeId); // Fetch employee data
-          setEmployeeName(employeeData.name); // Set employee name
-          setEmployeeImage(employeeData.imageUrl); 
-        }
-      } catch (error) {
-        console.error("Error fetching employee details:", error);
-      }
+    const handleNextMonth = () => {
+      const newDate = dayjs(currentDate).add(1, 'month');
+      onChangeMonth(newDate.toDate());
     };
 
-    const fetchTimekeepingData = async () => {
-      try {
-        const data = await getChamCongDetailsByEmployeeId("NV001"); // Fetch timekeeping data for employee 'NV001'
-        setTimekeepingData(data); // Set timekeeping data
-      } catch (error) {
-        console.error("Error fetching timekeeping data:", error);
-      }
-    };
-
-    fetchSalaryData();
-    fetchEmployeeName();
-    fetchTimekeepingData(); // Fetch timekeeping data for NV001
-  }, [salaryData]);
-
-  if (!salaryData) {
-    return <Text>Loading...</Text>; // Show loading until data is fetched
-  }
-
-  const formatCurrency = (amount) => {
-    return amount.toLocaleString('vi-VN') + ' đ';
+    return (
+      <View style={styles.monthPicker}>
+        <TouchableOpacity onPress={handlePrevMonth} style={styles.monthArrow}>
+          <Text style={styles.monthArrowText}>{"<"}</Text>
+        </TouchableOpacity>
+        <Text style={styles.monthText}>
+          {`Tháng ${dayjs(currentDate).format('M/YYYY')}`}
+        </Text>
+        <TouchableOpacity onPress={handleNextMonth} style={styles.monthArrow}>
+          <Text style={styles.monthArrowText}>{">"}</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
-  const renderTimekeepingItem = ({ item }) => (
-    <View style={styles.tableRow}>
-      <Text style={styles.tableCell}>{item.date}</Text>
-      <Text style={styles.tableCell}>{item.timeIn}</Text>
-      <Text style={styles.tableCell}>{item.checkOut}</Text>
-      <Text style={styles.tableCell}>{item.hoursWorked} hours</Text>
+  useEffect(() => {
+    fetchData();
+  }, [currentDate, employeeId]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const employee = await getEmployeeById(employeeId);
+      setEmployeeData(employee);
+  
+      const { salary } = await getEmployeeSalaryAndAttendance(
+        employeeId,
+        dayjs(currentDate).format("M-YYYY")
+      );
+  
+      const salaryFormula = await getCongThucLuong();
+      if (salaryFormula) {
+        console.log("Fetched Salary Formula:", salaryFormula);
+      }
+  
+      // Use getChamCongDetailsByMonth with both employeeId and formatted month
+      const attendanceDetails = await getChamCongDetailsByMonth(
+        employeeId,
+        dayjs(currentDate).format("M-YYYY")
+      );
+      setAttendanceData(attendanceDetails);
+  
+      setSalaryData(salary);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return amount?.toLocaleString('vi-VN') + ' đ' || '0 đ';
+  };
+
+  const renderAttendanceItem = ({ item }) => (
+    <View style={styles.attendanceItem}>
+      <Text style={styles.attendanceDate}>{`${item.date}-${item.month}-${item.year}`}</Text>
+      <Text style={styles.attendanceTime}>{item.timeIn}</Text>
+      <Text style={styles.attendanceTime}>{item.timeOut}</Text>
+    
     </View>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0073B1" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <ArrowLeft size={24} color="#1F2937" strokeWidth={1.5} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chi tiết BL</Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <ArrowLeft size={24} color="#1F2937" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Chi tiết lương & chấm công</Text>
       </View>
 
-      {/* Month Selector */}
-      <MonthSelector currentDate={currentMonth} onChangeMonth={setCurrentMonth} />
+      {/* Month Picker */}
+      <MonthYearPicker currentDate={currentDate} onChangeMonth={setCurrentDate} />
 
       {/* Employee Info */}
       <View style={styles.employeeCard}>
+        <Image
+          source={{ uri: employeeData?.imageUrl }}
+          style={styles.employeeImage}
+        />
         <View style={styles.employeeInfo}>
-          <View style={styles.avatarContainer}>
-            <Image source={employeeImage} style={styles.avatar} />
-          </View>
-          <View>
-            <Text style={styles.employeeId}>{salaryData.employeeId}</Text>
-            <Text style={styles.employeeName}>{employeeName}</Text>
-          </View>
+          <Text style={styles.employeeName}>{employeeData?.name}</Text>
+          <Text style={styles.employeeId}>Mã NV: {employeeId}</Text>
         </View>
       </View>
 
-      {/* Main Salary Info */}
+      {/* Salary Info */}
       <View style={styles.salaryCard}>
-        <View style={styles.salarySection}>
+        <Text style={styles.cardTitle}>Thông tin lương</Text>
+        <View style={styles.salaryInfo}>
           <View style={styles.salaryRow}>
-            <Text style={styles.labelText}>Tổng thu nhập</Text>
-            <Text style={styles.valueText}>{formatCurrency(salaryData.luong)}</Text>
+            <Text style={styles.salaryLabel}>Lương :</Text>
+            <Text style={styles.salaryValue}>{formatCurrency(salaryData?.luong)}</Text>
           </View>
           <View style={styles.salaryRow}>
-            <Text style={styles.labelText}>Khấu trừ</Text>
-            <Text style={styles.deductionText}>-{formatCurrency(salaryData.chuyencan)}</Text>
+            <Text style={styles.salaryLabel}>Phụ cấp:</Text>
+            <Text style={styles.salaryValue}>
+              {formatCurrency(salaryData?.phucap)}
+            </Text>
           </View>
           <View style={styles.salaryRow}>
-            <Text style={styles.labelText}>Thực nhận</Text>
-            <Text style={styles.netIncomeText}>{formatCurrency(salaryData.thucnhan)}</Text>
+            <Text style={styles.salaryLabel}>Thực nhận:</Text>
+            <Text style={styles.netValue}>{formatCurrency(salaryData?.thucnhan)}</Text>
           </View>
         </View>
       </View>
 
-      {/* Timekeeping Table */}
-      <View style={styles.timekeepingSection}>
-        <Text style={styles.sectionTitle}>Giờ chấm công</Text>
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderText}>Ngày</Text>
-          <Text style={styles.tableHeaderText}>Giờ vào</Text>
-          <Text style={styles.tableHeaderText}>Giờ ra</Text>
-          <Text style={styles.tableHeaderText}>Số giờ</Text>
+      {/* Attendance List */}
+      <View style={styles.attendanceCard}>
+        <Text style={styles.cardTitle}>Chi tiết chấm công</Text>
+        <View style={styles.attendanceHeader}>
+          <Text style={styles.headerCell}>Ngày công</Text>
+          <Text style={styles.headerCell}>Giờ Vào</Text>
+          <Text style={styles.headerCell}>Giờ Ra</Text>
         </View>
         <FlatList
-          data={timekeepingData}
-          renderItem={renderTimekeepingItem}
+          data={attendanceData}
+          renderItem={renderAttendanceItem}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.attendanceList}
+          showsVerticalScrollIndicator={false}
         />
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   header: {
-    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
+  backButton: {
+    marginRight: 12,
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  monthPicker: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#FCD34D',
+  },
+  monthArrow: {
+    padding: 8,
+  },
+  monthArrowText: {
+    fontSize: 18,
+    color: '#1F2937',
+  },
+  monthText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
   },
   employeeCard: {
-    marginHorizontal: 16,
-    marginBottom: 16,
+    margin: 16,
+    padding: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  employeeInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    gap: 12,
-  },
-  avatarContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    overflow: 'hidden',
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-  },
-  employeeId: {
-    fontWeight: '500',
-    color: '#111827',
-  },
-  employeeName: {
-    color: '#4B5563',
-  },
-  salaryCard: {
-    marginHorizontal: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0.1,
         shadowRadius: 2,
       },
       android: {
@@ -211,60 +236,112 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  salarySection: {
+  employeeImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  employeeInfo: {
+    flex: 1,
+  },
+  employeeName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  employeeId: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  salaryCard: {
+    margin: 16,
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 12,
+  },
+  salaryInfo: {
+    padding: 8,
   },
   salaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
-  },
-  labelText: {
-    color: '#4B5563',
-  },
-  valueText: {
-    fontWeight: '500',
-    color: '#111827',
-  },
-  deductionText: {
-    fontWeight: '500',
-    color: '#EF4444',
-  },
-  netIncomeText: {
-    fontWeight: '500',
-    color: '#059669',
-  },
-  timekeepingSection: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontWeight: '500',
-    color: '#111827',
     marginBottom: 8,
   },
-  tableHeader: {
+  salaryLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  salaryValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  netValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  attendanceCard: {
+    margin: 16,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+  },
+  attendanceHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 8,
+    paddingVertical: 8,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+    marginBottom: 8,
+    
+  },
+  headerCell: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#1F2937',
+  },
+  attendanceItem: {
+    flexDirection: 'row',
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
-  tableHeaderText: {
-    fontWeight: '500',
-    color: '#4B5563',
+  attendanceDate: {
     flex: 1,
-    textAlign: 'center',
+    fontSize: 14,
+    color: '#6B7280',
   },
-  tableRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-  },
-  tableCell: {
-    color: '#4B5563',
+  attendanceTime: {
     flex: 1,
-    textAlign: 'center',
+    fontSize: 14,
+    marginLeft:10,
+    color: '#6B7280',
+  },
+  attendanceHours: {
+    flex: 1,
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  statusBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusText: {
+    fontSize: 14,
+    color: '#FFFFFF',
   },
 });
+
+export default SalaryDetailScreen;

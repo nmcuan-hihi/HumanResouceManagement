@@ -158,7 +158,7 @@ export default function HomeScreenGD({ navigation, route }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.statItem}
-            onPress={() => navigation.navigate("DanhSachLuong")}
+            onPress={() => navigation.navigate("ChiTietBangLuong")}
           >
             <Icon name="attach-money" size={24} color="#D2691E" />
             <Text style={styles.statValue}>Lương</Text>
