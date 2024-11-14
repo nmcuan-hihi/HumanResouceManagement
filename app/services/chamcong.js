@@ -1,6 +1,99 @@
 import { getDatabase, ref, get, set, update, serverTimestamp } from 'firebase/database';
 import { app } from '../config/firebaseconfig';  // Đảm bảo cấu hình đúng
 
+export const getEmployeesWithLeave = async () => {
+  try {
+    const db = getDatabase(app);
+    const employeesRef = ref(db, 'employees');  // Đường dẫn tới bảng nhân viên
+    const leaveRef = ref(db, 'nghiPhep');      // Đường dẫn tới bảng nghỉ phép
+    const snapshotEmployees = await get(employeesRef);
+    const snapshotLeave = await get(leaveRef);
+    
+    if (!snapshotEmployees.exists() || !snapshotLeave.exists()) {
+      console.log("Không có dữ liệu nhân viên hoặc nghỉ phép");
+      return [];
+    }
+
+    // Lấy danh sách nhân viên từ Firebase
+    const employees = snapshotEmployees.val();
+    
+    // Lấy danh sách nghỉ phép từ Firebase
+    const leaves = snapshotLeave.val();
+    
+    // Lấy ngày hôm nay (hoặc có thể thay bằng ngày khác nếu muốn)
+    const today = new Date().toLocaleDateString('vi-VN');  // dd/MM/yyyy
+    
+    // Lọc danh sách nhân viên
+    const filteredEmployees = Object.values(employees).filter(employee => {
+      // Kiểm tra nếu nhân viên có trạng thái "false" hoặc đang nghỉ phép trong ngày hôm nay
+      const isOnLeave = Object.values(leaves).some(leave => 
+        leave.employeeId === employee.employeeId &&
+        leave.ngayBatDau <= today &&
+        leave.ngayKetThuc >= today &&
+        leave.trangThai !== "-1"
+      );
+
+      // Trả về true nếu nhân viên không nghỉ phép và có trang thái là true (đi làm)
+      return !isOnLeave && employee.trangthai === "true";
+    });
+
+    return filteredEmployees;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách nhân viên: ", error);
+    return [];
+  }
+};
+
+export const getEmployeesWithLeave2 = async () => {
+  const db = getDatabase();
+  
+  // Lấy danh sách nhân viên từ Firebase Realtime Database
+  const employeesRef = ref(db, 'employees');
+  const leavesRef = ref(db, 'nghiPhep');
+  
+  try {
+    // Lấy tất cả dữ liệu nhân viên
+    const employeeSnapshot = await get(employeesRef);
+    const employees = employeeSnapshot.val();
+    
+    // Lấy tất cả dữ liệu nghỉ phép
+    const leaveSnapshot = await get(leavesRef);
+    const leaves = leaveSnapshot.val();
+
+    // Lấy ngày hiện tại
+    const currentDate = new Date().toLocaleDateString('vi-VN');  // dd/MM/yyyy
+
+    
+    // Lọc danh sách nhân viên để loại bỏ những người đang nghỉ trong ngày hiện tại
+    const filteredEmployees = Object.keys(employees).filter(employeeId => {
+      const employee = employees[employeeId];
+      const leave = Object.values(leaves).find(leave => leave.employeeId === employeeId);
+      
+      // Kiểm tra xem nhân viên có ngày nghỉ trùng với ngày hiện tại không
+      if (leave) {
+        const leaveStartDate = leave.ngayBatDau;
+        const leaveEndDate = leave.ngayKetThuc;
+
+        // Nếu nhân viên đang nghỉ phép trong ngày hôm nay thì không thêm vào danh sách
+        if (currentDate >= leaveStartDate && currentDate <= leaveEndDate) {
+          return false;
+        }
+      }
+
+      // Nếu không có nghỉ phép hoặc không nghỉ trong ngày hiện tại, nhân viên sẽ có mặt trong danh sách
+      return true;
+    });
+
+    // Lấy thông tin của các nhân viên còn lại
+    const activeEmployees = filteredEmployees.map(employeeId => employees[employeeId]);
+
+    console.log(activeEmployees);
+    return activeEmployees;
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    return [];
+  }
+};
 // Lấy instance của Realtime Database
 const database = getDatabase(app);
 
@@ -99,3 +192,62 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     console.error('Lỗi khi lưu chấm công:', error);
   }
 };
+export const getEmployeesByLeaveType = async (leaveType = "Có lương") => {
+  try {
+    const db = getDatabase(app);
+    const employeesRef = ref(db, 'employees');  // Đường dẫn tới bảng nhân viên
+    const leaveRef = ref(db, 'nghiPhep');      // Đường dẫn tới bảng nghỉ phép
+    const snapshotEmployees = await get(employeesRef);
+    const snapshotLeave = await get(leaveRef);
+    
+    if (!snapshotEmployees.exists() || !snapshotLeave.exists()) {
+      console.log("Không có dữ liệu nhân viên hoặc nghỉ phép");
+      return [];
+    }
+
+    // Lấy danh sách nhân viên từ Firebase
+    const employees = snapshotEmployees.val();
+    
+    // Lấy danh sách nghỉ phép từ Firebase
+    const leaves = snapshotLeave.val();
+    
+    // Kiểm tra xem leaves có phải là đối tượng hay không
+    if (typeof leaves !== 'object') {
+      console.log("Dữ liệu nghỉ phép không phải là đối tượng hợp lệ:", leaves);
+      return [];
+    }
+
+    // Chuyển đổi đối tượng nghỉ phép thành mảng
+    const leavesArray = Object.values(leaves);
+
+    // Lọc danh sách nhân viên
+    const filteredEmployees = Object.values(employees).map(employee => {
+      // Kiểm tra nếu nhân viên có trạng thái nghỉ phép trong ngày hôm nay
+      const today = new Date().toLocaleDateString('vi-VN');  // dd/MM/yyyy
+      const isOnLeave = leavesArray.some(leave => 
+        leave.employeeId === employee.employeeId &&
+        leave.ngayBatDau <= today &&
+        leave.ngayKetThuc >= today 
+      );
+
+      // Lọc theo loại nghỉ
+      const isLeaveTypeMatch = leaveType === "Có lương" 
+        ? leavesArray.some(leave => leave.employeeId === employee.employeeId && leave.loaiNghi === "Có lương")
+        : leaveType === "Không lương" 
+        ? leavesArray.some(leave => leave.employeeId === employee.employeeId && leave.loaiNghi === "Không lương")
+        : true; // Trường hợp mặc định lấy tất cả
+
+      // Trả về đối tượng nhân viên, có thể thêm thuộc tính `isOnLeave` nếu cần
+      return isLeaveTypeMatch ? {
+        ...employee,
+        isOnLeave
+      } : null;
+    }).filter(employee => employee !== null); // Loại bỏ những nhân viên không thỏa mãn điều kiện
+
+    return filteredEmployees;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách nhân viên: ", error);
+    return [];
+  }
+};
+

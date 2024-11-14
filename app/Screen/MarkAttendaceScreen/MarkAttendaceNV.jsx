@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform , Modal,ActivityIndicator} from 'react-native';
+import {TextInput, View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform , Modal,ActivityIndicator} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { filterEmployeesByPhongBan } from '../../services/PhongBanDatabase';  // Hàm lọc nhân viên theo phòng ban
@@ -10,6 +10,9 @@ import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
 import { addChiTietChamCongToRealtime } from '../../services/chamcong';  // Import your Firestore function for adding attendance
 import { filterEmployeesByStatus } from '../../services/PhongBanDatabase';
 import BackNav from '../../Compoment/BackNav';
+import { searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
+import { getEmployeesWithLeave } from '../../services/chamcong';
+import { getEmployeesByLeaveType } from '../../services/chamcong';
 export default function ChamCongNV({navigation}) {
   const [timeIn, setTimeIn] = useState(new Date());
   const [timeOut, setTimeOut] = useState(new Date());
@@ -25,11 +28,11 @@ export default function ChamCongNV({navigation}) {
   const [loading, setLoading] = useState(false); // State for loading modal
   const [openStatus, setOpenStatus] = useState(false);
   const [valueStatus, setValueStatus] = useState(null);
-
+  const [searchTerm, setSearchTerm] = useState('');
   useEffect(() => {
     async function fetchEmployees() {
       try {
-        const employeesData = await filterEmployeesByStatus("true");
+        const employeesData = await getEmployeesWithLeave();
         if (employeesData) {
           setEmployees(employeesData);
         }
@@ -57,8 +60,29 @@ export default function ChamCongNV({navigation}) {
     if (valuePhongBan) {
       handleFilterEmployeesByPhongBan(valuePhongBan);
     }
-  }, []);
-
+    if (valueStatus) {
+      handleFilterEmployeesByStatus(valueStatus);
+    }
+  }, [valuePhongBan], [valueStatus]);
+  useEffect(() => {
+    
+    if (valueStatus) {
+      handleFilterEmployeesByStatus(valueStatus);
+    }
+  }, [valueStatus]);
+  
+  const handleSearch = async () => {
+    if (searchTerm.trim() === '') {
+      setFilteredData(employeeData);
+    } else {
+      const searchResults = await searchEmployeesByNameOrId(searchTerm);
+      const employeeArray = Object.keys(searchResults).map((key) => ({
+        ...searchResults[key],
+        manv: key,
+      }));
+      setEmployees(employeeArray);
+    }
+  };
   const handleFilterEmployeesByPhongBan = async (phongbanId) => {
     try {
       const filteredEmployees = await filterEmployeesByPhongBan(phongbanId);
@@ -67,6 +91,15 @@ export default function ChamCongNV({navigation}) {
       console.error("Error filtering employees by phòng ban:", error);
     }
   };
+  const handleFilterEmployeesByStatus = async (phongbanId) => {
+    try {
+      const filteredEmployees = await getEmployeesByLeaveType(phongbanId);
+      setEmployees(filteredEmployees);
+    } catch (error) {
+      console.error("Error filtering employees by phòng ban:", error);
+    }
+  };
+
 
   const handleTimeChange = (event, selectedDate, type) => {
     const currentDate = selectedDate || (type === 'timeIn' ? timeIn : timeOut);
@@ -109,8 +142,8 @@ export default function ChamCongNV({navigation}) {
   };
 
   const items = [
-    { label: 'Nghỉ có lương', value: '0' },
-    { label: 'Nghỉ không luong', value: '1' },
+    { label: 'Nghỉ có lương', value: 'Có lương' },
+    { label: 'Nghỉ không luong', value: 'Không lương' },
   ];
 
   const phongBanItems = phongBan.map(pban => ({
@@ -132,7 +165,7 @@ export default function ChamCongNV({navigation}) {
         employeeId: employee.employeeId,
         timeIn,
         timeOut,
-        status: valueStatus,
+        status: "di_lam",
         month: selectedMonth,
       }));
 
@@ -180,11 +213,21 @@ export default function ChamCongNV({navigation}) {
           </View>
         </View>
       </View>
-
+      <View style={styles.searchSection}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Tìm kiếm theo tên hoặc mã nhân viên"
+            value={searchTerm}
+            onChangeText={setSearchTerm}
+          />
+          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+            <Text style={styles.buttonText}>Tìm kiếm</Text>
+          </TouchableOpacity>
+        </View>
       {/* Dropdowns Section */}
       <View style={styles.dropdownContainer}>
-        <View style={styles.dropdownWrapper}>
-          <Text style={styles.label}>Trạng thái công việc</Text>
+      <View style={styles.dropdownWrapper}>
+          <Text style={styles.label}>Trạng thái</Text>
           <DropDownPicker
             open={openStatus}
             value={valueStatus}
@@ -279,6 +322,46 @@ export default function ChamCongNV({navigation}) {
 
 
 const styles = StyleSheet.create({
+  searchSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  searchInput: {
+    flex: 1,
+    borderColor: 'blue',
+    borderWidth: 1,
+    borderRadius: 3,
+    paddingHorizontal: 15,
+    height: 40,
+    backgroundColor: '#fff',
+    marginRight: 10,
+  },
+  searchButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 3,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  filterWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  filterSection: {
+    borderWidth: 1,
+    borderColor: "blue",
+    flex: 1,
+    marginHorizontal: 5,
+  },
   modalBackground: {
     flex: 1,
     justifyContent: 'center',
