@@ -198,8 +198,6 @@ export async function getChamCongDetailsByMonth(employeeId, thang) {
 
 
 
-
-
 // Lấy bảng lương
 export async function getBangLuong() {
   try {
@@ -222,7 +220,8 @@ export async function getBangLuong() {
   }
 }
 
-
+export async function getChamCongByMonth(thang) {
+  try {
     const chamCongRef = ref(db, "chitietchamcong");
     const snapshot = await get(chamCongRef);
 

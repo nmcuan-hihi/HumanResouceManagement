@@ -19,7 +19,7 @@ import { readChucVu, readPhongBan } from "../../services/database";
 import { readEmployeesFireStore } from "../../services/EmployeeFireBase";
 import {
   getCongThucLuong,
-  getChamCongDetailsByMonth,
+  getChamCongByMonth,
   getAllChamCongDetails,
   luuDanhSachLuongFirebase,
   layDanhSachBangLuongTheoThang,
@@ -125,7 +125,7 @@ const DanhSachLuong = ({ navigation }) => {
 
     const month = String(date.getMonth() + 1);
 
-    console.log(month,'---------------')
+    console.log(month, "---------------");
     return `${month}-${year}`;
   };
 
@@ -135,8 +135,7 @@ const DanhSachLuong = ({ navigation }) => {
     const groupedData = duLieuChamCong.reduce((acc, chamcong) => {
       const employeeId = chamcong.employeeId;
 
-
-      console.log(chamcong.month)
+      console.log(chamcong.month);
       const [dayPart, monthPart, yearPart] = chamcong.month.split("/");
 
       const month = `${monthPart}-${yearPart}`;
@@ -186,11 +185,10 @@ const DanhSachLuong = ({ navigation }) => {
       const tangCa = 0;
 
       const hs_thamnien = congThucLuong?.hs_thamnien || 0;
-      const luongThamNien =parseInt( luong * hs_thamnien);
+      const luongThamNien = parseInt(luong * hs_thamnien);
 
       const thucNhan =
         luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa + luongThamNien;
-
 
       const salaryEntry = {
         employeeId,
@@ -216,7 +214,7 @@ const DanhSachLuong = ({ navigation }) => {
       formatDateToYYYYMM(currentDate)
     );
 
-    const dataChamcong = await getChamCongDetailsByMonth(
+    const dataChamcong = await getChamCongByMonth(
       formatDateToYYYYMM(currentDate)
     );
     setListLuongGetDB(dataluong);
@@ -379,6 +377,11 @@ const DanhSachLuong = ({ navigation }) => {
 
     return (
       <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("ChiTietBangLuong", {
+            employeeId: item.employeeId,
+          });
+        }}
         style={[
           styles.salaryItem,
           { backgroundColor: index % 2 === 0 ? "#E8F5E9" : "#FFF3E0" },

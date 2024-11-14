@@ -154,6 +154,15 @@ export default function HomeScreenGD({ navigation, route }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.statItem}
+            onPress={() => navigation.navigate("DanhSachLuong")}
+          >
+            <Icon name="attach-money" size={24} color="#FFC107" />
+            <Text style={styles.statValue}>Lương nhân viên</Text>
+          </TouchableOpacity>
+
+
+          <TouchableOpacity
+            style={styles.statItem}
             onPress={() => navigation.navigate("ChiTietBangLuong")}
           >
             <Icon name="attach-money" size={24} color="#D2691E" />

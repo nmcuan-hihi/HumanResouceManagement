@@ -3,7 +3,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
 import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { Badge } from "react-native-elements";
-import { useEffect } from 'react';
 import { ref, onValue } from 'firebase/database';
 // Import các màn hình
 import TestScreen from "../Screen/FolderTest/TestScreen";
