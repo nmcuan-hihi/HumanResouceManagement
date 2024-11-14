@@ -58,6 +58,9 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     const formattedMonth = new Date(month).toLocaleDateString('vi-VN');
 
     const maLuongThang = new Date(timeIn).getMonth() + 1;
+    const moth = new Date(month).getMonth()+1;
+    console.log("month" +moth);
+    
     const yea = new Date(month).getFullYear();
     const day = new Date(month).getDate();
 
@@ -74,7 +77,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     const tangCa = gioRa > 17;
 
     // Tạo một đường dẫn duy nhất cho document trong Realtime Database
-    const chamCongRef = ref(database, `chitietchamcong/${employeeId}-${day}-${maLuongThang}-${yea}`);
+    const chamCongRef = ref(database, `chitietchamcong/${employeeId}-${day}-${moth}-${yea}`);
 
     await set(chamCongRef, {
       employeeId,

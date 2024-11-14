@@ -141,3 +141,27 @@ export async function getNewEmployeeId() {
     throw error;
   }
 }
+export async function readEmployeesOnLeave(loaiNghi) {
+  try {
+    const nghiPhepRef = ref(database, "nghiPhep");
+    const snapshot = await get(nghiPhepRef);
+
+    if (snapshot.exists()) {
+      const employeesOnLeave = [];
+      snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        if (data.loaiNghi === loaiNghi) {
+          employeesOnLeave.push({ id: childSnapshot.key, ...data });
+        }
+      });
+
+      return employeesOnLeave;
+    } else {
+      console.log("No data available");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error reading leave records:", error);
+    throw error;
+  }
+}
