@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
 import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { Badge } from "react-native-elements";
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue } from "firebase/database";
 // Import các màn hình
 import TestScreen from "../Screen/FolderTest/TestScreen";
 import HomeScreen from "../Screen/HomeScreen/HomeScreen";
@@ -22,34 +22,55 @@ export default function TabNavigation({ route }) {
   const { employee } = route.params || {};
   const role = employee?.chucvuId; // Kiểm tra role từ params
   const userID = employee.employeeId;
+
   const [unreadCount, setUnreadCount] = useState(0);
-
-
-
 
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     const callback = (danhSachThongBao) => {
-      const count = danhSachThongBao.filter(thongBao => !thongBao.trangThai).length;
-   
-        setUnreadNotifications(count);
-  
+      const count = danhSachThongBao.filter(
+        (thongBao) => !thongBao.trangThai
+      ).length;
+
+      setUnreadNotifications(count);
     };
 
     listenForNotifications(employee.employeeId, callback);
-    
-    return () => {
-    };
+
+    return () => {};
   }, [employee.employeeId]);
 
+  useEffect(() => {
+    // Set up a listener for changes in the "chats" node
+    const chatsRef = ref(database, "chats");
+    const unsubscribe = onValue(chatsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        let count = 0;
+        snapshot.forEach((childSnapshot) => {
+          const chatData = childSnapshot.val();
+          const { lastSend, status, participants } = chatData;
+          if (participants.includes(userID)) {
+            if (lastSend !== userID && status === "0") {
+              count += 1; // Increment unread count
+            }
+          }
+        });
+        setUnreadCount(count);
+      } else {
+        setUnreadCount(0);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [userID]);
 
   // Example unread counts
   const unreadMessages = 3;
 
-
   const IconWithBadge = ({ name, badgeCount, color, size, iconType }) => {
-    const IconComponent = iconType === "MaterialIcons" ? MaterialIcons : AntDesign;
+    const IconComponent =
+      iconType === "MaterialIcons" ? MaterialIcons : AntDesign;
     return (
       <View style={{ width: 24, height: 24, margin: 5 }}>
         <IconComponent name={name} size={size} color={color} />
@@ -57,7 +78,7 @@ export default function TabNavigation({ route }) {
           <Badge
             value={badgeCount}
             status="error"
-            containerStyle={{ position: 'absolute', top: -4, right: -4 }}
+            containerStyle={{ position: "absolute", top: -4, right: -4 }}
           />
         )}
       </View>
@@ -78,7 +99,13 @@ export default function TabNavigation({ route }) {
             </Text>
           ),
           tabBarIcon: ({ color }) => (
-            <IconWithBadge name="notifications" size={24} color={color} badgeCount={unreadNotifications} iconType="MaterialIcons" />
+            <IconWithBadge
+              name="notifications"
+              size={24}
+              color={color}
+              badgeCount={unreadNotifications}
+              iconType="MaterialIcons"
+            />
           ),
         }}
       />
@@ -93,7 +120,13 @@ export default function TabNavigation({ route }) {
             </Text>
           ),
           tabBarIcon: ({ color }) => (
-            <IconWithBadge name="message1" size={24} color={color} badgeCount={unreadCount} iconType="AntDesign" />
+            <IconWithBadge
+              name="message1"
+              size={24}
+              color={color}
+              badgeCount={unreadCount}
+              iconType="AntDesign"
+            />
           ),
         }}
       />
@@ -129,8 +162,7 @@ export default function TabNavigation({ route }) {
           }}
         />
       );
-    }
-    else if (role === "TP" && employee?.phongbanId === "NS") {
+    } else if (role === "TP" && employee?.phongbanId === "NS") {
       return (
         <Tab.Screen
           name="SalaryManagement"
@@ -144,8 +176,7 @@ export default function TabNavigation({ route }) {
           }}
         />
       );
-    }
-    else if (role === "NV") {
+    } else if (role === "NV") {
       return (
         <Tab.Screen
           name="Home"
