@@ -117,6 +117,7 @@ return {
     throw error;
   }
 }
+
 // Cập nhật công thức lương
 export async function updateCongThucLuong(newData) {
   try {
@@ -222,6 +223,26 @@ export async function getBangLuong() {
 }
 
 
+    const chamCongRef = ref(db, "chitietchamcong");
+    const snapshot = await get(chamCongRef);
+
+    const data = [];
+    snapshot.forEach((doc) => {
+      const key = doc.key;
+      const [employeeId, day, month, year] = key.split("-");
+
+      if (`${month}-${year}` === thang) {
+        data.push(doc.val());
+      }
+    });
+
+
+    return data;
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu từ Realtime Database:", error);
+    throw new Error("Không thể lấy dữ liệu chấm công.");
+  }
+}
 
 // Lưu danh sách lương vào Realtime Database
 export async function luuDanhSachLuongFirebase(salaryList) {

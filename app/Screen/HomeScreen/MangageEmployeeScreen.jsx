@@ -30,7 +30,9 @@ const EmployeeScreen = ({ navigation, route }) => {
     const data = await readEmployees();
     const dataArr = Object.values(data);
     setListEmployee(dataArr);
-    const newData = dataArr.filter((nv) => nv.phongbanId == employee.phongbanId);
+    const newData = dataArr.filter(
+      (nv) => nv.phongbanId == employee.phongbanId
+    );
     setListEmployeeMyPB(newData);
     console.log(newData);
   };
@@ -43,7 +45,7 @@ const EmployeeScreen = ({ navigation, route }) => {
 
   // Lấy số lượng nghỉ phép chưa xác nhận
   const getPendingLeaveCount = () => {
-    const nghiPhepRef = ref(database, 'nghiPhep');
+    const nghiPhepRef = ref(database, "nghiPhep");
     onValue(nghiPhepRef, (snapshot) => {
       let count = 0;
       snapshot.forEach((childSnapshot) => {
@@ -89,6 +91,17 @@ const EmployeeScreen = ({ navigation, route }) => {
               label="Phòng ban"
               onPress={() => navigateTo("PhongBanScreen")}
             />
+
+            <StatItem
+              icon="notifications"
+              component={MaterialIcons}
+              color="#9C27B0"
+              value=""
+              label="Thêm thông báo"
+              onPress={() => {
+                navigation.navigate("AddThongBao", { employee });
+              }}
+            />
             <StatItem
               icon="calendar-times-o"
               color="#2196F3"
@@ -112,7 +125,6 @@ const EmployeeScreen = ({ navigation, route }) => {
     </SafeAreaView>
   );
 };
-
 
 const StatItem = ({
   icon,

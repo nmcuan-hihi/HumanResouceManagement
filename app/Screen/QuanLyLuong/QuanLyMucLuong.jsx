@@ -26,6 +26,7 @@ export default function QuanLyMucLuong({ navigation }) {
   const [visibleModalCCan, setVisibleModalCCan] = useState(false);
   const [visibleModalPcap, setVisibleModalPcap] = useState(false);
   const [visibleModalTCa, setVisibleModalTCa] = useState(false);
+  const [visibleModalTNien, setVisibleModalTNien] = useState(false);
 
   const [visibleLoad, setVisibleLoad] = useState(false);
   const [visibleSuccess, setVisibleSuccess] = useState(false);
@@ -33,8 +34,14 @@ export default function QuanLyMucLuong({ navigation }) {
   const [congThucLuong, setCongThucLuong] = useState([]);
 
   const getCTL = async () => {
-    const data = await getCongThucLuong();
-    setCongThucLuong(data);
+    try {
+      setVisibleLoad(true);
+      const data = await getCongThucLuong();
+      setCongThucLuong(data);
+      setVisibleLoad(false);
+    } catch (error) {
+      setVisibleLoad(false);
+    }
   };
 
   const saveUpdatedValue = async (field, newValue) => {
@@ -151,6 +158,24 @@ export default function QuanLyMucLuong({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
+
+
+              {/*------------------------------- thâm niên */}
+              <View style={styles.infoSection}>
+            <Text>Hệ số thâm niên</Text>
+            <View style={styles.viewText}>
+              <Text style={styles.sectionTitle}>
+                {congThucLuong?.hs_thamnien * 100 + " %"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisibleModalTNien(true);
+                }}
+              >
+                <Icon name="edit" size={24} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+          </View>
         </ScrollView>
 
         <ModalEdit
@@ -183,6 +208,14 @@ export default function QuanLyMucLuong({ navigation }) {
           name={"Hệ số tăng ca"}
           value={congThucLuong?.hs_tangca * 100 + ""}
           onSave={(newValue) => saveUpdatedValue("hs_tangca", newValue / 100)}
+        />
+
+<ModalEdit
+          visibleModal={visibleModalTNien}
+          setVisibleModal={setVisibleModalTNien}
+          name={"Hệ số thâm niên"}
+          value={congThucLuong?.hs_thamnien * 100 + ""}
+          onSave={(newValue) => saveUpdatedValue("hs_thamnien", newValue / 100)}
         />
       </SafeAreaView>
     </>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
 import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
@@ -15,7 +15,7 @@ import QuanLyMucLuong from "../Screen/QuanLyLuong/QuanLyMucLuong";
 import ChammCong from "../Screen/MarkAttendaceScreen/MarkAttendace";
 import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
 import HomeMessenger from "../Screen/MessengerScreen/HomeMessenger";
-import { database } from "../config/firebaseconfig";
+import { listenForNotifications } from "../services/thongBaoFirebase";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,33 +26,27 @@ export default function TabNavigation({ route }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
 
-  const unreadNotifications = 1;
-  useEffect(() => {
-    // Set up a listener for changes in the "chats" node
-    const chatsRef = ref(database, "chats");
-    const unsubscribe = onValue(chatsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        let count = 0;
-        snapshot.forEach((childSnapshot) => {
-          const chatData = childSnapshot.val();
-          const { lastSend, status, participants } = chatData; 
-          if ( participants.includes(userID)) {
-          
-            if (lastSend !== userID && status === "0") {
-              count += 1; // Increment unread count
-            }
-          }
-        });
-        setUnreadCount(count);
-      } else {
-        setUnreadCount(0); 
-      }
-    });
-  
-    return () => unsubscribe(); 
-  }, [userID]);
-  
 
+
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  useEffect(() => {
+    const callback = (danhSachThongBao) => {
+      const count = danhSachThongBao.filter(thongBao => !thongBao.trangThai).length;
+   
+        setUnreadNotifications(count);
+  
+    };
+
+    listenForNotifications(employee.employeeId, callback);
+    
+    return () => {
+    };
+  }, [employee.employeeId]);
+
+
+  // Example unread counts
+  const unreadMessages = 3;
 
 
   const IconWithBadge = ({ name, badgeCount, color, size, iconType }) => {
