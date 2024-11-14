@@ -234,7 +234,7 @@ export const removePhongBan = async (maPhongBan) => {
 
 // Ghi dữ liệu bằng cấp
 export function writeBangCap(bangCap) {
-  const bangCapId = bangCap.bangCapId;
+  const bangCapId = bangCap.bangcap_id;
   set(ref(database, `bangcap/${bangCapId}`), bangCap)
     .then(() => {
       console.log(`Bằng cấp ${bangCapId} written successfully!`);
