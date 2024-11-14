@@ -156,6 +156,13 @@ export default function HomeScreenGD({ navigation, route }) {
             <Icon name="book" size={24} color="#FF9966" />
             <Text style={styles.statValue}>Kỹ năng</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate("DanhSachLuong")}
+          >
+            <Icon name="attach-money" size={24} color="#D2691E" />
+            <Text style={styles.statValue}>Lương</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
