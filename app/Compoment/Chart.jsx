@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Dimensions, Text } from 'react-native';
+import { View, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { readEmployees, readPhongBan } from "../services/database";
-
-
 
 const Chart = () => {
   const [listEmployee, setListEmployee] = useState([]);
@@ -54,7 +52,7 @@ const Chart = () => {
       population: pb.count,
       color: getRandomColor(),
       legendFontColor: "blue",
-      legendFontSize: 15,
+      legendFontSize: 14,
     }));
 
     setDataChart(chartData);
@@ -83,17 +81,19 @@ const Chart = () => {
     }
   }, [listEmployee, listPhongBan]);
 
+  // Lấy chiều rộng màn hình
+  const { width } = Dimensions.get('window');
+
   return (
-    <View>
+    <View style={{ paddingHorizontal: 10 }}>
       {dataChart.length > 0 ? (
         <PieChart
           data={dataChart}
-          width={380}
-          height={180}
+          width={width - 40} 
+          height={150}  // Chỉnh chiều cao nếu cần
           chartConfig={{
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-            },
+            style: {},
           }}
           accessor="population"
           backgroundColor="transparent"
@@ -102,6 +102,8 @@ const Chart = () => {
       ) : (
         <Text>Đang tải dữ liệu...</Text>
       )}
+
+    
     </View>
   );
 };

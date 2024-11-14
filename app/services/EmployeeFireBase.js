@@ -99,13 +99,14 @@ export async function readEmployeesFireStore() {
   }
 }
 
-// Function to get employee by ID from Realtime Database
 export async function getEmployeeById(employeeId) {
   try {
+    console.log("Fetching employee with ID:", employeeId); // Debug log
     const employeeRef = ref(database, `employees/${employeeId}`);
     const snapshot = await get(employeeRef);
 
     if (snapshot.exists()) {
+      console.log("Employee data found:", snapshot.val()); // Debug log
       return { id: employeeId, ...snapshot.val() };
     } else {
       console.log("No such employee!");
@@ -116,6 +117,7 @@ export async function getEmployeeById(employeeId) {
     throw error;
   }
 }
+
 
 // Function to generate new employee ID
 export async function getNewEmployeeId() {

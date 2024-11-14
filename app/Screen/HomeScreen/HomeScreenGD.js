@@ -63,29 +63,6 @@ export default function HomeScreenGD({ navigation, route }) {
     getListPB();
   }, []);
 
-  const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    { key: 'first', title: 'Tab 1' },
-    { key: 'second', title: 'Tab 2' },
-    { key: 'third', title: 'Tab 3' },
-    { key: 'fourth', title: 'Tab 4' },
-  ]);
-
-  const renderScene = SceneMap({
-    first: () => <FirstRoute data={listEmployee} />,
-    second: () => <SecondRoute data={listPhongBan} />,
-    third: () => <ThirdRoute data={listEmployee} />,
-    fourth: () => <FourthRoute data={listPhongBan} />,
-  });
-
-  const renderTabBar = props => (
-    <TabBar
-      {...props}
-      style={styles.tabBar}
-      labelStyle={styles.tabLabel}
-      indicatorStyle={styles.tabIndicator}
-    />
-  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -168,7 +145,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffff",
   },
   summaryCard: {
-    backgroundColor: "#FFF9C4",
+    backgroundColor: "#E3F2FD",
     marginTop: 16,
     marginHorizontal: 16,
     padding: 16,
