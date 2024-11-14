@@ -48,6 +48,8 @@ import DangKyNghiScreen from './app/Screen/NghiPhepScreen/DangKyNghiScreen';
 import DuyetNghiPhep from './app/Screen/NghiPhepScreen/DuyetNghiPhep';
 import ChiTietNghiPhep from './app/Screen/NghiPhepScreen/ChiTietNghiPhep';
 import MesengerDetails from './app/Screen/MessengerScreen/MesengerDetails';
+import CreateCompanyScreen from './app/Screen/LoginSreen/CreateCompanyScreen';
+import { AppProvider  } from "./app/config/AppProvider"; 
 
 const Tab = createBottomTabNavigator();
 
@@ -61,57 +63,60 @@ export default function App() {
     return null;
   }
   return (
+    <><AppProvider>
     <View style={styles.container}>
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="DangKyNghi" component={DangKyNghiScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="DuyetNghiPhep" component={DuyetNghiPhep} options={{ headerShown: false }} />
-        <Stack.Screen name="ChiTietNghiPhep" component={ChiTietNghiPhep} options={{ headerShown: false }} />
-        <Stack.Screen name="MesengerDetails" component={MesengerDetails} options={{ headerShown: false }} />
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen name="DangKyNghi" component={DangKyNghiScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="DuyetNghiPhep" component={DuyetNghiPhep} options={{ headerShown: false }} />
+          <Stack.Screen name="ChiTietNghiPhep" component={ChiTietNghiPhep} options={{ headerShown: false }} />
+          <Stack.Screen name="MesengerDetails" component={MesengerDetails} options={{ headerShown: false }} />
 
 
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="UserTabNav" component={TabNavigation} options={{ headerShown: false }} />
-        <Stack.Screen name="HomeScreenGD" component={HomeScreenGD} options={{ headerShown: false }} />
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="CreateCompanyScreen" component={CreateCompanyScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="UserTabNav" component={TabNavigation} options={{ headerShown: false }} />
+          <Stack.Screen name="HomeScreenGD" component={HomeScreenGD} options={{ headerShown: false }} />
 
-        <Stack.Screen name="DanhSachBangCap" component={DanhSachBangCap} options={{ headerShown: false }} />
-        <Stack.Screen name="DetailBangCap" component={DetailBangCap} options={{ headerShown: false }} />
+          <Stack.Screen name="DanhSachBangCap" component={DanhSachBangCap} options={{ headerShown: false }} />
+          <Stack.Screen name="DetailBangCap" component={DetailBangCap} options={{ headerShown: false }} />
 
-        <Stack.Screen name="QuanLyMucLuong" component={QuanLyMucLuong} options={{ headerShown: false }} />
- 
-
-        <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
-        <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />
-        <Stack.Screen name="EmployeeScreen" component={EmployeeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="AddEmployee" component={AddEmployeeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ListChucVu" component={ListChucVu} options={{ headerShown: false }} />
-        <Stack.Screen name="ChucVuDetail" component={ChucVuDetail} options={{ headerShown: false }} />
-        <Stack.Screen name="AddChucVu" component={AddChucVu} options={{ headerShown: false }} />
-       
-        <Stack.Screen name="ListEmployee" component={ListEmployee} options={{ headerShown: false }} />
-        <Stack.Screen name="EmployeeDetail" component={EmployeeDetailScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="EditEmployee" component={EmployeeEditScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="PhongBanScreen" component={PhongBanScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="NotificeScreen" component={NotificeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="AddMember" component={AddMember} options={{ headerShown: false }} />
-        <Stack.Screen name="DetailPB" component={DetailPB} options={{ headerShown: false }} />
+          <Stack.Screen name="QuanLyMucLuong" component={QuanLyMucLuong} options={{ headerShown: false }} />
 
 
-        <Stack.Screen name="Skill" component={DanhSachSkill} options={{ headerShown: false }} />
-        <Stack.Screen name="SkillDetail" component={DetailSkill} options={{ headerShown: false }} />
-        <Stack.Screen name="cccd" component={CccdScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
+          <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />
+          <Stack.Screen name="EmployeeScreen" component={EmployeeScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="AddEmployee" component={AddEmployeeScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ListChucVu" component={ListChucVu} options={{ headerShown: false }} />
+          <Stack.Screen name="ChucVuDetail" component={ChucVuDetail} options={{ headerShown: false }} />
+          <Stack.Screen name="AddChucVu" component={AddChucVu} options={{ headerShown: false }} />
+
+          <Stack.Screen name="ListEmployee" component={ListEmployee} options={{ headerShown: false }} />
+          <Stack.Screen name="EmployeeDetail" component={EmployeeDetailScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="EditEmployee" component={EmployeeEditScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="PhongBanScreen" component={PhongBanScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="NotificeScreen" component={NotificeScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="AddMember" component={AddMember} options={{ headerShown: false }} />
+          <Stack.Screen name="DetailPB" component={DetailPB} options={{ headerShown: false }} />
 
 
-        <Stack.Screen name="EditMatKhau" component={EditMatKhau} options={{ headerShown: false }} />
-        <Stack.Screen name="ThemBangCapNV" component={ThemBangCapNV} options={{ headerShown: false }} />
-        <Stack.Screen name="ThemSkillNV" component={ThemSkillNV} options={{ headerShown: false }} />
-        <Stack.Screen name="DetailBangCapNV" component={DetailBangCapNhanVien} options={{ headerShown: false }} />
-     
-      </Stack.Navigator>  
-    </NavigationContainer>
-    <StatusBar style="auto" />
-  </View>
+          <Stack.Screen name="Skill" component={DanhSachSkill} options={{ headerShown: false }} />
+          <Stack.Screen name="SkillDetail" component={DetailSkill} options={{ headerShown: false }} />
+          <Stack.Screen name="cccd" component={CccdScreen} options={{ headerShown: false }} />
+
+
+          <Stack.Screen name="EditMatKhau" component={EditMatKhau} options={{ headerShown: false }} />
+          <Stack.Screen name="ThemBangCapNV" component={ThemBangCapNV} options={{ headerShown: false }} />
+          <Stack.Screen name="ThemSkillNV" component={ThemSkillNV} options={{ headerShown: false }} />
+          <Stack.Screen name="DetailBangCapNV" component={DetailBangCapNhanVien} options={{ headerShown: false }} />
+
+        </Stack.Navigator>
+      </NavigationContainer>
+      <StatusBar style="auto" />
+    </View>
+    </AppProvider></>
   );
 }
 

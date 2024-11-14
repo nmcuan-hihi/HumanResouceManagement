@@ -1,38 +1,40 @@
 // app/config/firebaseconfig.js
-import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database"; // Import Realtime Database
-import { getStorage } from "firebase/storage"; // Import Storage
-import { getFirestore } from "firebase/firestore"; // Import Firestore
-import {
-  FIREBASE_API_KEY,
-  FIREBASE_AUTH_DOMAIN,
-  FIREBASE_DATABASE_URL,
-  FIREBASE_PROJECT_ID,
-  FIREBASE_STORAGE_BUCKET,
-  FIREBASE_MESSAGING_SENDER_ID,
-  FIREBASE_APP_ID,
-  FIREBASE_MEASUREMENT_ID,
-} from "@env";
+import { initializeApp, getApp, getApps } from "firebase/app";
+import { getDatabase, ref } from "firebase/database";
+import { getStorage } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
+import { useAppContext } from "../config/AppProvider"; // Import Context
 
-// Cấu hình Firebase
-const firebaseConfig = {
-  apiKey: FIREBASE_API_KEY,
-  authDomain: FIREBASE_AUTH_DOMAIN,
-  databaseURL: FIREBASE_DATABASE_URL,
-  projectId: FIREBASE_PROJECT_ID,
-  storageBucket: FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
-  appId: FIREBASE_APP_ID,
-  measurementId: FIREBASE_MEASUREMENT_ID,
+export const getFirebaseConfig = (companyId) => {
+  if (!companyId) {
+    throw new Error("Company ID is required");
+  }
+
+  const databaseURL = `https://your-project-id.firebaseio.com/${companyId}`;
+
+  return {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    databaseURL: databaseURL,  // Dùng URL với companyId
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
+  };
 };
 
-// Khởi tạo Firebase App
-const app = initializeApp(firebaseConfig);
+export const initializeFirebaseApp = (companyId) => {
+  const firebaseConfig = getFirebaseConfig(companyId);
 
-// Khởi tạo các dịch vụ Firebase
-const database = getDatabase(app); // Realtime Database
-const storage = getStorage(app); // Firebase Storage
-const firestore = getFirestore(app); // Firestore
+  if (getApps().length === 0) {
+    initializeApp(firebaseConfig); // Khởi tạo Firebase nếu chưa có
+  }
 
-// Xuất các dịch vụ Firebase
-export { app, database, storage, firestore };
+  const app = getApp(); // Lấy app Firebase đã khởi tạo
+  const database = getDatabase(app);
+  const storage = getStorage(app);
+  const firestore = getFirestore(app);
+
+  return { app, database, storage, firestore };
+};

@@ -105,6 +105,7 @@ export async function getEmployeeById(employeeId) {
     const employeeRef = ref(database, `employees/${employeeId}`);
     const snapshot = await get(employeeRef);
 
+    console.log("===="+ employeeRef)
     if (snapshot.exists()) {
       return { id: employeeId, ...snapshot.val() };
     } else {

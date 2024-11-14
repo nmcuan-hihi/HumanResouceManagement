@@ -1,89 +1,69 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { getDatabase, ref, get, child } from "firebase/database";
-import { app } from "../../services/database";
-import { getEmployeeById } from "../../services/EmployeeFireBase";
+// screens/LoginScreen.js
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { useAppContext } from '../../config/AppProvider'; // Sử dụng Context
+import { initializeFirebaseApp } from '../../config/firebaseconfig';
+import { getEmployeeById } from '../../services/EmployeeFireBase'; // Giả sử bạn có dịch vụ này
 
-const database = getDatabase(app);
-
-export default function LoginScreen({ navigation }) {
-  const [employeeId, setEmployeeId] = useState("NV008");
-  const [password, setPassword] = useState(""); // Mock password input
-
-  
+export default function LoginScreen() {
+  const [employeeId, setEmployeeId] = useState('');
+  const [password, setPassword] = useState('');
+  const [companyId, setCompanyId] = useState('');
+  const { setCompanyId: setGlobalCompanyId } = useAppContext(); // Sử dụng Context để set companyId
+  const navigation = useNavigation();
 
   const handleLogin = async () => {
-   
-    if (!employeeId) {
-      
-        Alert.alert("Error", "Please enter your employee ID.");
-        return;
+    if (!employeeId || !password || !companyId) {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
     }
+
+    // Lưu companyId vào Context
+    setGlobalCompanyId(companyId);
 
     try {
-      const employeeData = await getEmployeeById(employeeId);
+      // Khởi tạo Firebase với companyId
+      const { database } = initializeFirebaseApp(companyId);
 
-      if (employeeData != null) {
-
-        if (password === employeeData.matKhau) {
-
-          navigation.navigate("UserTabNav", { employee: employeeData }); 
-        } else {
-          Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
-        }
+      const employeeData = await getEmployeeById(employeeId, database);
+      if (employeeData && password === employeeData.matKhau) {
+        navigation.navigate('UserTabNav', { employee: employeeData });
       } else {
-        Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
+        Alert.alert('Error', 'Invalid credentials.');
       }
     } catch (error) {
-      Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
+      Alert.alert('Error', 'An error occurred.');
+      console.error(error);
     }
-};
-
-  
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Enter your Employee ID</Text>
-        <Ionicons
-          style={{ marginEnd: 30 }}
-          name="person-circle-outline"
-          size={24}
-          color="blue"
-        />
-      </View>
-
-      <Text style={styles.subTitle}>
-        Enter your employee ID and password to login.
-      </Text>
-
+      <Text style={styles.title}>Login</Text>
       <TextInput
         style={styles.input}
         placeholder="Employee ID"
         value={employeeId}
-        
         onChangeText={setEmployeeId}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
         value={password}
-        onChangeText={setPassword}
         secureTextEntry
+        onChangeText={setPassword}
       />
-
+      <TextInput
+        style={styles.input}
+        placeholder="Company ID"
+        value={companyId}
+        onChangeText={setCompanyId}
+      />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Continue →</Text>
+        <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
-
     </View>
   );
 }
@@ -94,22 +74,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 20,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingTop: 100,
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
   title: {
-    color: "blue",
     fontSize: 22,
     fontWeight: "bold",
-  },
-  subTitle: {
-    fontSize: 14,
-    color: "#6e6e6e",
-    marginBottom: 30,
+    marginBottom: 20,
   },
   input: {
     height: 50,
@@ -118,7 +86,6 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     marginBottom: 20,
     paddingHorizontal: 10,
-    fontSize: 16,
   },
   button: {
     backgroundColor: "#00BFFF",
@@ -128,26 +95,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "center",
     justifyContent: "center",
-    marginTop: 290,
   },
   buttonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-  },
-  testButtons: {
-    marginTop: 30,
-  },
-  testButton: {
-    backgroundColor: "#d3d3d3",
-    borderRadius: 15,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 5,
-  },
-  testButtonText: {
-    color: "#000",
-    fontSize: 16,
   },
 });
