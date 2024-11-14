@@ -1,19 +1,22 @@
-import { getDatabase, ref, set, get, update, remove, child } from "firebase/database";
-import { app } from "../config/firebaseconfig";
-import { initializeApp } from "firebase/app";
 import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
+  getDatabase,
+  ref,
+  set,
+  get,
+  update,
+  remove,
+  child,
+  push,
+  query,
+  orderByChild,
+  equalTo,
+} from "firebase/database";
+import { app } from "../config/firebaseconfig";
 
-const database = getDatabase(app);
-const storage = getStorage(app); // Initialize Firebase Storage
+const database = getDatabase(app); // Khởi tạo Realtime Database
 
-// Function to add an employee to Realtime Database
-export const addEmployee = async (employee) => {
->>>>>>> 40.2_huy_fix
+// Hàm ghi dữ liệu nhân viên vào Realtime Database
+export const addEmployeeFireStore = async (employee) => {
   try {
     const sanitizedEmployee = {};
     Object.keys(employee).forEach((key) => {
@@ -29,12 +32,23 @@ export const addEmployee = async (employee) => {
   }
 };
 
-// Function to add employee data and profile image to Realtime Database
-export async function addEmployeeWithImage(employeeData, profileImage) {
+// Ghi dữ liệu nhân viên
+export function writeUserData(employee) {
+  const employeeId = employee.employeeId;
+  set(ref(database, `employees/${employeeId}`), employee)
+    .then(() => {
+      console.log(`Employee ${employeeId} written successfully!`);
+    })
+    .catch((error) => {
+      console.error(`Error writing employee ${employeeId}:`, error);
+    });
+}
+
+// Thêm nhân viên với hình ảnh
+export async function addEmployee(employeeData, profileImage) {
   try {
     employeeData.matKhau = employeeData.employeeId;
-
-    const imageRef = storageRef(storage, `employee/${employeeData.employeeId}.jpg`);
+    const imageRef = ref(database, `employeeImages/${employeeData.employeeId}.jpg`);
 
     const response = await fetch(profileImage);
     const blob = await response.blob();
@@ -42,7 +56,6 @@ export async function addEmployeeWithImage(employeeData, profileImage) {
 
     const imageUrl = await getDownloadURL(imageRef);
     const employee = { ...employeeData, imageUrl };
-
     await set(ref(database, `employees/${employeeData.employeeId}`), employee);
     console.log(`Employee ${employeeData.employeeId} added successfully!`);
   } catch (error) {
@@ -54,11 +67,10 @@ export async function addEmployeeWithImage(employeeData, profileImage) {
 export async function readEmployees() {
   try {
     const snapshot = await get(ref(database, "employees"));
-
     if (snapshot.exists()) {
-      return Object.keys(snapshot.val()).map((key) => ({
-        id: key,
-        ...snapshot.val()[key],
+      const employees = Object.entries(snapshot.val()).map(([id, data]) => ({
+        id,
+        ...data,
       }));
       return employees;
     } else {
@@ -70,34 +82,41 @@ export async function readEmployees() {
   }
 }
 
-// Function to update employee info
-export const updateEmployee = async (employeeId, employeeData) => {
+// Cập nhật thông tin nhân viên
+export const updateEmployee = async (employee_id, employeeData) => {
   try {
-    await update(ref(database, `employees/${employeeId}`), employeeData);
-    console.log(`Employee ${employeeId} updated successfully!`);
+    const employeeRef = ref(database, `employees/${employee_id}`);
+    await update(employeeRef, employeeData);
+    console.log(`Employee ${employee_id} updated successfully!`);
   } catch (error) {
-    console.error(`Error updating employee ${employeeId}:`, error);
+    console.error(`Error updating employee ${employee_id}:`, error);
+    throw error;
   }
 };
 
-// Function to delete employee
-export const deleteEmployee = async (employeeId) => {
+// Xóa nhân viên
+export const deleteEmployee = async (employee_id) => {
   try {
-    await remove(ref(database, `employees/${employeeId}`));
-    console.log(`Employee ${employeeId} deleted successfully!`);
+    const employeeRef = ref(database, `employees/${employee_id}`);
+    await remove(employeeRef);
+    console.log(`Employee ${employee_id} deleted successfully!`);
   } catch (error) {
-    console.error(`Error deleting employee ${employeeId}:`, error);
+    console.error(`Error deleting employee ${employee_id}:`, error);
+    throw error;
   }
 };
 
-// Toggle employee status
-export const toggleEmployeeStatus = async (employeeId, currentStatus) => {
+// Chuyển đổi trạng thái nhân viên
+export const toggleEmployeeStatus = async (employee_id, currentStatus) => {
   try {
+    const employeeRef = ref(database, `employees/${employee_id}`);
     const newStatus = !currentStatus;
-    await update(ref(database, `employees/${employeeId}`), { trangthai: newStatus });
-    console.log(`Employee ${employeeId} status updated successfully!`);
+
+    await update(employeeRef, { trangthai: newStatus });
+    console.log(`Employee ${employee_id} status updated to ${newStatus ? "active" : "inactive"} successfully!`);
   } catch (error) {
-    console.error(`Error updating employee ${employeeId} status:`, error);
+    console.error(`Error updating employee ${employee_id} status:`, error);
+    throw error;
   }
 };
 // Create ChucVu
@@ -112,8 +131,55 @@ export const createChucVu = async (chucvu_id, chucVu) => {
   }
 };
 
+// Read ChucVu
+export const readChucVu = async () => {
+  try {
+    const db = getDatabase();
+    const chucVuRef = ref(db, "chucvu");
+    const snapshot = await get(chucVuRef);
 
-// Function to add department (Phòng Ban)
+    if (snapshot.exists()) {
+      const chucVus = Object.keys(snapshot.val()).map((key) => ({
+        id: key,
+        ...snapshot.val()[key],
+      }));
+
+      return chucVus; // Return list of chucVu
+    } else {
+      console.log("No data available");
+      return null; // No data found
+    }
+  } catch (error) {
+    console.error("Error reading chuc vu data:", error);
+    return null; // Handle error
+  }
+};
+
+// Update ChucVu
+export const updateChucVu = async (maChucVu, updatedData) => {
+  try {
+    const db = getDatabase();
+    const chucVuRef = ref(db, `chucvu/${maChucVu}`);
+    await update(chucVuRef, updatedData); // Update data at the specific location
+    console.log(`Chức vụ ${maChucVu} đã được cập nhật thành công`);
+  } catch (error) {
+    console.error(`Lỗi khi cập nhật chức vụ ${maChucVu}:`, error);
+  }
+};
+
+// Delete ChucVu
+export const deleteChucVu = async (chucvu_id) => {
+  try {
+    const db = getDatabase();
+    const chucVuRef = ref(db, `chucvu/${chucvu_id}`);
+    await remove(chucVuRef); // Remove data at the specific location
+    console.log(`Chức vụ ${chucvu_id} đã được xóa thành công`);
+  } catch (error) {
+    console.error(`Lỗi khi xóa chức vụ ${chucvu_id}:`, error);
+  }
+};
+
+// Ghi dữ liệu phòng ban
 export function writePhongBan(phongBan) {
   const maPhongBan = phongBan.maPhongBan;
   set(ref(database, `phongban/${maPhongBan}`), phongBan)
@@ -125,15 +191,14 @@ export function writePhongBan(phongBan) {
     });
 }
 
-// Function to read department (Phòng Ban) list
+// Đọc danh sách phòng ban
 export async function readPhongBan() {
   try {
     const snapshot = await get(ref(database, "phongban"));
-
     if (snapshot.exists()) {
-      return Object.keys(snapshot.val()).map((key) => ({
-        id: key,
-        ...snapshot.val()[key],
+      const phongBans = Object.entries(snapshot.val()).map(([id, data]) => ({
+        id,
+        ...data,
       }));
       return phongBans;
     } else {
@@ -145,57 +210,31 @@ export async function readPhongBan() {
   }
 }
 
-// Position Functions (Chức vụ)
-export const createChucVu = async (chucvuId, chucVu) => {
+// Cập nhật phòng ban
+export const editPhongBan = async (maPhongBan, updatedData) => {
   try {
-    await set(ref(database, `chucvu/${chucvuId}`), chucVu);
-    console.log(`Chức vụ ${chucvuId} added successfully!`);
+    const phongBanRef = ref(database, `phongban/${maPhongBan}`);
+    await update(phongBanRef, updatedData);
+    console.log("Cập nhật phòng ban thành công");
   } catch (error) {
-    console.error(`Error adding chức vụ ${chucvuId}:`, error);
+    console.error("Lỗi khi cập nhật phòng ban:", error);
   }
 };
 
-export const readChucVu = async () => {
+// Xóa phòng ban
+export const removePhongBan = async (maPhongBan) => {
   try {
-    const snapshot = await get(ref(database, "chucvu"));
-
-    if (snapshot.exists()) {
-      return Object.keys(snapshot.val()).map((key) => ({
-        id: key,
-        ...snapshot.val()[key],
-      }));
-    } else {
-      console.log("No data available");
-      return null;
-    }
+    const phongBanRef = ref(database, `phongban/${maPhongBan}`);
+    await remove(phongBanRef);
+    console.log(`Phòng ban ${maPhongBan} đã được xóa thành công`);
   } catch (error) {
-    console.error("Error reading chuc vu data:", error);
+    console.error(`Lỗi khi xóa phòng ban ${maPhongBan}:`, error);
   }
 };
 
-// Update Position (Chức vụ)
-export const updateChucVu = async (maChucVu, updatedData) => {
-  try {
-    await update(ref(database, `chucvu/${maChucVu}`), updatedData);
-    console.log(`Chức vụ ${maChucVu} updated successfully!`);
-  } catch (error) {
-    console.error(`Error updating chức vụ ${maChucVu}:`, error);
-  }
-};
-
-// Delete Position (Chức vụ)
-export const deleteChucVu = async (chucvuId) => {
-  try {
-    await remove(ref(database, `chucvu/${chucvuId}`));
-    console.log(`Chức vụ ${chucvuId} deleted successfully!`);
-  } catch (error) {
-    console.error(`Error deleting chức vụ ${chucvuId}:`, error);
-  }
-};
-
-// Qualification Functions (Bằng cấp)
+// Ghi dữ liệu bằng cấp
 export function writeBangCap(bangCap) {
-  const bangCapId = bangCap.bangcap_id;
+  const bangCapId = bangCap.bangCapId;
   set(ref(database, `bangcap/${bangCapId}`), bangCap)
     .then(() => {
       console.log(`Bằng cấp ${bangCapId} written successfully!`);
@@ -209,11 +248,10 @@ export function writeBangCap(bangCap) {
 export async function readBangCap() {
   try {
     const snapshot = await get(ref(database, "bangcap"));
-
     if (snapshot.exists()) {
-      return Object.keys(snapshot.val()).map((key) => ({
-        id: key,
-        ...snapshot.val()[key],
+      const bangCaps = Object.entries(snapshot.val()).map(([id, data]) => ({
+        id,
+        ...data,
       }));
       return bangCaps;
     } else {
@@ -225,11 +263,7 @@ export async function readBangCap() {
   }
 }
 
-    console.error("Error reading bang cap:", error);
-  }
-}
-
-// Update Qualification (Bằng cấp)
+// Cập nhật bằng cấp
 export async function updateBangCap(bangcapId, tenBang) {
   try {
     await update(ref(database, `bangcap/${bangcapId}`), { tenBang });
@@ -239,38 +273,14 @@ export async function updateBangCap(bangcapId, tenBang) {
   }
 }
 
-// Delete Qualification (Bằng cấp)
-export async function deleteBangCap(bangCapId) {
-  try {
-    await remove(ref(database, `bangcap/${bangCapId}`));
-    console.log(`Bằng cấp ${bangCapId} deleted successfully!`);
-  } catch (error) {
-    console.error(`Error deleting bằng cấp ${bangCapId}:`, error);
-  }
-}
-
-// Get employee by ID
-export const getEmployeeById = async (employeeId) => {
-  try {
-    const snapshot = await get(child(ref(database), `employees/${employeeId}`));
-    if (snapshot.exists()) {
-      return { id: employeeId, ...snapshot.val() };
-    }
-    console.log(`Employee with ID ${employeeId} not found`);
-    return null;
-  } catch (error) {
-    console.error("Error retrieving employee:", error);
-  }
-};
-
 // Xóa bằng cấp
-export const removeBangCap = async (bangCapId) => {
+export const deleteBangCap = async (bangCap_id) => {
   try {
-    const bangCapRef = ref(database, `bangcap/${bangCapId}`);
+    const bangCapRef = ref(database, `bangcap/${bangCap_id}`);
     await remove(bangCapRef);
-    console.log(`Bằng cấp ${bangCapId} đã được xóa thành công`);
+    console.log(`Bằng cấp ${bangCap_id} đã được xóa thành công`);
   } catch (error) {
-    console.error(`Lỗi khi xóa bằng cấp ${bangCapId}:`, error);
+    console.error(`Lỗi khi xóa bằng cấp ${bangCap_id}:`, error);
   }
 };
 
