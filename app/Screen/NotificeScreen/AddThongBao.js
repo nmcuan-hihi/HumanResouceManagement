@@ -94,6 +94,13 @@ export default function AddThongBao({ route, navigation }) {
   }, [searchPB, listNV]);
 
   const taoThongBao = async () => {
+    if (!tieuDe.trim()) {
+      Alert.alert("Thông báo", "Tiêu đề không được để trống.");
+    }
+    if (!noiDung.trim()) {
+      Alert.alert("Thông báo", "Nội dung không được để trống.");
+    }
+
     try {
       const dataTB = await taoThongBaoDataBase({
         tieuDe,

@@ -8,14 +8,16 @@ import {
 } from "react-native";
 import {
   capNhatTrangThaiThongBao,
-  layDanhSachThongBaoNhanVien,
   layThongBaoById,
   listenForNotifications,
 } from "../../services/thongBaoFirebase";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
 
 export default function NotificeScreen({ navigation, route }) {
   const { employee } = route.params;
   const [listThongBaoNV, setListThongBaoNV] = useState([]);
+
+  
 
   useEffect(() => {
     const unsubscribe = listenForNotifications(
@@ -85,6 +87,7 @@ export default function NotificeScreen({ navigation, route }) {
           if (item.trangThai == false) {
             capNhatTrangThai(employee.employeeId, item.maThongBao);
           }
+          navigation.navigate("ChiTietThongBao", { thongBao: item });
         }}
         style={[
           styles.notificationCard,
@@ -93,7 +96,17 @@ export default function NotificeScreen({ navigation, route }) {
           },
         ]}
       >
-        <Text style={styles.notificationTitle}>{item.tieuDe}</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ width: "70%" }}>
+            <Text style={styles.notificationTitle}>{item.tieuDe}</Text>
+          </View>
+          {item.trangThai && (
+            <View style={{ flexDirection: "row" }}>
+              <Text style={styles.daDoc}>Đã đọc</Text>
+              <EvilIcons name="check" size={15} color="#999999" />
+            </View>
+          )}
+        </View>
         <Text style={styles.notificationDate}>
           {item.noiDung.length > 60
             ? `${item.noiDung.substring(0, 60)}...`
@@ -181,5 +194,10 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+
+  daDoc: {
+    fontSize: 14,
+    color: "#999999",
   },
 });
