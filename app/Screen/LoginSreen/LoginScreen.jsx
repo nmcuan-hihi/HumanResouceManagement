@@ -15,8 +15,8 @@ import { getEmployeeById } from "../../services/EmployeeFireBase";
 const database = getDatabase(app);
 
 export default function LoginScreen({ navigation }) {
-  const [employeeId, setEmployeeId] = useState("NV000");
-  const [password, setPassword] = useState("133"); // Mock password input
+  const [employeeId, setEmployeeId] = useState("NV004");
+  const [password, setPassword] = useState(""); // Mock password input
 
   
 

@@ -1,7 +1,7 @@
 import { getDatabase, ref, get, set, update, serverTimestamp } from 'firebase/database';
 import { app } from '../config/firebaseconfig';  // Đảm bảo cấu hình đúng
 
-export const getEmployeesWithLeave = async () => {
+export const getEmployeesWithLeave = async (today) => {
   try {
     const db = getDatabase(app);
     const employeesRef = ref(db, 'employees');  // Đường dẫn tới bảng nhân viên
@@ -20,12 +20,9 @@ export const getEmployeesWithLeave = async () => {
     // Lấy danh sách nghỉ phép từ Firebase
     const leaves = snapshotLeave.val();
     
-    // Lấy ngày hôm nay (hoặc có thể thay bằng ngày khác nếu muốn)
-    const today = new Date().toLocaleDateString('vi-VN');  // dd/MM/yyyy
-    
     // Lọc danh sách nhân viên
     const filteredEmployees = Object.values(employees).filter(employee => {
-      // Kiểm tra nếu nhân viên có trạng thái "false" hoặc đang nghỉ phép trong ngày hôm nay
+      // Kiểm tra nếu nhân viên có trạng thái "false" hoặc đang nghỉ phép trong ngày `today`
       const isOnLeave = Object.values(leaves).some(leave => 
         leave.employeeId === employee.employeeId &&
         leave.ngayBatDau <= today &&
@@ -43,6 +40,52 @@ export const getEmployeesWithLeave = async () => {
     return [];
   }
 };
+export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) {
+  try {
+    const db = getDatabase(app);
+    const employeesRef = ref(db, "employees");
+    const leaveRef = ref(db, "nghiPhep");
+
+    // Đọc danh sách nhân viên
+    const snapshotEmployees = await get(employeesRef);
+    if (!snapshotEmployees.exists()) {
+      return [];
+    }
+    const employees = snapshotEmployees.val();
+
+    // Đọc danh sách nghỉ phép
+    const snapshotLeave = await get(leaveRef);
+    if (!snapshotLeave.exists()) {
+      return Object.values(employees).filter(
+        (employee) => employee.phongbanId === phongbanId && employee.trangthai === "true"
+      );
+    }
+    const leaves = snapshotLeave.val();
+
+    // Lọc danh sách nhân viên theo phòng ban và nghỉ phép
+    const filteredEmployees = Object.values(employees).filter((employee) => {
+      const isOnLeave = Object.values(leaves).some(
+        (leave) =>
+          leave.employeeId === employee.employeeId &&
+          leave.ngayBatDau <= today &&
+          leave.ngayKetThuc >= today &&
+          leave.trangThai !== "-1"
+      );
+
+      return (
+        employee.phongbanId === phongbanId &&
+        !isOnLeave &&
+        employee.trangthai === "true"
+      );
+    });
+
+    return filteredEmployees;
+  } catch (error) {
+    console.error("Lỗi khi lọc nhân viên theo phòng ban và nghỉ phép:", error);
+    return [];
+  }
+}
+
 
 export const getEmployeesWithLeave2 = async () => {
   const db = getDatabase();
@@ -150,7 +193,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     // Lấy thông tin ngày, tháng, năm
     const date = new Date(month);
     const year = date.getFullYear();
-    const monthName = `Tháng ${date.getMonth() + 1}`;
+    const monthName = `${date.getMonth() + 1}`;
     const day = date.getDate();
 
     // Xử lý các trạng thái

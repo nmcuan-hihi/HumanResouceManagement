@@ -12,7 +12,7 @@ import { filterEmployeesByStatus } from '../../services/PhongBanDatabase';
 import BackNav from '../../Compoment/BackNav';
 import { searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { getEmployeesWithLeave } from '../../services/chamcong';
-import { getEmployeesByLeaveType } from '../../services/chamcong';
+import { getEmployeesByLeaveType , getFilteredEmployeesByPhongBanAndLeave} from '../../services/chamcong';
 export default function ChamCongNV({navigation}) {
   const [timeIn, setTimeIn] = useState(() => {
     const defaultTimeIn = new Date();
@@ -40,7 +40,8 @@ export default function ChamCongNV({navigation}) {
   useEffect(() => {
     async function fetchEmployees() {
       try {
-        const employeesData = await getEmployeesWithLeave();
+        const formattedDate = new Date(selectedMonth).toLocaleDateString('vi-VN');
+        const employeesData = await getEmployeesWithLeave(formattedDate);
         if (employeesData) {
           setEmployees(employeesData);
         }
@@ -48,7 +49,7 @@ export default function ChamCongNV({navigation}) {
         console.error("Error fetching employees:", error);
       }
     }
-
+  
     async function fetchPhongBan() {
       try {
         const phongBanData = await readPhongBanFromRealtime();
@@ -59,14 +60,15 @@ export default function ChamCongNV({navigation}) {
         console.error("Error fetching phong ban:", error);
       }
     }
-
+  
     fetchEmployees();
     fetchPhongBan();
-  }, []);
+  }, [selectedMonth]); // Thêm selectedMonth vào dependency
+  
 
   useEffect(() => {
     if (valuePhongBan) {
-      handleFilterEmployeesByPhongBan(valuePhongBan);
+      getFilteredEmployeesByPhongBanAndLeave(valuePhongBan, selectedMonth);
     }
     if (valueStatus) {
       handleFilterEmployeesByStatus(valueStatus);
