@@ -22,7 +22,7 @@ export default function EmployeeList({ navigation }) {
   const fetchData = async () => {
     setRefreshing(true);
     try {
-      const data = await getEmployeesWithLeave2();
+      const data = await readEmployeesFireStore();
       if (data && typeof data === 'object') {
         const employeeArray = Object.keys(data).map((key) => ({
           ...data[key],
