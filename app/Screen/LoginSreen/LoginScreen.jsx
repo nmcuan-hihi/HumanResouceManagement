@@ -8,34 +8,28 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { getDatabase, ref, get, child } from "firebase/database";
-import { app } from "../../services/database";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
 
-const database = getDatabase(app);
+import { useSelector } from "react-redux";
 
 export default function LoginScreen({ navigation }) {
+  const { idCty } = useSelector((state) => state.congTy);
+
   const [employeeId, setEmployeeId] = useState("NV000");
   const [password, setPassword] = useState("133"); // Mock password input
 
-  
-
   const handleLogin = async () => {
-   
     if (!employeeId) {
-      
-        Alert.alert("Error", "Please enter your employee ID.");
-        return;
+      Alert.alert("Error", "Please enter your employee ID.");
+      return;
     }
 
     try {
-      const employeeData = await getEmployeeById(employeeId);
+      const employeeData = await getEmployeeById(employeeId,idCty);
 
       if (employeeData != null) {
-
         if (password === employeeData.matKhau) {
-
-          navigation.navigate("UserTabNav", { employee: employeeData }); 
+          navigation.navigate("UserTabNav", { employee: employeeData });
         } else {
           Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
         }
@@ -45,9 +39,7 @@ export default function LoginScreen({ navigation }) {
     } catch (error) {
       Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
     }
-};
-
-  
+  };
 
   return (
     <View style={styles.container}>
@@ -69,7 +61,6 @@ export default function LoginScreen({ navigation }) {
         style={styles.input}
         placeholder="Employee ID"
         value={employeeId}
-        
         onChangeText={setEmployeeId}
       />
       <TextInput
@@ -83,7 +74,6 @@ export default function LoginScreen({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Continue →</Text>
       </TouchableOpacity>
-
     </View>
   );
 }

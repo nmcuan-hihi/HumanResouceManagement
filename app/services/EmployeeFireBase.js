@@ -99,10 +99,10 @@ export async function readEmployeesFireStore() {
   }
 }
 
-export async function getEmployeeById(employeeId) {
+export async function getEmployeeById(employeeId,idCty) {
   try {
     console.log("Fetching employee with ID:", employeeId); // Debug log
-    const employeeRef = ref(database, `employees/${employeeId}`);
+    const employeeRef = ref(database, `${idCty}/employees/${employeeId}`);
     const snapshot = await get(employeeRef);
 
     if (snapshot.exists()) {

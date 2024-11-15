@@ -5,6 +5,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './app/Screen/LoginSreen/LoginScreen';
 import HomeScreen from './app/Screen/HomeScreen/HomeScreen';
 
+import LoginCongTy from './app/Screen/LoginSreen/LoginCongTy';
+
 import ChamCong from './app/Screen/MarkAttendaceScreen/MarkAttendace';
 import ChamCongNV from './app/Screen/MarkAttendaceScreen/MarkAttendaceNV';
 import EmployeeScreen from './app/Screen/HomeScreen/MangageEmployeeScreen';
@@ -56,7 +58,8 @@ import SalaryDetailScreen from './app/Screen/QuanLyLuong/ChiTietBangLuong';
 import AddThongBao from './app/Screen/NotificeScreen/AddThongBao';
 import ChiTietThongBao from './app/Screen/NotificeScreen/ChiTietThongBao';
 
-
+import { Provider } from "react-redux";
+import { store } from "./app/redux/store";
 
 const Tab = createBottomTabNavigator();
 
@@ -70,14 +73,16 @@ export default function App() {
     return null;
   }
   return (
+    <Provider store={store}>
     <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="LoginCongTy">
         <Stack.Screen name="DangKyNghi" component={DangKyNghiScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DuyetNghiPhep" component={DuyetNghiPhep} options={{ headerShown: false }} />
         <Stack.Screen name="ChiTietNghiPhep" component={ChiTietNghiPhep} options={{ headerShown: false }} />
         <Stack.Screen name="MesengerDetails" component={MesengerDetails} options={{ headerShown: false }} />
-
+        
+        <Stack.Screen name="LoginCongTy" component={LoginCongTy} options={{ headerShown: false }} />
 
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
@@ -128,6 +133,7 @@ export default function App() {
     </NavigationContainer>
     <StatusBar style="auto" />
   </View>
+  </Provider>
   );
 }
 
