@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Platform,
   Image,
-  Dimensions,
+  ScrollView,
 } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import dayjs from 'dayjs';
@@ -106,15 +106,20 @@ const SalaryDetailScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.fixedContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <ArrowLeft size={24} color="#1F2937" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chi tiết lương & chấm công</Text>
-        </View>
+      {/* Fixed Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <ArrowLeft size={24} color="#1F2937" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Chi tiết lương & chấm công</Text>
+      </View>
 
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Month Picker */}
         <MonthYearPicker currentDate={currentDate} onChangeMonth={setCurrentDate} />
 
@@ -160,10 +165,8 @@ const SalaryDetailScreen = ({ navigation, route }) => {
             </View>
           </View>
         </View>
-      </View>
 
-      {/* Scrollable Attendance Section */}
-      <View style={styles.attendanceContainer}>
+        {/* Attendance Info */}
         <View style={styles.attendanceCard}>
           <Text style={styles.cardTitle}>Chi tiết chấm công</Text>
           <View style={styles.attendanceHeader}>
@@ -171,16 +174,9 @@ const SalaryDetailScreen = ({ navigation, route }) => {
             <Text style={styles.headerCell}>Giờ Vào</Text>
             <Text style={styles.headerCell}>Giờ Ra</Text>
           </View>
-          <FlatList
-            data={attendanceData}
-            renderItem={renderAttendanceItem}
-            keyExtractor={(item, index) => `${item.id}-${index}`}
-            contentContainerStyle={styles.attendanceList}
-            showsVerticalScrollIndicator={true}
-            style={styles.attendanceListContainer}
-          />
+          {attendanceData.map((item, index) => renderAttendanceItem({ item, index }))}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -188,9 +184,6 @@ const SalaryDetailScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  fixedContent: {
     backgroundColor: '#F9FAFB',
   },
   loadingContainer: {
@@ -205,6 +198,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   backButton: {
     marginRight: 12,
@@ -314,16 +313,11 @@ const styles = StyleSheet.create({
   netValue: {
     color: '#10B981',
   },
-  attendanceContainer: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
   attendanceCard: {
     margin: 16,
     padding: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    flex: 1,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -349,12 +343,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
     color: '#1F2937',
-  },
-  attendanceListContainer: {
-    flex: 1,
-  },
-  attendanceList: {
-    paddingBottom: 16,
   },
   attendanceItem: {
     flexDirection: 'row',
