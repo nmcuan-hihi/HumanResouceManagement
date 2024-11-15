@@ -125,7 +125,6 @@ const DanhSachLuong = ({ navigation }) => {
 
     const month = String(date.getMonth() + 1);
 
-    console.log(month, "---------------");
     return `${month}-${year}`;
   };
 
@@ -135,7 +134,6 @@ const DanhSachLuong = ({ navigation }) => {
     const groupedData = duLieuChamCong.reduce((acc, chamcong) => {
       const employeeId = chamcong.employeeId;
 
-      console.log(chamcong.month);
       const [dayPart, monthPart, yearPart] = chamcong.month.split("/");
 
       const month = `${monthPart}-${yearPart}`;
@@ -162,31 +160,31 @@ const DanhSachLuong = ({ navigation }) => {
         (cv) => cv.chucvu_id === nhanVien.chucvuId
       );
 
+
       const dateString = nhanVien.ngaybatdau;
       const [ngay, thang, nam] = dateString.split("/").map(Number);
       const dateObject = new Date(nam, thang - 1, ngay);
       const today = new Date();
 
-      const diffMilliseconds = today - dateObject;
+      const diffMilliseconds = today - dateObject ? today - dateObject : 0;
 
       // Chuyển milliseconds sang năm
       const namThamNien = Math.floor(
         diffMilliseconds / (1000 * 60 * 60 * 24 * 365.25)
       );
 
+      const hs_thamnien = congThucLuong?.hs_thamnien || 0;
+
       const luongCoban = parseInt(congThucLuong.luongcoban * chucVu?.hschucvu);
       const luong1Ngay = parseInt(luongCoban / 26);
       const luong = luong1Ngay * ngayCong;
       const chuyenCan = ngayCong >= 26 ? congThucLuong.chuyencan : 0;
       const phuCap = parseInt(luong * congThucLuong.hs_phucap);
-      // const tangCa = parseInt(
-      //   ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca
-      // );
-      const tangCa = 0;
+      const tangCa = parseInt(
+        ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca
+      );
 
-      const hs_thamnien = congThucLuong?.hs_thamnien || 0;
-      const luongThamNien = parseInt(luong * hs_thamnien);
-
+      const luongThamNien = parseInt(luong * hs_thamnien * namThamNien);
       const thucNhan =
         luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa + luongThamNien;
 
@@ -220,8 +218,16 @@ const DanhSachLuong = ({ navigation }) => {
     setListLuongGetDB(dataluong);
     setDSChamCong(dataChamcong);
     // Nếu không có dữ liệu, lấy dữ liệu tạm tính
-    const luongs =
-      dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
+    const today = formatDateToYYYYMM(new Date());
+    let  luongs = [];
+
+    console.log(today != formatDateToYYYYMM(currentDate))
+    if (today != formatDateToYYYYMM(currentDate)) {
+      luongs = dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
+    } else {
+      luongs = luongTamTinh(dataChamcong);
+    }
+
     setListLuong(luongs);
     setVisibleLoad(checkLoad);
   };
@@ -373,7 +379,7 @@ const DanhSachLuong = ({ navigation }) => {
 
     const totalOvertime = dsChamCong
       .filter((chamCong) => chamCong.employeeId === item.employeeId)
-      .reduce((total, chamCong) => total + (chamCong?.tangca || 0), 0);
+      .reduce((total, chamCong) => total + (chamCong?.tangCa || 0), 0);
 
     return (
       <TouchableOpacity
@@ -415,7 +421,9 @@ const DanhSachLuong = ({ navigation }) => {
           </Text>
           <View>
             <Text style={styles.date}>Ngày công: {item.ngaycong}</Text>
-            <Text style={styles.date}>Tăng ca: {totalOvertime} giờ</Text>
+            <Text style={styles.date}>
+              Tăng ca: {totalOvertime.toFixed(1)} giờ
+            </Text>
           </View>
         </View>
       </TouchableOpacity>

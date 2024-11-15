@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons'; // Import icon
 import { getPhongBanById } from "../services/InfoDataLogin";
 import { useNavigation } from "@react-navigation/native";
 
-const Dashboard = ({ listEmployee, employee }) => {
+const Dashboard = ({ listEmployee, employee,onPressChamCong }) => {
   const [phongBan, setPhongBan] = useState(null);
   const phongbanId = employee?.phongbanId;
   const navigation = useNavigation();
@@ -70,7 +70,7 @@ const Dashboard = ({ listEmployee, employee }) => {
 
       {/* Nút chức năng */}
       <TouchableOpacity style={styles.button}
-      
+      onPress={onPressChamCong}
       >
         <Text style={styles.buttonText}>Chấm công của bạn</Text>
       </TouchableOpacity>
