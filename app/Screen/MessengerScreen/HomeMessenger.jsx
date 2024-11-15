@@ -140,7 +140,10 @@ export default function HomeMessenger({ navigation, route }) {
                     {CheckStatusSend(otherParticipantId, item.lastSend, item.status) ? 'Đã đọc' : 'Chưa đọc'}
                   </Text>
                 </View>
-                <Text style={styles.lastMessageText}>{item.lastMessage}</Text>
+                <Text style={styles.lastMessageText}>
+                  {item.lastMessage.length > 30 ? item.lastMessage.substring(0, 50) + "..." : item.lastMessage}
+                </Text>
+
                 <Text style={styles.timestampText}>{formatTimestamp(item.timestamp)}</Text>
               </TouchableOpacity>
             );
@@ -183,7 +186,7 @@ export default function HomeMessenger({ navigation, route }) {
                       );
                     }
                   }
-                  else{
+                  else {
                     if (item.phongbanId == employee.phongbanId && item.employeeId != employee.employeeId) {
                       return (
                         <TouchableOpacity style={styles.employeeItem} onPress={() => handleSelectEmployee(item)}>
