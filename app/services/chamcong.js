@@ -150,10 +150,8 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     // Định dạng `month` thành ngày/tháng/năm
     const formattedMonth = new Date(month).toLocaleDateString('vi-VN');
 
-    const maLuongThang = new Date(timeIn).getMonth() + 1;
-    const moth = new Date(month).getMonth()+1;
-    console.log("month" +moth);
-    
+    const maLuongThang = new Date(month).getMonth() + 1;
+    const moth = new Date(month).getMonth() + 1;
     const yea = new Date(month).getFullYear();
     const day = new Date(month).getDate();
 
@@ -167,7 +165,14 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     const gioRa = new Date(timeOut).getHours();
     const diMuon = gioVao >= 9 && gioVao < 11;
     const vangMat = gioVao >= 11;
-    const tangCa = gioRa > 17;
+
+    // Tính số giờ tăng ca nếu `timeOut` sau 17:00
+    let tangCaHours = 0;
+    if (gioRa > 17) {
+      const overtimeStart = new Date(timeOut);
+      overtimeStart.setHours(17, 0, 0, 0); // Thiết lập thời gian bắt đầu tính tăng ca là 5 PM
+      tangCaHours = (new Date(timeOut) - overtimeStart) / (1000 * 60 * 60); // Số giờ tăng ca
+    }
 
     // Tạo một đường dẫn duy nhất cho document trong Realtime Database
     const chamCongRef = ref(database, `chitietchamcong/${employeeId}-${day}-${moth}-${yea}`);
@@ -182,7 +187,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
       maChamCong,
       diMuon,
       vangMat,
-      tangCa,
+      tangCa: tangCaHours,
       loaiChamCong: "0",
       createdAt: serverTimestamp(),
     });
@@ -192,6 +197,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     console.error('Lỗi khi lưu chấm công:', error);
   }
 };
+
 export const getEmployeesByLeaveType = async (leaveType = "Có lương") => {
   try {
     const db = getDatabase(app);
