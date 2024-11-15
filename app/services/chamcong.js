@@ -147,48 +147,39 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     const formattedTimeIn = formatTime(new Date(timeIn));
     const formattedTimeOut = formatTime(new Date(timeOut));
 
-    // Định dạng `month` thành ngày/tháng/năm
-    const formattedMonth = new Date(month).toLocaleDateString('vi-VN');
+    // Lấy thông tin ngày, tháng, năm
+    const date = new Date(month);
+    const year = date.getFullYear();
+    const monthName = `Tháng ${date.getMonth() + 1}`;
+    const day = date.getDate();
 
-    const maLuongThang = new Date(month).getMonth() + 1;
-    const moth = new Date(month).getMonth() + 1;
-    const yea = new Date(month).getFullYear();
-    const day = new Date(month).getDate();
-
-    const maChamCong = await getNextChamCongCode();
-    if (!maChamCong) {
-      console.error('Không thể tạo mã chấm công');
-      return;
-    }
-
+    // Xử lý các trạng thái
     const gioVao = new Date(timeIn).getHours();
     const gioRa = new Date(timeOut).getHours();
-    const diMuon = gioVao >= 9 && gioVao < 11;
+    const diMuon = gioVao > 9 && gioVao < 11;
     const vangMat = gioVao >= 11;
 
     // Tính số giờ tăng ca nếu `timeOut` sau 17:00
     let tangCaHours = 0;
     if (gioRa > 17) {
       const overtimeStart = new Date(timeOut);
-      overtimeStart.setHours(17, 0, 0, 0); // Thiết lập thời gian bắt đầu tính tăng ca là 5 PM
+      overtimeStart.setHours(17, 0, 0, 0); // Bắt đầu tính tăng ca từ 5 PM
       tangCaHours = (new Date(timeOut) - overtimeStart) / (1000 * 60 * 60); // Số giờ tăng ca
     }
 
-    // Tạo một đường dẫn duy nhất cho document trong Realtime Database
-    const chamCongRef = ref(database, `chitietchamcong/${employeeId}-${day}-${moth}-${yea}`);
+    // Tạo đường dẫn
+    const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
 
+    // Lưu dữ liệu vào Realtime Database
     await set(chamCongRef, {
       employeeId,
       timeIn: formattedTimeIn,
       timeOut: formattedTimeOut,
       status,
-      month: formattedMonth,
-      maLuongThang,
-      maChamCong,
       diMuon,
       vangMat,
       tangCa: tangCaHours,
-      loaiChamCong: "0",
+      loaiChamCong: '0',
       createdAt: serverTimestamp(),
     });
 
