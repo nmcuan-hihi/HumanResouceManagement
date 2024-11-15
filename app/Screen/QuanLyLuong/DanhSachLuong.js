@@ -161,6 +161,8 @@ const DanhSachLuong = ({ navigation }) => {
         (cv) => cv.chucvu_id === nhanVien.chucvuId
       );
 
+      console.log(totalOvertime,'gio tang ca')
+
       const dateString = nhanVien.ngaybatdau;
       const [ngay, thang, nam] = dateString.split("/").map(Number);
       const dateObject = new Date(nam, thang - 1, ngay);
@@ -372,8 +374,8 @@ const DanhSachLuong = ({ navigation }) => {
 
     const totalOvertime = dsChamCong
       .filter((chamCong) => chamCong.employeeId === item.employeeId)
-      .reduce((total, chamCong) => total + (chamCong?.tangca || 0), 0);
-
+      .reduce((total, chamCong) => total + (chamCong?.tangCa || 0), 0);
+    
     return (
       <TouchableOpacity
         onPress={() => {
@@ -414,7 +416,7 @@ const DanhSachLuong = ({ navigation }) => {
           </Text>
           <View>
             <Text style={styles.date}>Ngày công: {item.ngaycong}</Text>
-            <Text style={styles.date}>Tăng ca: {totalOvertime} giờ</Text>
+            <Text style={styles.date}>Tăng ca: {totalOvertime.toFixed(1)} giờ</Text>
           </View>
         </View>
       </TouchableOpacity>
