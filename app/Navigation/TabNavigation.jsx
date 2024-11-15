@@ -94,7 +94,7 @@ export default function TabNavigation({ route }) {
         initialParams={{ employee }}
         options={{
           tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 15, marginTop: -7 }}>
+            <Text style={{ color, fontSize: 12, marginTop: -7 }}>
               Notifications
             </Text>
           ),
@@ -115,7 +115,7 @@ export default function TabNavigation({ route }) {
         initialParams={{ employee }}
         options={{
           tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 15, marginTop: -7 }}>
+            <Text style={{ color, fontSize: 12, marginTop: -7 }}>
               Messenger
             </Text>
           ),
@@ -136,7 +136,7 @@ export default function TabNavigation({ route }) {
         initialParams={{ employee }}
         options={{
           tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 15, marginTop: -7 }}>Profile</Text>
+            <Text style={{ color, fontSize: 12, marginTop: -7 }}>Profile</Text>
           ),
           tabBarIcon: ({ color }) => (
             <FontAwesome name="user" size={24} color={color} />
