@@ -14,8 +14,16 @@ import { searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { getEmployeesWithLeave } from '../../services/chamcong';
 import { getEmployeesByLeaveType } from '../../services/chamcong';
 export default function ChamCongNV({navigation}) {
-  const [timeIn, setTimeIn] = useState(new Date());
-  const [timeOut, setTimeOut] = useState(new Date());
+  const [timeIn, setTimeIn] = useState(() => {
+    const defaultTimeIn = new Date();
+    defaultTimeIn.setHours(9, 0, 0, 0); // Đặt giờ là 9:00 sáng
+    return defaultTimeIn;
+  });
+  const [timeOut, setTimeOut] = useState(() => {
+    const defaultTimeIn = new Date();
+    defaultTimeIn.setHours(17, 0, 0, 0); // Đặt giờ là 9:00 sáng
+    return defaultTimeIn;
+  });
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState({ timeIn: false, timeOut: false, month: false });
   const [employees, setEmployees] = useState([]);
@@ -381,7 +389,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   container: {
-    flex: 9,
+    flex: 15,
     backgroundColor: '#f5f5f5',
   },
   header: {

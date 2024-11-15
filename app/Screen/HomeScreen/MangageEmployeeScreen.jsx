@@ -117,12 +117,12 @@ const EmployeeScreen = ({ navigation, route }) => {
               label="Nghỉ phép"
               onPress={() => navigateTo("DuyetNghiPhep")}
             />
-            <StatItem icon="money" color="#FFC107" value="0" label="Lương" />
+            <StatItem icon="money" color="#FFC107"  label="Lương" />
             <StatItem
               icon="fingerprint"
               component={MaterialIcons}
               color="#9C27B0"
-              value="0"
+              
               label="Chấm công nhân viên"
               onPress={() => navigateTo("ChamCongNV")}
             />
