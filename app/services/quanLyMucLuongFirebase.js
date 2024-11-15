@@ -13,6 +13,28 @@ import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng x�
 
 const db = getDatabase(app);
 
+// Thêm các hàm listeners mới
+export function setupSalaryListener(employeeId, month, callback) {
+  const formattedMonth = dayjs(month).format("M-YYYY");
+  const salaryRef = ref(db, `bangluongnhanvien/${employeeId}-${formattedMonth}`);
+  
+  const unsubscribe = onValue(salaryRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      callback({
+        id: snapshot.key,
+        ...data,
+        luong: parseFloat(data.luong) || 0,
+        phucap: parseFloat(data.phucap) || 0,
+        thucnhan: parseFloat(data.thucnhan) || 0,
+      });
+    } else {
+      callback(null);
+    }
+  });
+
+  return () => off(salaryRef, 'value', unsubscribe);
+}
 // Lấy công thức lương từ Realtime Database
 export async function getCongThucLuong() {
   try {
@@ -54,6 +76,9 @@ export async function getEmployeeSalaryAndAttendance(employeeId, month) {
           // Đảm bảo các giá trị số được parse đúng
           luong: String(data.luong) || "",
           phucap: String(data.phucap) || "",
+          chuyencan: String(data.chuyencan) || "",
+          ngaycong: String(data.ngaycong) || "",
+          tangca: String(data.tangca) || "",
           thucnhan: String(data.thucnhan) || "",
         };
       }
