@@ -146,6 +146,18 @@ const SalaryDetailScreen = ({ navigation, route }) => {
             </Text>
           </View>
           <View style={styles.salaryRow}>
+            <Text style={styles.salaryLabel}>Ngày công:</Text>
+            <Text style={styles.netValue}>{salaryData?.ngaycong}</Text>
+          </View>
+          <View style={styles.salaryRow}>
+            <Text style={styles.salaryLabel}>Chuyên cần:</Text>
+            <Text style={styles.netValue}>{salaryData?.chuyencan}</Text>
+          </View>
+          <View style={styles.salaryRow}>
+            <Text style={styles.salaryLabel}>Tăng ca:</Text>
+            <Text style={styles.netValue}>{formatCurrency(salaryData?.tangca)}</Text>
+          </View>
+          <View style={styles.salaryRow}>
             <Text style={styles.salaryLabel}>Thực nhận:</Text>
             <Text style={styles.netValue}>{formatCurrency(salaryData?.thucnhan)}</Text>
           </View>

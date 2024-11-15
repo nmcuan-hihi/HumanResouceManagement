@@ -51,10 +51,10 @@ export async function getEmployeeSalaryAndAttendance(employeeId, month) {
         salaryData = {
           id: doc.key,
           ...data,
-          // Đảm bảo các giá trị số được parse đúng
-          luong: String(data.luong) || "",
-          phucap: String(data.phucap) || "",
-          thucnhan: String(data.thucnhan) || "",
+          // // Đảm bảo các giá trị số được parse đúng
+          // luong: String(data.luong) || "",
+          // phucap: String(data.phucap) || "",
+          // thucnhan: String(data.thucnhan) || "",
         };
       }
     });
