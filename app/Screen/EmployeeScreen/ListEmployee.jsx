@@ -7,7 +7,7 @@ import { readPhongBanFromRealtime } from '../../services/PhongBanDatabase';
 import { filterEmployeesByPhongBan, filterEmployeesByGender, filterEmployeesByStatus, searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
 import { useFocusEffect } from '@react-navigation/native';
-
+import { getEmployeesWithLeave2 } from '../../services/chamcong';
 export default function EmployeeList({ navigation }) {
   const [employeeData, setEmployeeData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -22,7 +22,7 @@ export default function EmployeeList({ navigation }) {
   const fetchData = async () => {
     setRefreshing(true);
     try {
-      const data = await readEmployeesFireStore();
+      const data = await getEmployeesWithLeave2();
       if (data && typeof data === 'object') {
         const employeeArray = Object.keys(data).map((key) => ({
           ...data[key],

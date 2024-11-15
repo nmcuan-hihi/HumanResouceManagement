@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DashboardGD from "../../Compoment/DashboardGD";
@@ -66,10 +60,7 @@ export default function HomeScreenGD({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-       showsVerticalScrollIndicator={false}
-
-      >
+      <ScrollView showsVerticalScrollIndicator={false}>
         <DashboardGD listEmployee={listEmployee} listPhongBan={listPhongBan} />
         <Text style={styles.dateText}>
           Hôm nay, {date.toLocaleDateString("vi-VN")}
@@ -79,7 +70,7 @@ export default function HomeScreenGD({ navigation, route }) {
             <Chart />
           </View>
         </View>
-      
+
         <View style={styles.statsContainer}>
           <TouchableOpacity
             style={styles.statItem}
@@ -91,7 +82,7 @@ export default function HomeScreenGD({ navigation, route }) {
           <TouchableOpacity
             style={styles.statItem}
             onPress={() => {
-              navigation.navigate("NotificeScreen");
+              navigation.navigate("AddThongBao", { employee });
             }}
           >
             <Icon name="notifications" size={24} color="#4CAF50" />
@@ -106,7 +97,12 @@ export default function HomeScreenGD({ navigation, route }) {
             <Icon name="house" size={24} color="#FFC107" />
             <Text style={styles.statValue}>Phòng ban</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statItem} onPress={() => {navigation.navigate('ListChucVu')}}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => {
+              navigation.navigate("ListChucVu");
+            }}
+          >
             <Icon name="badge" size={24} color="#F44336" />
             <Text style={styles.statValue}>Chức Vụ</Text>
           </TouchableOpacity>
@@ -132,6 +128,22 @@ export default function HomeScreenGD({ navigation, route }) {
           >
             <Icon name="book" size={24} color="#FF9966" />
             <Text style={styles.statValue}>Kỹ năng</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate("DanhSachLuong")}
+          >
+            <Icon name="attach-money" size={24} color="#FFC107" />
+            <Text style={styles.statValue}>Lương nhân viên</Text>
+          </TouchableOpacity>
+
+
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate("ChiTietBangLuong")}
+          >
+            <Icon name="attach-money" size={24} color="#D2691E" />
+            <Text style={styles.statValue}>Lương</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -165,7 +177,7 @@ const styles = StyleSheet.create({
   },
   scene: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   tabBar: {
     backgroundColor: "#E3F2FD",

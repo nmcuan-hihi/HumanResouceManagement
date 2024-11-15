@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,16 +13,72 @@ import {
 import BackNav from "../../Compoment/BackNav";
 import HeaderNav from "../../Compoment/HeaderNav";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import {
+  getCongThucLuong,
+  updateCongThucLuong,
+} from "../../services/quanLyMucLuongFirebase";
+
+import LoadingModal from "../../Compoment/modalLodading";
+import ModalSuccess from "../../Compoment/modalSuccess";
 
 export default function QuanLyMucLuong({ navigation }) {
-  const data = 4750000;
+  const [visibleModalLCB, setVisibleModalLCB] = useState(false);
+  const [visibleModalCCan, setVisibleModalCCan] = useState(false);
+  const [visibleModalPcap, setVisibleModalPcap] = useState(false);
+  const [visibleModalTCa, setVisibleModalTCa] = useState(false);
+  const [visibleModalTNien, setVisibleModalTNien] = useState(false);
 
-  const [visibleModal, setVisibleModal] = useState(false);
+  const [visibleLoad, setVisibleLoad] = useState(false);
+  const [visibleSuccess, setVisibleSuccess] = useState(false);
+
+  const [congThucLuong, setCongThucLuong] = useState([]);
+
+  const getCTL = async () => {
+    try {
+      setVisibleLoad(true);
+      const data = await getCongThucLuong();
+      setCongThucLuong(data);
+      setVisibleLoad(false);
+    } catch (error) {
+      setVisibleLoad(false);
+    }
+  };
+
+  const saveUpdatedValue = async (field, newValue) => {
+    setVisibleLoad(true);
+    try {
+      const updatedData = { [field]: newValue };
+
+      await updateCongThucLuong(updatedData);
+
+      setCongThucLuong((prevState) => ({
+        ...prevState,
+        ...updatedData,
+      }));
+
+      setVisibleLoad(false);
+
+      setVisibleSuccess(true);
+
+      setTimeout(() => {
+        setVisibleSuccess(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Error saving updated value:", error);
+      setVisibleLoad(false);
+    }
+  };
+
+  useEffect(() => {
+    getCTL();
+  }, []);
 
   // Thêm nhiều nhân viên khác vào đây
 
   return (
     <>
+      <LoadingModal visible={visibleLoad} />
+      <ModalSuccess visible={visibleSuccess} />
       <View style={styles.header}>
         {/* Sử dụng BackNav với onEditPress */}
         <BackNav navigation={navigation} name={"Quản lý mức lương"} />
@@ -32,14 +88,88 @@ export default function QuanLyMucLuong({ navigation }) {
         <ScrollView>
           <View style={styles.infoSection}>
             <Text>Mức lương cơ bản </Text>
-            <Text></Text>
             <View style={styles.viewText}>
               <Text style={styles.sectionTitle}>
-                {(data + "").replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " vnđ"}
+                {(congThucLuong?.luongcoban + "").replace(
+                  /\B(?=(\d{3})+(?!\d))/g,
+                  "."
+                ) + " vnđ"}
               </Text>
               <TouchableOpacity
                 onPress={() => {
-                  setVisibleModal(true);
+                  setVisibleModalLCB(true);
+                }}
+              >
+                <Icon name="edit" size={24} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/*------------------------------- chuyên cần */}
+          <View style={styles.infoSection}>
+            <Text>Chuyên cần </Text>
+            <View style={styles.viewText}>
+              <Text style={styles.sectionTitle}>
+                {(congThucLuong?.chuyencan + "").replace(
+                  /\B(?=(\d{3})+(?!\d))/g,
+                  "."
+                ) + " vnđ"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisibleModalCCan(true);
+                }}
+              >
+                <Icon name="edit" size={24} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/*------------------------------- phụ cấp */}
+          <View style={styles.infoSection}>
+            <Text>Hệ số phụ cấp </Text>
+            <View style={styles.viewText}>
+              <Text style={styles.sectionTitle}>
+                {congThucLuong?.hs_phucap * 100 + " %"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisibleModalPcap(true);
+                }}
+              >
+                <Icon name="edit" size={24} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/*------------------------------- tăng ca */}
+          <View style={styles.infoSection}>
+            <Text>Hệ số tăng ca </Text>
+            <View style={styles.viewText}>
+              <Text style={styles.sectionTitle}>
+                {congThucLuong?.hs_tangca * 100 + " %"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisibleModalTCa(true);
+                }}
+              >
+                <Icon name="edit" size={24} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+
+              {/*------------------------------- thâm niên */}
+              <View style={styles.infoSection}>
+            <Text>Hệ số thâm niên</Text>
+            <View style={styles.viewText}>
+              <Text style={styles.sectionTitle}>
+                {congThucLuong?.hs_thamnien * 100 + " %"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisibleModalTNien(true);
                 }}
               >
                 <Icon name="edit" size={24} color="#2196F3" />
@@ -48,40 +178,113 @@ export default function QuanLyMucLuong({ navigation }) {
           </View>
         </ScrollView>
 
-        <Modal visible={visibleModal} transparent={true} animationType="slide">
-          <View style={styles.modalCtn}>
-            <View style={styles.bodyModal}>
-              <View style={{ width: "95%", alignSelf: "center" }}>
-                <HeaderNav
-                  name={"Chỉnh sửa"}
-                  nameIconRight={"close"}
-                  onEditPress={() => {
-                    setVisibleModal(false);
-                  }}
-                />
-              </View>
+        <ModalEdit
+          visibleModal={visibleModalLCB}
+          setVisibleModal={setVisibleModalLCB}
+          name={"Lương cơ bản"}
+          value={congThucLuong?.luongcoban}
+          onSave={(newValue) => saveUpdatedValue("luongcoban", newValue)}
+        />
 
-              <View style={styles.body}>
-                <Text></Text>
-                <TextInput
-                  style={styles.TextInput}
-                  placeholder="Lương cơ bản"
-                  keyboardType="numeric"                />
-              </View>
+        <ModalEdit
+          visibleModal={visibleModalCCan}
+          setVisibleModal={setVisibleModalCCan}
+          name={"Chuyên cần"}
+          value={congThucLuong?.chuyencan}
+          onSave={(newValue) => saveUpdatedValue("chuyencan", newValue)}
+        />
 
-              <View style={styles.bodyBtn}>
-                <TouchableOpacity style={styles.btnThem}>
-                  <Text style={styles.nameBtn}>Cập nhật</Text>
-                </TouchableOpacity>
-              
-              </View>
-            </View>
-          </View>
-        </Modal>
+        <ModalEdit
+          visibleModal={visibleModalPcap}
+          setVisibleModal={setVisibleModalPcap}
+          name={"Hệ số phụ cấp"}
+          value={congThucLuong?.hs_phucap * 100 + ""}
+          onSave={(newValue) => saveUpdatedValue("hs_phucap", newValue / 100)}
+        />
+
+        <ModalEdit
+          visibleModal={visibleModalTCa}
+          setVisibleModal={setVisibleModalTCa}
+          name={"Hệ số tăng ca"}
+          value={congThucLuong?.hs_tangca * 100 + ""}
+          onSave={(newValue) => saveUpdatedValue("hs_tangca", newValue / 100)}
+        />
+
+<ModalEdit
+          visibleModal={visibleModalTNien}
+          setVisibleModal={setVisibleModalTNien}
+          name={"Hệ số thâm niên"}
+          value={congThucLuong?.hs_thamnien * 100 + ""}
+          onSave={(newValue) => saveUpdatedValue("hs_thamnien", newValue / 100)}
+        />
       </SafeAreaView>
     </>
   );
 }
+
+const ModalEdit = ({
+  visibleModal,
+  setVisibleModal,
+  name,
+  value = "",
+  onSave,
+}) => {
+  const [inputValue, setInputValue] = useState(value);
+
+  useEffect(() => {
+    setInputValue(formatNumber(value));
+  }, [value]);
+
+  const formatNumber = (val) => {
+    const numericValue = val.replace(/\D/g, "");
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const handleTextChange = (val) => {
+    const numericValue = val.replace(/\D/g, "");
+    setInputValue(formatNumber(numericValue));
+  };
+
+  return (
+    <Modal visible={visibleModal} transparent={true} animationType="slide">
+      <View style={styles.modalCtn}>
+        <View style={styles.bodyModal}>
+          <View style={{ width: "95%", alignSelf: "center" }}>
+            <HeaderNav
+              name={name}
+              nameIconRight={"close"}
+              onEditPress={() => {
+                setVisibleModal(false);
+              }}
+            />
+          </View>
+
+          <View style={styles.body}>
+            <TextInput
+              style={styles.TextInput}
+              value={inputValue}
+              onChangeText={handleTextChange}
+              placeholder={name}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.bodyBtn}>
+            <TouchableOpacity
+              style={styles.btnThem}
+              onPress={() => {
+                onSave(inputValue.replace(/\./g, ""));
+                setVisibleModal(false);
+              }}
+            >
+              <Text style={styles.nameBtn}>Cập nhật</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -97,10 +300,9 @@ const styles = StyleSheet.create({
   },
 
   infoSection: {
+    marginBottom: 10,
     borderRadius: 10,
-    padding: 16,
     marginHorizontal: 16,
-    marginBottom: 16,
   },
 
   viewText: {
@@ -108,7 +310,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 50,
     paddingHorizontal: 20,
-    borderRadius: 20,
+    borderRadius: 10,
     elevation: 5,
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
