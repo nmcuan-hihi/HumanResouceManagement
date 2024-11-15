@@ -125,7 +125,6 @@ const DanhSachLuong = ({ navigation }) => {
 
     const month = String(date.getMonth() + 1);
 
-    console.log(month, "---------------");
     return `${month}-${year}`;
   };
 
@@ -167,26 +166,26 @@ const DanhSachLuong = ({ navigation }) => {
       const dateObject = new Date(nam, thang - 1, ngay);
       const today = new Date();
 
-      const diffMilliseconds = today - dateObject;
+      const diffMilliseconds = (today - dateObject)?(today - dateObject):0;
 
       // Chuyển milliseconds sang năm
       const namThamNien = Math.floor(
         diffMilliseconds / (1000 * 60 * 60 * 24 * 365.25)
       );
 
+      const hs_thamnien = congThucLuong?.hs_thamnien || 0;
+
+
       const luongCoban = parseInt(congThucLuong.luongcoban * chucVu?.hschucvu);
       const luong1Ngay = parseInt(luongCoban / 26);
       const luong = luong1Ngay * ngayCong;
       const chuyenCan = ngayCong >= 26 ? congThucLuong.chuyencan : 0;
       const phuCap = parseInt(luong * congThucLuong.hs_phucap);
-      // const tangCa = parseInt(
-      //   ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca
-      // );
-      const tangCa = 0;
+      const tangCa = parseInt(
+        ((totalOvertime * luong1Ngay) / 8) * congThucLuong.hs_tangca
+      );
 
-      const hs_thamnien = congThucLuong?.hs_thamnien || 0;
-      const luongThamNien = parseInt(luong * hs_thamnien);
-
+      const luongThamNien = parseInt(luong * hs_thamnien * namThamNien);
       const thucNhan =
         luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa + luongThamNien;
 
@@ -220,8 +219,8 @@ const DanhSachLuong = ({ navigation }) => {
     setListLuongGetDB(dataluong);
     setDSChamCong(dataChamcong);
     // Nếu không có dữ liệu, lấy dữ liệu tạm tính
-    const luongs =
-      dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
+    const luongs =luongTamTinh(dataChamcong)
+      // dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
     setListLuong(luongs);
     setVisibleLoad(checkLoad);
   };
