@@ -54,7 +54,11 @@ export default function ChammCong({ navigation, route }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <Dashboard listEmployee={listEmployeeMyPB} employee={employee} />
+        <Dashboard listEmployee={listEmployeeMyPB} employee={employee}  onPressChamCong={() => {
+            navigation.navigate("ChiTietBangLuong", {
+              employeeId: employee.employeeId,
+            });
+          }} />
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>

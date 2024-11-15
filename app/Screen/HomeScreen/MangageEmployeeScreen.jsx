@@ -67,7 +67,15 @@ const EmployeeScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.wrapper}>
       <ScrollView>
-        <Dashboard listEmployee={listEmployeeMyPB} employee={employee} />
+        <Dashboard
+          listEmployee={listEmployeeMyPB}
+          employee={employee}
+          onPressChamCong={() => {
+            navigation.navigate("ChiTietBangLuong", {
+              employeeId: employee.employeeId,
+            });
+          }}
+        />
 
         <View style={styles.container}>
           <Text style={styles.contentText}>Chức năng</Text>

@@ -57,7 +57,6 @@ export default function HomeScreenGD({ navigation, route }) {
     getListPB();
   }, []);
 
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -137,10 +136,13 @@ export default function HomeScreenGD({ navigation, route }) {
             <Text style={styles.statValue}>Lương nhân viên</Text>
           </TouchableOpacity>
 
-
           <TouchableOpacity
             style={styles.statItem}
-            onPress={() => navigation.navigate("ChiTietBangLuong")}
+            onPress={() =>
+              navigation.navigate("ChiTietBangLuong", {
+                employeeId: employee.employeeId,
+              })
+            }
           >
             <Icon name="attach-money" size={24} color="#D2691E" />
             <Text style={styles.statValue}>Lương</Text>
