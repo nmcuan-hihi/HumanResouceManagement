@@ -178,7 +178,25 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
       return;
     }
 
-    // Định dạng `timeIn` và `timeOut` với giờ, phút và buổi
+    const database = getDatabase();
+    const thongTinChamCongRef = ref(database, 'thongtinchamcong');
+
+    // Lấy dữ liệu từ `thongtinchamcong`
+    const snapshot = await get(thongTinChamCongRef);
+    if (!snapshot.exists()) {
+      console.error('Không tìm thấy dữ liệu thongtinchamcong');
+      return;
+    }
+
+    const thongTinChamCong = snapshot.val();
+    const { giovaolam, giotanlam, handitre } = thongTinChamCong;
+
+    if (!giovaolam || !giotanlam || !handitre) {
+      console.error('Dữ liệu thongtinchamcong không đầy đủ:', thongTinChamCong);
+      return;
+    }
+
+    // Định dạng `timeIn` và `timeOut`
     const formatTime = (date) => {
       const hours = date.getHours();
       const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -199,14 +217,15 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     // Xử lý các trạng thái
     const gioVao = new Date(timeIn).getHours();
     const gioRa = new Date(timeOut).getHours();
-    const diMuon = gioVao > 9 && gioVao < 11;
-    const vangMat = gioVao >= 11;
 
-    // Tính số giờ tăng ca nếu `timeOut` sau 17:00
+    const diMuon = gioVao > parseInt(giovaolam) && gioVao < parseInt(handitre);
+    const vangMat = gioVao >= parseInt(handitre);
     let tangCaHours = 0;
-    if (gioRa > 17) {
+
+    // Tính số giờ tăng ca nếu `timeOut` sau giờ tan làm
+    if (gioRa > parseInt(giotanlam)) {
       const overtimeStart = new Date(timeOut);
-      overtimeStart.setHours(17, 0, 0, 0); // Bắt đầu tính tăng ca từ 5 PM
+      overtimeStart.setHours(parseInt(giotanlam), 0, 0, 0); // Bắt đầu tính tăng ca từ giờ tan làm
       tangCaHours = (new Date(timeOut) - overtimeStart) / (1000 * 60 * 60); // Số giờ tăng ca
     }
 
