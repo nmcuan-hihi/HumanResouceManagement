@@ -2,13 +2,9 @@ import React, { useState, useEffect } from 'react';
 import {TextInput, View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform , Modal,ActivityIndicator} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { filterEmployeesByPhongBan } from '../../services/PhongBanDatabase';  // Hàm lọc nhân viên theo phòng ban
-import { Button } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { readPhongBanFromRealtime } from '../../services/PhongBanDatabase';
-import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
 import { addChiTietChamCongToRealtime } from '../../services/chamcong';  // Import your Firestore function for adding attendance
-import { filterEmployeesByStatus } from '../../services/PhongBanDatabase';
 import BackNav from '../../Compoment/BackNav';
 import { searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { getEmployeesWithLeave } from '../../services/chamcong';
@@ -68,12 +64,10 @@ export default function ChamCongNV({navigation}) {
 
   useEffect(() => {
     if (valuePhongBan) {
-      getFilteredEmployeesByPhongBanAndLeave(valuePhongBan, selectedMonth);
+      handleFilterEmployeesByPhongBan(valuePhongBan, selectedMonth);
     }
-    if (valueStatus) {
-      handleFilterEmployeesByStatus(valueStatus);
-    }
-  }, [valuePhongBan], [valueStatus]);
+    
+  }, [valuePhongBan]);
   useEffect(() => {
     
     if (valueStatus) {
@@ -93,9 +87,9 @@ export default function ChamCongNV({navigation}) {
       setEmployees(employeeArray);
     }
   };
-  const handleFilterEmployeesByPhongBan = async (phongbanId) => {
+  const handleFilterEmployeesByPhongBan = async (phongbanId, selecl) => {
     try {
-      const filteredEmployees = await filterEmployeesByPhongBan(phongbanId);
+      const filteredEmployees = await getFilteredEmployeesByPhongBanAndLeave(phongbanId, selecl);
       setEmployees(filteredEmployees);
     } catch (error) {
       console.error("Error filtering employees by phòng ban:", error);
