@@ -9,7 +9,10 @@ import BackNav from '../../Compoment/BackNav';
 import { searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
 import { getEmployeesWithLeave } from '../../services/chamcong';
 import { getEmployeesByLeaveType , getFilteredEmployeesByPhongBanAndLeave} from '../../services/chamcong';
-export default function ChamCongNV({navigation}) {
+export default function ChamCongNV({navigation, route}) {
+  const { phongbanId } = route.params || {}; // Nhận dữ liệu từ params
+  console.log(phongbanId);
+  
   const [timeIn, setTimeIn] = useState(() => {
     const defaultTimeIn = new Date();
     defaultTimeIn.setHours(9, 0, 0, 0); // Đặt giờ là 9:00 sáng
@@ -33,11 +36,13 @@ export default function ChamCongNV({navigation}) {
   const [openStatus, setOpenStatus] = useState(false);
   const [valueStatus, setValueStatus] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   useEffect(() => {
+   
     async function fetchEmployees() {
       try {
         const formattedDate = new Date(selectedMonth).toLocaleDateString('vi-VN');
-        const employeesData = await getEmployeesWithLeave(formattedDate);
+        const employeesData = await getFilteredEmployeesByPhongBanAndLeave(phongbanId,formattedDate);
         if (employeesData) {
           setEmployees(employeesData);
         }
@@ -50,31 +55,39 @@ export default function ChamCongNV({navigation}) {
       try {
         const phongBanData = await readPhongBanFromRealtime();
         if (phongBanData) {
-          setPhongBan(phongBanData);
+          const filteredPhongBan = phongBanData.filter(pban => pban.maPhongBan === phongbanId);
+          setPhongBan(filteredPhongBan); // Chỉ lưu phòng ban khớp với phongbanId
         }
       } catch (error) {
         console.error("Error fetching phong ban:", error);
       }
     }
+    
   
     fetchEmployees();
     fetchPhongBan();
-  }, [selectedMonth]); // Thêm selectedMonth vào dependency
+  }, [selectedMonth,phongbanId]); // Thêm selectedMonth vào dependency
   
 
   useEffect(() => {
-    if (valuePhongBan) {
-      handleFilterEmployeesByPhongBan(valuePhongBan, selectedMonth);
+    if (phongbanId) {
+      handleFilterEmployeesByPhongBan(phongbanId, selectedMonth);
     }
     
-  }, [valuePhongBan]);
+  }, [phongbanId]);
   useEffect(() => {
     
     if (valueStatus) {
       handleFilterEmployeesByStatus(valueStatus);
     }
   }, [valueStatus]);
-  
+  useEffect(() => {
+    if (employees && employees.phongbanId !== phongbanId) {
+      setIsButtonDisabled(true); // Vô hiệu hóa nút nếu không thuộc phòng ban
+    } else {
+      setIsButtonDisabled(false); // Bật nút nếu đúng phòng ban
+    }
+  }, [employees, phongbanId]);
   const handleSearch = async () => {
     if (searchTerm.trim() === '') {
       setFilteredData(employeeData);
@@ -109,6 +122,10 @@ export default function ChamCongNV({navigation}) {
     const currentDate = selectedDate || (type === 'timeIn' ? timeIn : timeOut);
     setShowTimePicker(prev => ({ ...prev, [type]: Platform.OS === 'ios' && false }));
     type === 'timeIn' ? setTimeIn(currentDate) : setTimeOut(currentDate);
+  };
+   // Kiểm tra xem nhân viên có thuộc phongbanId này không
+  const isEmployeeInPhongBan = (employeePhongBanId) => {
+    return employeePhongBanId === phongbanId;
   };
 
   const handleMonthChange = (event, selectedDate) => {

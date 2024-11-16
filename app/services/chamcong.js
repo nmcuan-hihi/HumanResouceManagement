@@ -27,7 +27,7 @@ export const getEmployeesWithLeave = async (today) => {
         leave.employeeId === employee.employeeId &&
         leave.ngayBatDau <= today &&
         leave.ngayKetThuc >= today &&
-        leave.trangThai !== "-1"
+        leave.trangThai === "1"
       );
 
       // Trả về true nếu nhân viên không nghỉ phép và có trang thái là true (đi làm)
@@ -69,7 +69,7 @@ export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) 
           leave.employeeId === employee.employeeId &&
           leave.ngayBatDau <= today &&
           leave.ngayKetThuc >= today &&
-          leave.trangThai !== "-1"
+          leave.trangThai === "1"
       );
 
       return (

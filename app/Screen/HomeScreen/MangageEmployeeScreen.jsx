@@ -124,7 +124,7 @@ const EmployeeScreen = ({ navigation, route }) => {
               color="#9C27B0"
               
               label="Chấm công nhân viên"
-              onPress={() => navigateTo("ChamCongNV")}
+              onPress={() => navigation.navigate("ChamCongNV", {phongbanId: employee.phongbanId})}
             />
            
             <StatItem
