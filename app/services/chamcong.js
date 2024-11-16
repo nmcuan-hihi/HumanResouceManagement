@@ -309,4 +309,34 @@ export const getEmployeesByLeaveType = async (leaveType = "Có lương") => {
     return [];
   }
 };
+export async function readThongTinChamCong() {
+  try {
+    const db = getDatabase();
+    const chamCongRef = ref(db, "thongtinchamcong");
 
+    const snapshot = await get(chamCongRef);
+    if (snapshot.exists()) {
+      console.log("Dữ liệu thongtinchamcong:", snapshot.val());
+      return snapshot.val();
+    } else {
+      console.log("Không có dữ liệu trong thongtinchamcong.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Lỗi khi đọc thongtinchamcong:", error);
+    return null;
+  }
+}
+export async function updateThongTinChamCong(updateData) {
+  try {
+    const db = getDatabase();
+    const chamCongRef = ref(db, "thongtinchamcong");
+
+    // Thực hiện cập nhật
+    await update(chamCongRef, updateData);
+
+    console.log("Cập nhật thongtinchamcong thành công:", updateData);
+  } catch (error) {
+    console.error("Lỗi khi cập nhật thongtinchamcong:", error);
+  }
+}

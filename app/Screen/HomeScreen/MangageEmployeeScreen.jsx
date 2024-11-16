@@ -126,6 +126,15 @@ const EmployeeScreen = ({ navigation, route }) => {
               label="Chấm công nhân viên"
               onPress={() => navigateTo("ChamCongNV")}
             />
+           
+            <StatItem
+              icon="fingerprint"
+              component={MaterialIcons}
+              color="#9C27B0"
+              
+              label="Thông tin chấm công"
+              onPress={() => navigateTo("ThongTinChamCong")}
+            />
             <StatItem icon="tasks" color="#FF9800" value="0" label="Nhiệm Vụ" />
           </View>
         </View>
