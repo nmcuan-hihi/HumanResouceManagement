@@ -216,7 +216,7 @@ const DanhSachLuong = ({ navigation }) => {
 
       const luongThamNien = parseInt(luong * hs_thamnien * namThamNien);
       const thucNhan =
-        luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa + luongThamNien;
+       parseInt( luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa + luongThamNien);
 
       const salaryEntry = {
         employeeId,
@@ -251,8 +251,7 @@ const DanhSachLuong = ({ navigation }) => {
       currentDate.getFullYear(),
       currentDate.getMonth() + 1,
       (data) => {
-
-        dataChamcong = data;
+        dataChamcong = Array.isArray(data) ? data : [];
 
         // Cập nhật danh sách chấm công
         setDSChamCong(dataChamcong);
@@ -323,11 +322,9 @@ const DanhSachLuong = ({ navigation }) => {
     setListSearch(data);
   };
 
- 
-
   useEffect(() => {
-    const uniqueIds = new Set(listNV.map(nv => nv.id));
-    filterNVByPb(listLuong.filter(luong => uniqueIds.has(luong.employeeId)));
+    const uniqueIds = new Set(listNV.map((nv) => nv.id));
+    filterNVByPb(listLuong.filter((luong) => uniqueIds.has(luong.employeeId)));
   }, [listLuong, searchPB]);
 
   useEffect(() => {
