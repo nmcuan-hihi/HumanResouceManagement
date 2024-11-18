@@ -40,6 +40,35 @@ export const getEmployeesWithLeave = async (today) => {
     return [];
   }
 };
+ const fetchExistingTimeIn = async (employeeId) => {
+      try {
+        const date = new Date(selectedMonth);
+        const year = date.getFullYear();
+        const monthName = date.getMonth() + 1;
+        const day = date.getDate();
+        
+        const database = getDatabase();
+        const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
+        const snapshot = await get(chamCongRef);
+        
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.timeIn) {
+            // Convert timeIn string back to Date object
+            const [time, period] = data.timeIn.split(' ');
+            const [hours, minutes] = time.split(':');
+            const timeInDate = new Date(selectedMonth);
+            let hour = parseInt(hours);
+            if (period === 'PM' && hour !== 12) hour += 12;
+            if (period === 'AM' && hour === 12) hour = 0;
+            timeInDate.setHours(hour, parseInt(minutes));
+            setTimeIn(timeInDate);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching existing timeIn:", error);
+      }
+    };
 export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) {
   try {
     const db = getDatabase(app);
@@ -190,16 +219,16 @@ const getNextChamCongCode = async () => {
 export const addChiTietChamCongToRealtime = async (attendanceData) => {
   try {
     const { employeeId, timeIn, timeOut, status, month } = attendanceData;
-
-    if (!employeeId || !timeIn || !timeOut || !status || !month) {
+    
+    // Kiểm tra dữ liệu
+    if (!employeeId || !month || !status) {
       console.error('Dữ liệu không hợp lệ:', attendanceData);
       return;
     }
 
-    const database = getDatabase();
     const thongTinChamCongRef = ref(database, 'thongtinchamcong');
 
-    // Lấy dữ liệu từ `thongtinchamcong`
+    // Lấy dữ liệu hiện tại từ Realtime Database
     const snapshot = await get(thongTinChamCongRef);
     if (!snapshot.exists()) {
       console.error('Không tìm thấy dữ liệu thongtinchamcong');
@@ -214,52 +243,69 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
       return;
     }
 
-    // Định dạng `timeIn` và `timeOut`
+    // Hàm định dạng giờ
     const formatTime = (date) => {
       const hours = date.getHours();
       const minutes = date.getMinutes().toString().padStart(2, '0');
       const period = hours >= 12 ? 'PM' : 'AM';
-      const formattedHours = hours % 12 || 12; // Định dạng 12 giờ
+      const formattedHours = hours % 12 || 12;
       return `${formattedHours}:${minutes} ${period}`;
     };
 
-    const formattedTimeIn = formatTime(new Date(timeIn));
-    const formattedTimeOut = formatTime(new Date(timeOut));
-
-    // Lấy thông tin ngày, tháng, năm
+    // Lấy thông tin ngày tháng
     const date = new Date(month);
     const year = date.getFullYear();
     const monthName = `${date.getMonth() + 1}`;
     const day = date.getDate();
 
-    // Xử lý các trạng thái
-    const gioVao = new Date(timeIn).getHours();
-    const gioRa = new Date(timeOut).getHours();
+    // Tham chiếu tới bản ghi chấm công của nhân viên
+    const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
+    
+    // Lấy dữ liệu hiện tại nếu có
+    const existingRecord = await get(chamCongRef);
+    const existingData = existingRecord.exists() ? existingRecord.val() : {};
 
-    const diMuon = gioVao > parseInt(giovaolam) && gioVao < parseInt(handitre);
-    const vangMat = gioVao >= parseInt(handitre);
-    let tangCaHours = 0;
+    let updatedData = {
+      ...existingData,
+      employeeId,
+      status,
+      loaiChamCong: '0',
+    };
 
-    // Tính số giờ tăng ca nếu `timeOut` sau giờ tan làm
-    if (gioRa > parseInt(giotanlam)) {
-      const overtimeStart = new Date(timeOut);
-      overtimeStart.setHours(parseInt(giotanlam), 0, 0, 0); // Bắt đầu tính tăng ca từ giờ tan làm
-      tangCaHours = (new Date(timeOut) - overtimeStart) / (1000 * 60 * 60); // Số giờ tăng ca
+    // Xử lý timeIn
+    if (timeIn) {
+      const formattedTimeIn = formatTime(new Date(timeIn));
+      const gioVao = new Date(timeIn).getHours();
+      updatedData = {
+        ...updatedData,
+        timeIn: formattedTimeIn,
+        diMuon: gioVao > parseInt(giovaolam) && gioVao < parseInt(handitre),
+        vangMat: gioVao >= parseInt(handitre),
+      };
     }
 
-    // Tạo đường dẫn
-    const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
+    // Xử lý timeOut
+    if (timeOut) {
+      const formattedTimeOut = formatTime(new Date(timeOut));
+      const gioRa = new Date(timeOut).getHours();
+      let tangCaHours = 0;
+
+      if (gioRa > parseInt(giotanlam)) {
+        const overtimeStart = new Date(timeOut);
+        overtimeStart.setHours(parseInt(giotanlam), 0, 0, 0);
+        tangCaHours = (new Date(timeOut) - overtimeStart) / (1000 * 60 * 60);
+      }
+
+      updatedData = {
+        ...updatedData,
+        timeOut: formattedTimeOut,
+        tangCa: tangCaHours,
+      };
+    }
 
     // Lưu dữ liệu vào Realtime Database
     await set(chamCongRef, {
-      employeeId,
-      timeIn: formattedTimeIn,
-      timeOut: formattedTimeOut,
-      status,
-      diMuon,
-      vangMat,
-      tangCa: tangCaHours,
-      loaiChamCong: '0',
+      ...updatedData,
       createdAt: serverTimestamp(),
     });
 
