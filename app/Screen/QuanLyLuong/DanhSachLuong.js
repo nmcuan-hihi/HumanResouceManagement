@@ -128,38 +128,68 @@ const DanhSachLuong = ({ navigation }) => {
     return `${month}-${year}`;
   };
 
+  function calculateHours(timeIn, timeOut) {
+    const formatTime = (time) => {
+      // Chuyển đổi thời gian về định dạng 24 giờ
+      const [timeParts, modifier] = time.split(" ");
+      let [hours, minutes] = timeParts.split(":");
+
+      if (modifier === "PM" && hours !== "12") {
+        hours = parseInt(hours, 10) + 12; // Chuyển đổi PM
+      }
+      if (modifier === "AM" && hours === "12") {
+        hours = "0"; // Chuyển đổi 12 AM thành 00
+      }
+
+      // Trả về đối tượng Date (Ngày, tháng, năm có thể được ghi rõ nếu cần)
+      const date = new Date();
+      date.setHours(hours, minutes);
+      return date;
+    };
+
+    const startTime = formatTime(timeIn);
+    const endTime = formatTime(timeOut);
+
+    // Tính số giờ giữa thời gian vào và ra
+    const diffInMilliseconds = endTime - startTime; // Số mili giây giữa hai thời gian
+    const diffInHours = diffInMilliseconds / 1000 / 60 / 60; // Chuyển đổi mili giây sang giờ
+
+    return diffInHours;
+  }
+
+  const timeIn = "9:00 AM";
+  const timeOut = "5:00 PM";
+  const hoursWorked = calculateHours(timeIn, timeOut);
+
   const luongTamTinh = (duLieuChamCong) => {
     const temporarySalaryData = [];
 
     const groupedData = duLieuChamCong.reduce((acc, chamcong) => {
       const employeeId = chamcong.employeeId;
 
-      const [dayPart, monthPart, yearPart] = chamcong.month.split("/");
-
-      const month = `${monthPart}-${yearPart}`;
-
       if (!acc[employeeId]) {
         acc[employeeId] = {
           employeeId,
-          month,
           ngayCong: 0,
           totalOvertime: 0,
         };
       }
-      acc[employeeId].ngayCong += 1;
+      const gioLam = calculateHours(chamcong.timeIn, chamcong.timeOut);
+
+      acc[employeeId].ngayCong += gioLam / 8;
+      acc[employeeId].ngayCong = Math.round(acc[employeeId].ngayCong * 10) / 10;
       acc[employeeId].totalOvertime += chamcong?.tangCa ? chamcong?.tangCa : 0;
 
       return acc;
     }, {});
 
     for (const employeeId in groupedData) {
-      const { month, ngayCong, totalOvertime } = groupedData[employeeId];
+      const { ngayCong, totalOvertime } = groupedData[employeeId];
       const nhanVien = listNV.find((emp) => emp.employeeId === employeeId);
 
       const chucVu = chucVuData.find(
         (cv) => cv.chucvu_id === nhanVien.chucvuId
       );
-
 
       const dateString = nhanVien.ngaybatdau;
       const [ngay, thang, nam] = dateString.split("/").map(Number);
@@ -190,7 +220,7 @@ const DanhSachLuong = ({ navigation }) => {
 
       const salaryEntry = {
         employeeId,
-        thang: month + "",
+        thang: formatDateToYYYYMM(currentDate) + "",
         ngaycong: ngayCong + "",
         thucnhan: thucNhan + "",
         luong: luong + "",
@@ -204,32 +234,48 @@ const DanhSachLuong = ({ navigation }) => {
     }
     return temporarySalaryData;
   };
-
   const getChiTietCC = async () => {
     setVisibleLoad(true);
 
+    // Lấy dữ liệu lương
     const dataluong = await layDanhSachBangLuongTheoThang(
-      formatDateToYYYYMM(currentDate)
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1
     );
 
-    const dataChamcong = await getChamCongByMonth(
-      formatDateToYYYYMM(currentDate)
+    // Khởi động một biến để lưu chi tiết chấm công
+    let dataChamcong = [];
+
+    // Lắng nghe dữ liệu chấm công
+    const unsubscribeChamCong = getChamCongByMonth(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      (data) => {
+
+        dataChamcong = data;
+
+        // Cập nhật danh sách chấm công
+        setDSChamCong(dataChamcong);
+
+        // Kiểm tra và cập nhật lại danh sách lương
+        const today = formatDateToYYYYMM(new Date());
+        let luongs = [];
+
+        if (today !== formatDateToYYYYMM(currentDate)) {
+          luongs =
+            dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
+        } else {
+          luongs = luongTamTinh(dataChamcong);
+        }
+
+        setListLuong(luongs);
+        setVisibleLoad(checkLoad);
+      }
     );
-    setListLuongGetDB(dataluong);
-    setDSChamCong(dataChamcong);
-    // Nếu không có dữ liệu, lấy dữ liệu tạm tính
-    const today = formatDateToYYYYMM(new Date());
-    let  luongs = [];
 
-    console.log(today != formatDateToYYYYMM(currentDate))
-    if (today != formatDateToYYYYMM(currentDate)) {
-      luongs = dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
-    } else {
-      luongs = luongTamTinh(dataChamcong);
-    }
-
-    setListLuong(luongs);
-    setVisibleLoad(checkLoad);
+    return () => {
+      unsubscribeChamCong();
+    };
   };
 
   useEffect(() => {
@@ -277,8 +323,11 @@ const DanhSachLuong = ({ navigation }) => {
     setListSearch(data);
   };
 
+ 
+
   useEffect(() => {
-    filterNVByPb();
+    const uniqueIds = new Set(listNV.map(nv => nv.id));
+    filterNVByPb(listLuong.filter(luong => uniqueIds.has(luong.employeeId)));
   }, [listLuong, searchPB]);
 
   useEffect(() => {
@@ -303,7 +352,11 @@ const DanhSachLuong = ({ navigation }) => {
             text: "Lưu",
             onPress: async () => {
               setVisibleLoad(true);
-              await luuDanhSachLuongFirebase(luongTamTinh(dsChamCong));
+              await luuDanhSachLuongFirebase(
+                luongTamTinh(dsChamCong),
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1
+              );
               getChiTietCC();
               setVisibleLoad(false);
               Alert.alert("Thông báo", "Lưu thông tin thành công");
