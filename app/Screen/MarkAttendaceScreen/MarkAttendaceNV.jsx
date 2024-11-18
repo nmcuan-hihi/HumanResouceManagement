@@ -42,9 +42,19 @@ export default function ChamCongNV({navigation, route}) {
     async function fetchEmployees() {
       try {
         const formattedDate = new Date(selectedMonth).toLocaleDateString('vi-VN');
-        const employeesData = await getFilteredEmployeesByPhongBanAndLeave(phongbanId,formattedDate);
+        const employeesData = await getFilteredEmployeesByPhongBanAndLeave(phongbanId, formattedDate);
+        
         if (employeesData) {
           setEmployees(employeesData);
+    
+          // Log các nhân viên có trangthaiCheckbox = true
+          const employeesWithCheckboxTrue = employeesData.filter(employee => employee.trangthaiCheckbox);
+          console.log("Nhân viên có trangthaiCheckbox = true:", employeesWithCheckboxTrue);
+    
+          // Lặp qua tất cả nhân viên và gọi toggleCheckmark
+          employeesWithCheckboxTrue.forEach(employee => {
+            toggleCheckmark(employee.employeeId);
+          });
         }
       } catch (error) {
         console.error("Error fetching employees:", error);
@@ -122,10 +132,6 @@ export default function ChamCongNV({navigation, route}) {
     const currentDate = selectedDate || (type === 'timeIn' ? timeIn : timeOut);
     setShowTimePicker(prev => ({ ...prev, [type]: Platform.OS === 'ios' && false }));
     type === 'timeIn' ? setTimeIn(currentDate) : setTimeOut(currentDate);
-  };
-   // Kiểm tra xem nhân viên có thuộc phongbanId này không
-  const isEmployeeInPhongBan = (employeePhongBanId) => {
-    return employeePhongBanId === phongbanId;
   };
 
   const handleMonthChange = (event, selectedDate) => {
@@ -291,7 +297,7 @@ export default function ChamCongNV({navigation, route}) {
               <Text style={styles.employeeName}>{employee.employeeId} {employee.name}</Text>
               <Text style={styles.employeeDepartment}>{employee.phongbanId}</Text>
             </View>
-            <TouchableOpacity onPress={() => toggleCheckmark(employee.employeeId)}>
+            <TouchableOpacity onPress={() => toggleCheckmark(employee.employeeId)} >
               <Icon
                 name={employee.trangthai === 'checked' ? "check-box" : "check-box-outline-blank"}
                 size={24}

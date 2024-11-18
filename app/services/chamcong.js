@@ -56,35 +56,51 @@ export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) 
     // Đọc danh sách nghỉ phép
     const snapshotLeave = await get(leaveRef);
     if (!snapshotLeave.exists()) {
+      // Không có dữ liệu nghỉ phép, trả về danh sách nhân viên trong phòng ban
       return Object.values(employees).filter(
         (employee) => employee.phongbanId === phongbanId && employee.trangthai === "true"
       );
     }
     const leaves = snapshotLeave.val();
 
-    // Lọc danh sách nhân viên theo phòng ban và nghỉ phép
+    // Lọc danh sách nhân viên
     const filteredEmployees = Object.values(employees).filter((employee) => {
-      const isOnLeave = Object.values(leaves).some(
+      // Kiểm tra nhân viên có lịch nghỉ "Không lương" trong ngày hôm nay
+      const isOnUnpaidLeave = Object.values(leaves).some(
         (leave) =>
           leave.employeeId === employee.employeeId &&
           leave.ngayBatDau <= today &&
           leave.ngayKetThuc >= today &&
-          leave.trangThai === "1"
+          leave.loaiNghi === "Không lương" 
       );
-
+      
+      // Nhân viên chỉ được hiển thị nếu thuộc phòng ban và không có lịch nghỉ "Không lương"
       return (
         employee.phongbanId === phongbanId &&
-        !isOnLeave &&
+        !isOnUnpaidLeave &&
         employee.trangthai === "true"
       );
     });
 
-    return filteredEmployees;
+    // Cập nhật trạng thái checkbox cho những nhân viên có "Có lương"
+    const updatedEmployees = filteredEmployees.map((employee) => ({
+      ...employee,
+      trangthaiCheckbox: Object.values(leaves).some(
+        (leave) =>
+          leave.employeeId === employee.employeeId &&
+        leave.ngayBatDau <= today &&
+          leave.ngayKetThuc >= today &&
+          leave.loaiNghi === "Có lương" // Đánh dấu checkbox nếu có lương
+      ),
+    }));
+
+    return updatedEmployees;
   } catch (error) {
     console.error("Lỗi khi lọc nhân viên theo phòng ban và nghỉ phép:", error);
     return [];
   }
 }
+
 
 
 export const getEmployeesWithLeave2 = async () => {
