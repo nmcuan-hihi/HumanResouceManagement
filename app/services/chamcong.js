@@ -71,7 +71,8 @@ export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) 
           leave.employeeId === employee.employeeId &&
           leave.ngayBatDau <= today &&
           leave.ngayKetThuc >= today &&
-          leave.loaiNghi === "Không lương" 
+          leave.loaiNghi === "Không lương"&& 
+          leave.trangThai === "1"
       );
       
       // Nhân viên chỉ được hiển thị nếu thuộc phòng ban và không có lịch nghỉ "Không lương"
@@ -90,6 +91,7 @@ export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) 
           leave.employeeId === employee.employeeId &&
         leave.ngayBatDau <= today &&
           leave.ngayKetThuc >= today &&
+          leave.trangThai === "1" &&
           leave.loaiNghi === "Có lương" // Đánh dấu checkbox nếu có lương
       ),
     }));
