@@ -225,36 +225,47 @@ export default function ChamCongNV({ navigation, route }) {
     value: pban.maPhongBan,
   }));
 
-  const handleSaveAttendance = async () => {
-    setLoading(true);
-    try {
-      const selectedEmployees = employees.filter(employee => employee.trangthai === 'checked');
-      if (selectedEmployees.length === 0) {
-        alert('Vui lòng chọn ít nhất một nhân viên để chấm công');
-        setLoading(false);
-        return;
-      }
   
-      const attendanceData = selectedEmployees.map(employee => ({
-        employeeId: employee.employeeId,
-        status: "di_lam",
-        month: selectedMonth,
-        ...(attendanceType === 'timeIn' 
-          ? { timeIn } 
-          : { timeIn: null, timeOut }),
-      }));
-  
-      for (const data of attendanceData) {
-        await addChiTietChamCongToRealtime(data);
-      }
-      alert('Chấm công thành công!');
-    } catch (error) {
-      console.error("Error saving attendance:", error);
-      alert('Đã xảy ra lỗi khi chấm công.');
-    } finally {
+// Cập nhật trong component ChamCongNV
+const handleSaveAttendance = async () => {
+  setLoading(true);
+  try {
+    const selectedEmployees = employees.filter(employee => employee.trangthai === 'checked');
+    if (selectedEmployees.length === 0) {
+      alert('Vui lòng chọn ít nhất một nhân viên để chấm công');
       setLoading(false);
+      return;
     }
-  };
+
+    const errors = [];
+    for (const employee of selectedEmployees) {
+      try {
+        const attendanceData = {
+          employeeId: employee.employeeId,
+          status: "di_lam",
+          month: selectedMonth,
+          ...(attendanceType === 'timeIn' 
+            ? { timeIn } 
+            : { timeIn: null, timeOut }),
+        };
+        await addChiTietChamCongToRealtime(attendanceData);
+      } catch (error) {
+        errors.push(error.message);
+      }
+    }
+
+    if (errors.length > 0) {
+      alert(`Có lỗi xảy ra:\n${errors.join('\n')}`);
+    } else {
+      alert('Chấm công thành công!');
+    }
+  } catch (error) {
+    console.error("Error saving attendance:", error);
+    alert('Đã xảy ra lỗi khi chấm công.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
@@ -315,18 +326,6 @@ export default function ChamCongNV({ navigation, route }) {
               </View>
             )}
           </View>
-        </View>
-
-        <View style={styles.searchSection}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm kiếm theo tên hoặc mã nhân viên"
-            value={searchTerm}
-            onChangeText={setSearchTerm}
-          />
-          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-            <Text style={styles.buttonText}>Tìm kiếm</Text>
-          </TouchableOpacity>
         </View>
 
         

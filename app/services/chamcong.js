@@ -40,35 +40,7 @@ export const getEmployeesWithLeave = async (today) => {
     return [];
   }
 };
- const fetchExistingTimeIn = async (employeeId) => {
-      try {
-        const date = new Date(selectedMonth);
-        const year = date.getFullYear();
-        const monthName = date.getMonth() + 1;
-        const day = date.getDate();
-        
-        const database = getDatabase();
-        const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
-        const snapshot = await get(chamCongRef);
-        
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          if (data.timeIn) {
-            // Convert timeIn string back to Date object
-            const [time, period] = data.timeIn.split(' ');
-            const [hours, minutes] = time.split(':');
-            const timeInDate = new Date(selectedMonth);
-            let hour = parseInt(hours);
-            if (period === 'PM' && hour !== 12) hour += 12;
-            if (period === 'AM' && hour === 12) hour = 0;
-            timeInDate.setHours(hour, parseInt(minutes));
-            setTimeIn(timeInDate);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching existing timeIn:", error);
-      }
-    };
+
 export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) {
   try {
     const db = getDatabase(app);
@@ -219,7 +191,7 @@ const getNextChamCongCode = async () => {
 export const addChiTietChamCongToRealtime = async (attendanceData) => {
   try {
     const { employeeId, timeIn, timeOut, status, month } = attendanceData;
-    
+
     // Kiểm tra dữ liệu
     if (!employeeId || !month || !status) {
       console.error('Dữ liệu không hợp lệ:', attendanceData);
@@ -260,10 +232,15 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
 
     // Tham chiếu tới bản ghi chấm công của nhân viên
     const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
-    
+
     // Lấy dữ liệu hiện tại nếu có
     const existingRecord = await get(chamCongRef);
     const existingData = existingRecord.exists() ? existingRecord.val() : {};
+
+    // Kiểm tra nếu là timeOut nhưng chưa có timeIn
+    if (timeOut && !timeIn && !existingData.timeIn) {
+      throw new Error(`Nhân viên ${employeeId} chưa chấm công giờ vào`);
+    }
 
     let updatedData = {
       ...existingData,
@@ -311,7 +288,8 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
 
     console.log('Chấm công thành công');
   } catch (error) {
-    console.error('Lỗi khi lưu chấm công:', error);
+    console.log('Lỗi khi lưu chấm công:', error);
+    throw error; // Ném lỗi để component có thể xử lý
   }
 };
 
