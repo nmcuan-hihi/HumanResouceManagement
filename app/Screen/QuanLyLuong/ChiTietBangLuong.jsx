@@ -101,11 +101,12 @@ const SalaryDetailScreen = ({ navigation, route }) => {
   };
 
   const renderAttendanceItem = (item) => {
-    // Ensure the createdAt value is valid and convert it to a local date
-    const formattedDate = dayjs.utc(item.createdAt).local().format('DD-MM-YYYY'); // Adjust to local time
-  
+    // Convert the date to DD/MM/YYYY format
+    const itemDate = new Date(item.date);
+    const formattedDate = `${itemDate.getDate().toString().padStart(2, '0')}/${(itemDate.getMonth() + 1).toString().padStart(2, '0')}/${itemDate.getFullYear()}`;
+    
     return (
-      <View style={styles.attendanceItem} key={item.date}>
+      <View style={styles.attendanceItem} key={item.id}>
         <Text style={styles.attendanceDate}>{formattedDate}</Text>
         <Text style={styles.attendanceTime}>{item.timeIn}</Text>
         <Text style={styles.attendanceTime}>{item.timeOut}</Text>

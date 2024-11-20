@@ -209,19 +209,39 @@ export async function getChamCongDetailsByMonth(employeeId, thang) {
 export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
   const db = getDatabase();
   const reference = ref(db, `chitietchamcong/${employeeId}/${nam}/${thang}`);
+  
   onValue(reference, (snapshot) => {
     const data = snapshot.val();
     if (data) {
-      const attendanceDetails = Object.keys(data).map(key => ({
-        ...data[key],
-        date: key,
-      }));
+      const today = new Date(); // Get today's date
+      console.log("Today's date: ", today.toISOString()); // Log today's date
+      
+      const attendanceDetails = Object.keys(data).map(key => {
+        // Manually build a date string in the format 'YYYY-MM-DD'
+        const day = key;
+        const fullDateString = `${nam}-${thang}-${day.padStart(2, '0')}`;
+        const itemDate = new Date(fullDateString); // Convert to Date object
+        console.log("Item date: ", itemDate.toISOString()); // Log the date for each item
+        
+        return {
+          ...data[key],
+          date: fullDateString, // Store the date as 'YYYY-MM-DD'
+        };
+      }).filter(item => {
+        const itemDate = new Date(item.date); // Convert 'date' to Date object
+        console.log("Filtered item date: ", itemDate.toISOString()); // Log filtered date
+        return itemDate <= today; // Filter out future dates
+      });
+      
+      console.log("Filtered attendance details: ", attendanceDetails); // Log the final filtered data
       callback(attendanceDetails);
     } else {
-      callback([]);
+      callback([]); // If no data, return an empty array
     }
   });
 }
+
+
 
 
 
