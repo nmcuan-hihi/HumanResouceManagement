@@ -206,26 +206,25 @@ export async function getChamCongDetailsByMonth(employeeId, thang) {
 }
 
 // Lấy bảng lương
-export async function getBangLuong() {
-  try {
-    const bangLuongRef = ref(db, "bangluongnhanvien");
-    const snapshot = await get(bangLuongRef);
-
-    const data = [];
-    snapshot.forEach((doc) => {
-      const docData = doc.val();
-      data.push({
-        id: doc.key,
-        ...docData,
-      });
-    });
-
-    return data;
-  } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ collection:", error);
-    throw error;
-  }
+export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
+  const db = getDatabase();
+  const reference = ref(db, `chitietchamcong/${employeeId}/${nam}/${thang}`);
+  onValue(reference, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const attendanceDetails = Object.keys(data).map(key => ({
+        ...data[key],
+        date: key,
+      }));
+      callback(attendanceDetails);
+    } else {
+      callback([]);
+    }
+  });
 }
+
+
+
 
 
 
