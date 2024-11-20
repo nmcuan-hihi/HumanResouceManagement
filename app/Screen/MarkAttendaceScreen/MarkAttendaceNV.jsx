@@ -52,7 +52,8 @@ export default function ChamCongNV({ navigation, route }) {
   const [valueStatus, setValueStatus] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [lockedEmployeeIds, setLockedEmployeeIds] = useState(new Set());
   useEffect(() => {
     async function fetchEmployees() {
       try {
@@ -63,10 +64,18 @@ export default function ChamCongNV({ navigation, route }) {
           setEmployees(employeesData);
           const employeesWithCheckboxTrue = employeesData.filter(employee => employee.trangthaiCheckbox);
           console.log("Nhân viên có trangthaiCheckbox = true:", employeesWithCheckboxTrue);
+          
+          // Tạo Set mới để lưu ID của nhân viên cần khóa
+          const newLockedIds = new Set();
+          
           employeesWithCheckboxTrue.forEach(employee => {
             toggleCheckmark(employee.employeeId);
-            setIsButtonDisabled(true);
+            newLockedIds.add(employee.employeeId);
           });
+          
+          // Set locked IDs và isInitialized sau khi xử lý xong
+          setLockedEmployeeIds(newLockedIds);
+          setIsInitialized(true);
         }
       } catch (error) {
         console.error("Error fetching employees:", error);
@@ -196,6 +205,9 @@ export default function ChamCongNV({ navigation, route }) {
   };
 
   const toggleCheckmark = (employeeId) => {
+    // Chỉ khóa những nhân viên có ID trong danh sách locked
+    if (lockedEmployeeIds.has(employeeId)) return;
+    
     setEmployees(prevEmployees =>
       prevEmployees.map(employee =>
         employee.employeeId === employeeId
@@ -210,10 +222,13 @@ export default function ChamCongNV({ navigation, route }) {
     setEmployees(prevEmployees =>
       prevEmployees.map(employee => ({
         ...employee,
-        trangthai: !selectAll ? 'checked' : 'unchecked',
+        trangthai: selectAll
+          ? 'unchecked' // Nếu `selectAll` là `true`, bỏ chọn tất cả
+          : (employee.trangthai === 'checked' ? 'checked' : 'checked') // Nếu chưa check, chọn nó
       }))
     );
   };
+  
 
   const items = [
     { label: 'Nghỉ có lương', value: 'Có lương' },
