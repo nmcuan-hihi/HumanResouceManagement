@@ -1,17 +1,7 @@
-import {
-    getDatabase,
-    get,
-    ref,
-    set,
-    child,
-} from "firebase/database";
+import { getDatabase, get, ref, set, child } from "firebase/database";
 import { app } from "../config/firebaseconfig";
-import {
-    getStorage,
-    ref as storageRef,
-    uploadBytes,
-    getDownloadURL,
-} from "firebase/storage";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { store } from "../redux/store"; // Import Redux store to access idCty
 
 const database = getDatabase(app);
 const storage = getStorage(app); // Initialize Firebase Storage
@@ -19,8 +9,11 @@ const storage = getStorage(app); // Initialize Firebase Storage
 // Function to upload CCCD images and save URLs to Realtime Database
 export async function writeInfoCCCD(employeeId, imgFront, imgBack) {
     try {
-        const frontImageRef = storageRef(storage, `cccd/${employeeId}/front.jpg`);
-        const backImageRef = storageRef(storage, `cccd/${employeeId}/back.jpg`);
+        const state = store.getState();
+        const idCty = state.congTy.idCty; // Get idCty from Redux store
+
+        const frontImageRef = storageRef(storage, `${idCty}/cccd/${employeeId}/front.jpg`);
+        const backImageRef = storageRef(storage, `${idCty}/cccd/${employeeId}/back.jpg`);
 
         // Upload front image
         const frontBlob = await (await fetch(imgFront)).blob();
@@ -34,8 +27,8 @@ export async function writeInfoCCCD(employeeId, imgFront, imgBack) {
         const frontImageURL = await getDownloadURL(frontImageRef);
         const backImageURL = await getDownloadURL(backImageRef);
 
-        // Save image URLs in Realtime Database
-        await set(ref(database, `cccd/${employeeId}`), {
+        // Save image URLs in Realtime Database under the company id
+        await set(ref(database, `${idCty}/cccd/${employeeId}`), {
             frontImage: frontImageURL,
             backImage: backImageURL,
         });
@@ -49,7 +42,10 @@ export async function writeInfoCCCD(employeeId, imgFront, imgBack) {
 // Function to read CCCD image URLs from Realtime Database
 export async function readInfoCCCD(employeeId) {
     try {
-        const snapshot = await get(child(ref(database), `cccd/${employeeId}`));
+        const state = store.getState();
+        const idCty = state.congTy.idCty; // Get idCty from Redux store
+
+        const snapshot = await get(child(ref(database), `${idCty}/cccd/${employeeId}`));
 
         if (snapshot.exists()) {
             const data = snapshot.val();

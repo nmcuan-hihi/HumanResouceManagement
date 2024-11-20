@@ -1,18 +1,22 @@
-// app/services/NghiPhepDB.js
 import { database } from '../config/firebaseconfig';
 import { ref, push, set, get, update } from 'firebase/database';
+import { store } from "../redux/store"; // Import Redux store to access idCty
 
 // Hàm để đăng ký nghỉ phép
 export async function dangKyNghiPhep(nghiPhepData) {
   try {
-    // Tạo một reference đến nhánh "nghiPhep" trong database
-    const nghiPhepRef = ref(database, 'nghiPhep');
+    // Lấy idCty từ store
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
+    
+    // Tạo một reference đến nhánh "nghiPhep" trong database của công ty
+    const nghiPhepRef = ref(database, `/${idCty}/nghiPhep`);
 
     // Tạo một ID mới cho yêu cầu nghỉ phép
     const newNghiPhepRef = push(nghiPhepRef);
 
-     // Cấu trúc dữ liệu nghỉ phép từ đối tượng
-     const dataToSave = {
+    // Cấu trúc dữ liệu nghỉ phép từ đối tượng
+    const dataToSave = {
       employeeId: nghiPhepData.employeeId,
       employeeName: nghiPhepData.employeeName, // Thêm tên nhân viên
       department: nghiPhepData.department, 
@@ -38,8 +42,12 @@ export async function dangKyNghiPhep(nghiPhepData) {
 // Hàm để lấy tất cả yêu cầu nghỉ phép
 export async function layDanhSachNghiPhep() {
   try {
-    // Tạo reference đến nhánh "nghiPhep" trong database
-    const nghiPhepRef = ref(database, 'nghiPhep');
+    // Lấy idCty từ store
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
+    
+    // Tạo reference đến nhánh "nghiPhep" trong database của công ty
+    const nghiPhepRef = ref(database, `/${idCty}/nghiPhep`);
 
     // Lấy dữ liệu từ Firebase
     const snapshot = await get(nghiPhepRef);
@@ -64,12 +72,15 @@ export async function layDanhSachNghiPhep() {
   }
 }
 
-
 // Hàm để duyệt hoặc hủy yêu cầu nghỉ phép
 export async function duyetNghiPhep(id, status) {
   try {
-    // Tạo reference đến yêu cầu nghỉ phép cụ thể trong database
-    const nghiPhepRef = ref(database, `nghiPhep/${id}`);
+    // Lấy idCty từ store
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
+    
+    // Tạo reference đến yêu cầu nghỉ phép cụ thể trong database của công ty
+    const nghiPhepRef = ref(database, `/${idCty}/nghiPhep/${id}`);
 
     // Cập nhật trạng thái của yêu cầu nghỉ phép
     await update(nghiPhepRef, { trangThai: status });

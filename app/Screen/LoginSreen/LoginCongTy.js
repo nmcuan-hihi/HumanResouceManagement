@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,55 +8,90 @@ import {
   Alert,
   Image,
 } from "react-native";
-
-import { useDispatch, useSelector } from "react-redux";
-import { getIdCtyData } from "../../services/loginFrebase";
+import BackNav from "../../Compoment/BackNav";
+import { addCompany, checkCompanyExists } from "../../services/loginFrebase";
+import { useDispatch } from "react-redux";
 import { saveIdCty } from "../../redux/slices/ctySlice";
-
-export default function LoginCongTy({ navigation }) {
+export default function AddCongTy({ navigation }) {
+  const [idCongTy, setIdCongTy] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [directorName, setDirectorName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const dispatch = useDispatch();
+  const handleSubmit = async () => {
+    // Kiểm tra thông tin đầu vào
+    if (!idCongTy || !companyName || !directorName || !phoneNumber) {
+      Alert.alert("Thông báo", "Vui lòng điền đầy đủ thông tin");
+      return;
+    }
 
-  const [idCty, setIdCty] = useState();
-  // Xử lý trạng thái Redux và hiển thị thông báo
-
-  const handleFetch = async () => {
     try {
-      const id = await getIdCtyData(idCty);
+      // Kiểm tra xem công ty đã tồn tại hay chưa
+      const exists = await checkCompanyExists(idCongTy);
+      if (exists) {
+        Alert.alert("Thông báo", "Mã công ty đã tồn tại. Vui lòng nhập mã khác.");
+        return;
+      }
 
-      if (id!=null &&idCty==id ) {
-        dispatch(saveIdCty(id));
-        navigation.navigate("Login");
+        // Lưu companyId vào Redux store và biến toàn cục
+        dispatch(saveIdCty(idCongTy));
+      // Thêm công ty vào Firebase
+      const success = await addCompany(idCongTy, companyName, directorName, phoneNumber);
+      if (success) {
+        Alert.alert("Thành công", "Công ty đã được tạo thành công! ");
+        navigation.goBack(); // Quay về màn hình trước đó
       } else {
-        Alert.alert("Thông báo", `Mã công ty không tồn tại`);
+        Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm công ty. Vui lòng thử lại.");
       }
     } catch (error) {
-      Alert.alert("Lỗi", `Truy cập công ty không thành công`);
+      console.error("Lỗi khi thêm công ty:", error);
+      Alert.alert("Lỗi", "Không thể thêm công ty. Vui lòng kiểm tra kết nối mạng.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Quản lý nhân sự </Text>
+      <BackNav name={"Tạo Công Ty"} />
+      <View style={styles.box}>
+        <View style={styles.header}>
+          <Image
+            style={styles.anh}
+            source={require("../../../assets/images/anhnen.png")}
+          />
+        </View>
 
-        <Image
-          style={styles.anh}
-          source={require("../../../assets/images/anhnen.png")}
+        <Text style={styles.subTitle}>Nhập thông tin công ty</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập mã công ty"
+          value={idCongTy}
+          onChangeText={setIdCongTy}
         />
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập tên công ty"
+          value={companyName}
+          onChangeText={setCompanyName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập tên giám đốc"
+          value={directorName}
+          onChangeText={setDirectorName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập số điện thoại"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Thêm công ty</Text>
+        </TouchableOpacity>
       </View>
-
-      <Text style={styles.subTitle}>Nhập ID công ty của bạn</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nhập mã công ty"
-        value={idCty}
-        onChangeText={setIdCty}
-      />
-
-      <TouchableOpacity style={styles.button} onPress={handleFetch}>
-        <Text style={styles.buttonText}>Continue →</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -67,16 +102,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 20,
   },
+  box: {
+    flex: 34,
+  },
   header: {
     alignItems: "center",
     paddingTop: 50,
     justifyContent: "center",
     marginBottom: 20,
-  },
-  title: {
-    color: "blue",
-    fontSize: 24,
-    fontWeight: "bold",
   },
   anh: {
     width: 200,
@@ -104,26 +137,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "center",
     justifyContent: "center",
-    marginTop: 290,
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-  },
-  testButtons: {
-    marginTop: 30,
-  },
-  testButton: {
-    backgroundColor: "#d3d3d3",
-    borderRadius: 15,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 5,
-  },
-  testButtonText: {
-    color: "#000",
-    fontSize: 16,
   },
 });

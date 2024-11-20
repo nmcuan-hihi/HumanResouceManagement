@@ -1,17 +1,23 @@
 // Import các thư viện và cấu hình Firebase
 import { getDatabase, ref, get, query, orderByChild, equalTo } from "firebase/database";
 import { app } from "../config/firebaseconfig";
-
+import { store } from "../redux/store"; // Import Redux store to access idCty
 const database = getDatabase(app);
+
+// Lấy idCty từ Redux Store
+const getIdCty = () => {
+  const state = store.getState();
+  return state.congTy.idCty; // Lấy idCty từ state.congTy
+};
 
 // Hàm lọc nhân viên theo phòng ban
 export async function filterEmployeesByPhongBan(phongbanId) {
   try {
-    const employeesRef = ref(database, "employees");
+    const idCty = getIdCty(); // Lấy idCty từ Redux
+    const employeesRef = ref(database, `companies/${idCty}/employees`);
     const q = query(employeesRef, orderByChild("phongbanId"), equalTo(phongbanId));
     const snapshot = await get(q);
 
-    // Kiểm tra nếu snapshot không có dữ liệu, trả về mảng trống
     if (!snapshot.exists()) {
       return [];
     }
@@ -24,16 +30,15 @@ export async function filterEmployeesByPhongBan(phongbanId) {
     return filteredEmployees;
   } catch (error) {
     console.error("Error filtering employees by phòng ban:", error);
-    // Trả về mảng trống nếu có lỗi
     return [];
   }
 }
 
-
 // Hàm lọc nhân viên theo giới tính
 export async function filterEmployeesByGender(gender) {
   try {
-    const employeesRef = ref(database, "employees");
+    const idCty = getIdCty(); // Lấy idCty từ Redux
+    const employeesRef = ref(database, `companies/${idCty}/employees`);
     const q = query(employeesRef, orderByChild("gioitinh"), equalTo(gender));
     const snapshot = await get(q);
 
@@ -52,7 +57,8 @@ export async function filterEmployeesByGender(gender) {
 // Hàm lọc nhân viên theo trạng thái hoạt động
 export async function filterEmployeesByStatus(status) {
   try {
-    const employeesRef = ref(database, "employees");
+    const idCty = getIdCty(); // Lấy idCty từ Redux
+    const employeesRef = ref(database, `companies/${idCty}/employees`);
     const q = query(employeesRef, orderByChild("trangthai"), equalTo(status));
     const snapshot = await get(q);
 
@@ -71,7 +77,8 @@ export async function filterEmployeesByStatus(status) {
 // Hàm tìm kiếm nhân viên theo tên hoặc mã nhân viên
 export async function searchEmployeesByNameOrId(searchTerm) {
   try {
-    const employeesRef = ref(database, "employees");
+    const idCty = getIdCty(); // Lấy idCty từ Redux
+    const employeesRef = ref(database, `companies/${idCty}/employees`);
     const snapshot = await get(employeesRef);
 
     const searchResults = {};
@@ -81,8 +88,8 @@ export async function searchEmployeesByNameOrId(searchTerm) {
       const employeeId = employee.employeeId || "";
 
       if (
-        (typeof employeeName === 'string' && employeeName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (typeof employeeId === 'string' && employeeId.toLowerCase().includes(searchTerm.toLowerCase()))
+        (employeeName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (employeeId.toLowerCase().includes(searchTerm.toLowerCase()))
       ) {
         searchResults[doc.key] = employee;
       }
@@ -98,7 +105,8 @@ export async function searchEmployeesByNameOrId(searchTerm) {
 // Hàm đọc thông tin phòng ban từ Realtime Database
 export async function readPhongBanFromRealtime() {
   try {
-    const phongBanRef = ref(database, "phongban");
+    const idCty = getIdCty(); // Lấy idCty từ Redux
+    const phongBanRef = ref(database, `companies/${idCty}/phongban`);
     const snapshot = await get(phongBanRef);
 
     const phongBanData = [];
@@ -120,7 +128,8 @@ export async function readPhongBanFromRealtime() {
 // Hàm tìm kiếm nhân viên theo mã nhân viên
 export async function searchEmployeesById(employeeId) {
   try {
-    const employeesRef = ref(database, "employees");
+    const idCty = getIdCty(); // Lấy idCty từ Redux
+    const employeesRef = ref(database, `companies/${idCty}/employees`);
     const q = query(employeesRef, orderByChild("employeeId"), equalTo(employeeId));
     const snapshot = await get(q);
 
@@ -139,10 +148,10 @@ export async function searchEmployeesById(employeeId) {
 // Hàm lọc nhân viên theo nhiều tiêu chí (phòng ban, giới tính, trạng thái)
 export async function filterEmployees({ phongbanId, gender, status }) {
   try {
-    const employeesRef = ref(database, "employees");
+    const idCty = getIdCty(); // Lấy idCty từ Redux
+    const employeesRef = ref(database, `companies/${idCty}/employees`);
     let q = employeesRef;
 
-    // Thêm điều kiện lọc nếu tồn tại
     if (phongbanId) {
       q = query(q, orderByChild("phongbanId"), equalTo(phongbanId));
     }

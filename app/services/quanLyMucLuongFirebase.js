@@ -10,7 +10,7 @@ import {
 } from "firebase/database";
 import { app } from "../config/firebaseconfig"; // Đảm bảo bạn đã cấu hình đúng
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
-
+import { store } from "../redux/store"; // Import Redux store to access idCty
 const db = getDatabase(app);
 
 // Lấy công thức lương từ Realtime Database

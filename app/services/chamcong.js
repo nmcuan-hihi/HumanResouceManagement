@@ -1,6 +1,6 @@
 import { getDatabase, ref, get, set, update, serverTimestamp } from 'firebase/database';
 import { app } from '../config/firebaseconfig';  // Đảm bảo cấu hình đúng
-
+import { store } from "../redux/store"; // Import Redux store to access idCty
 export const getEmployeesWithLeave = async () => {
   try {
     const db = getDatabase(app);

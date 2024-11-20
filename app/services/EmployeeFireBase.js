@@ -8,6 +8,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import { store, storeHRM } from "../redux/store";
 
 const database = getDatabase(app);
 const storage = getStorage(app);
@@ -16,19 +17,18 @@ const storage = getStorage(app);
 export const editEmployeeFireStore = async (updatedData, newProfileImage = null) => {
   const employeeId = updatedData.employeeId;
 
-  console.log('Employee ID:', employeeId);
-  console.log('Updated Data:', updatedData);
-
   try {
-    const employeeRef = ref(database, `employees/${employeeId}`);
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
+    const employeeRef = ref(database, `${idCty}/employees/${employeeId}`);
 
     // Check if a new image is provided
     let imageUrl = updatedData.imageUrl;
     if (newProfileImage) {
-      const imageRef = storageRef(storage, `employee/${employeeId}.jpg`);
+      const imageRef = storageRef(storage, `${idCty}/employee/${employeeId}.jpg`);
       const response = await fetch(newProfileImage);
-      if (!response.ok) throw new Error('Failed to fetch new image');
-      
+      if (!response.ok) throw new Error("Failed to fetch new image");
+
       const blob = await response.blob();
       await uploadBytes(imageRef, blob);
       imageUrl = await getDownloadURL(imageRef);
@@ -36,8 +36,6 @@ export const editEmployeeFireStore = async (updatedData, newProfileImage = null)
 
     const updatedEmployee = { ...updatedData, imageUrl };
     
-    console.log('Updated Employee Data:', updatedEmployee);
-
     // Update the employee data in Realtime Database
     await update(employeeRef, updatedEmployee);
 
@@ -49,13 +47,17 @@ export const editEmployeeFireStore = async (updatedData, newProfileImage = null)
 };
 
 // Function to add a new employee in Realtime Database
-export const addEmployeeFireStore = async (employee, profileImage) => {
+export const addEmployeeFireStore = async (employee, profileImage = null) => {
   try {
-    employee.employeeId = await getNewEmployeeId();
-    employee.matKhau = employee.employeeId; 
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
 
-    // Reference for the image in storage
-    const imageRef = storageRef(storage, `employee/${employee.employeeId}.jpg`);
+    employee.employeeId = await getNewEmployeeId();
+    employee.matKhau = employee.employeeId;
+    const imageUrl = "";
+    if(profileImage != null){
+        // Reference for the image in storage
+    const imageRef = storageRef(storage, `${idCty}/employee/${employee.employeeId}.jpg`);
 
     // Upload image
     const response = await fetch(profileImage);
@@ -63,23 +65,31 @@ export const addEmployeeFireStore = async (employee, profileImage) => {
     await uploadBytes(imageRef, blob);
 
     // Get image URL
-    const imageUrl = await getDownloadURL(imageRef);
+    imageUrl = await getDownloadURL(imageRef);
+    }
+
+
+   
 
     // Update employee data with image URL
     const emp = { ...employee, imageUrl };
 
     // Add employee to Realtime Database
-    await set(ref(database, `employees/${employee.employeeId}`), emp);
+    await set(ref(database, `${idCty}/employees/${employee.employeeId}`), emp);
     console.log("Employee successfully added to Realtime Database!");
   } catch (error) {
     console.error("Error adding employee:", error);
+    throw error;
   }
 };
 
 // Function to read all employees from Realtime Database
 export async function readEmployeesFireStore() {
   try {
-    const employeeRef = ref(database, "employees");
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
+
+    const employeeRef = ref(database, `${idCty}/employees`);
     const snapshot = await get(employeeRef);
 
     if (snapshot.exists()) {
@@ -99,10 +109,16 @@ export async function readEmployeesFireStore() {
   }
 }
 
-export async function getEmployeeById(employeeId,idCty) {
+// Function to get an employee by ID from Realtime Database
+export async function getEmployeeById(employeeId) {
   try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
+    console.log("ID Công ty:", idCty);
+
     console.log("Fetching employee with ID:", employeeId); // Debug log
     const employeeRef = ref(database, `${idCty}/employees/${employeeId}`);
+ 
     const snapshot = await get(employeeRef);
 
     if (snapshot.exists()) {
@@ -118,11 +134,13 @@ export async function getEmployeeById(employeeId,idCty) {
   }
 }
 
-
 // Function to generate new employee ID
 export async function getNewEmployeeId() {
   try {
-    const employeeRef = ref(database, "employees");
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
+
+    const employeeRef = ref(database, `${idCty}/employees`);
     const snapshot = await get(employeeRef);
 
     let newId;

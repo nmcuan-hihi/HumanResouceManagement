@@ -1,10 +1,15 @@
-// app/services/NghiPhepDB.js
 import { database } from "../config/firebaseconfig";
-import { ref, push, set, get, update,onValue } from "firebase/database";
+import { ref, push, set, get, update, onValue } from "firebase/database";
+import { store } from "../redux/store"; // Import Redux store to access idCty
 
+// Lấy idCty từ Redux store
+const state = store.getState();
+const idCty = state.congTy.idCty; // Lấy idCty từ state
+
+// Tạo thông báo cho công ty
 export async function taoThongBaoDataBase(thongBao) {
   try {
-    const notificationRef = ref(database, `thongbaocty`);
+    const notificationRef = ref(database, `${idCty}/thongbaocty`); // Đặt idCty vào đường dẫn
 
     // Tạo thông báo mới
     const newNotificationRef = push(notificationRef);
@@ -26,6 +31,8 @@ export async function taoThongBaoDataBase(thongBao) {
     throw error;
   }
 }
+
+// Thêm thông báo cho nhân viên
 export async function themThongBaoNhanVien(employeeId, maThongBao) {
   try {
     // Dữ liệu thông báo cho nhân viên
@@ -40,7 +47,7 @@ export async function themThongBaoNhanVien(employeeId, maThongBao) {
 
     // Lưu thông báo cho nhân viên vào Realtime Database với key đã chỉ định
     await set(
-      ref(database, `thongbaonhanvien/${newNotificationKey}`),
+      ref(database, `${idCty}/thongbaonhanvien/${newNotificationKey}`), // Thêm idCty vào tham chiếu
       notificationNhanVienData
     );
 
@@ -55,9 +62,10 @@ export async function themThongBaoNhanVien(employeeId, maThongBao) {
   }
 }
 
+// Lấy danh sách thông báo cho nhân viên
 export async function layDanhSachThongBaoNhanVien(employeeId) {
   try {
-    const thongBaoRef = ref(database, `thongbaonhanvien`);
+    const thongBaoRef = ref(database, `${idCty}/thongbaonhanvien`); // Thêm idCty vào tham chiếu
 
     const snapshot = await get(thongBaoRef);
 
@@ -82,51 +90,42 @@ export async function layDanhSachThongBaoNhanVien(employeeId) {
   }
 }
 
-
-
-
-// Hàm này để lắng nghe thông báo cho nhân viên
+// Lắng nghe thông báo cho nhân viên
 export function listenForNotifications(employeeId, callback) {
-    const thongBaonhanVienRef = ref(database, `thongbaonhanvien`);
-  
-    // Đăng ký listener trên ref này
-    onValue(thongBaonhanVienRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const danhSachThongBao = [];
-        snapshot.forEach((childSnapshot) => {
-          const thongBao = childSnapshot.val();
-          // Kiểm tra nếu employeeId khớp
-          if (thongBao.employeeId === employeeId) {
-            danhSachThongBao.push(thongBao);
-          }
-        });
-        // Gọi callback với danh sách thông báo
-        callback(danhSachThongBao);
-      } else {
-        console.log("Không có dữ liệu nào.");
-        callback([]);
-      }
-    });
-  }
+  const thongBaonhanVienRef = ref(database, `${idCty}/thongbaonhanvien`); // Thêm idCty vào tham chiếu
 
+  // Đăng ký listener trên ref này
+  onValue(thongBaonhanVienRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const danhSachThongBao = [];
+      snapshot.forEach((childSnapshot) => {
+        const thongBao = childSnapshot.val();
+        // Kiểm tra nếu employeeId khớp
+        if (thongBao.employeeId === employeeId) {
+          danhSachThongBao.push(thongBao);
+        }
+      });
+      // Gọi callback với danh sách thông báo
+      callback(danhSachThongBao);
+    } else {
+      console.log("Không có dữ liệu nào.");
+      callback([]);
+    }
+  });
+}
 
-
-
+// Lấy thông báo theo ID
 export async function layThongBaoById(maThongBao) {
   try {
-    // Tạo tham chiếu đến thông báo theo key
-    const notificationRef = ref(database, `thongbaocty/${maThongBao}`);
+    const notificationRef = ref(database, `${idCty}/thongbaocty/${maThongBao}`); // Thêm idCty vào tham chiếu
 
-    // Lấy dữ liệu từ Realtime Database
     const snapshot = await get(notificationRef);
 
-    // Kiểm tra nếu snapshot tồn tại và có dữ liệu
     if (!snapshot.exists()) {
       console.log(`Không tìm thấy thông báo với key: ${maThongBao}`);
       return null;
     }
 
-    // Trả về thông báo
     const thongBao = snapshot.val();
     return thongBao;
   } catch (error) {
@@ -135,22 +134,19 @@ export async function layThongBaoById(maThongBao) {
   }
 }
 
+// Cập nhật trạng thái thông báo cho nhân viên
 export async function capNhatTrangThaiThongBao(employeeId, maThongBao) {
-    try {
-      // Tạo key bằng employeeId-maThongBao
-      const notificationKey = `${employeeId}-${maThongBao}`;
-  
-      // Tạo tham chiếu đến thông báo theo key
-      const notificationRef = ref(database, `thongbaonhanvien/${notificationKey}`);
-  
-      // Cập nhật trạng thái
-      await update(notificationRef, { trangThai: true });
-  
-      console.log(`Cập nhật trạng thái cho thông báo nhân viên ${maThongBao} thành công.`);
-      return true;
-    } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái thông báo:", error);
-      throw error;
-    }
-  }
+  try {
+    const notificationKey = `${employeeId}-${maThongBao}`;
 
+    const notificationRef = ref(database, `${idCty}/thongbaonhanvien/${notificationKey}`); // Thêm idCty vào tham chiếu
+
+    await update(notificationRef, { trangThai: true });
+
+    console.log(`Cập nhật trạng thái cho thông báo nhân viên ${maThongBao} thành công.`);
+    return true;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái thông báo:", error);
+    throw error;
+  }
+}

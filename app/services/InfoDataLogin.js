@@ -4,13 +4,16 @@ import {
   get,
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
-
+import { store } from "../redux/store"; // Import Redux store to access idCty
 const database = getDatabase(app);
 
 // Function to get department (phong ban) by ID from Realtime Database
 export const getPhongBanById = async (phongBanId) => {
   try {
-    const phongBanRef = ref(database, `phongban/${phongBanId}`); // Reference to phongban by ID
+    // Lấy idCty từ store
+const state = store.getState();
+const idCty = state.congTy.idCty;
+    const phongBanRef = ref(database, `${idCty}/phongban/${phongBanId}`); // Reference to phongban by ID
     const snapshot = await get(phongBanRef); // Fetch data from Realtime Database
 
     if (snapshot.exists()) {

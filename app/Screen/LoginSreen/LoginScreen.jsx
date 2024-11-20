@@ -9,70 +9,98 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
-
-import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { saveIdCty } from "../../redux/slices/ctySlice";
 
 export default function LoginScreen({ navigation }) {
-  const { idCty } = useSelector((state) => state.congTy);
-
-  const [employeeId, setEmployeeId] = useState("NV000");
-  const [password, setPassword] = useState("133"); // Mock password input
+  const [companyId, setCompanyId] = useState("Nhabee");
+  const [employeeId, setEmployeeId] = useState("");
+  const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
 
   const handleLogin = async () => {
-    if (!employeeId) {
-      Alert.alert("Error", "Please enter your employee ID.");
+    if (!companyId || !employeeId || !password) {
+      Alert.alert("Error", "Vui lòng nhập đầy đủ thông tin.");
       return;
     }
 
     try {
-      const employeeData = await getEmployeeById(employeeId,idCty);
+      dispatch(saveIdCty(companyId));
 
-      if (employeeData != null) {
-        if (password === employeeData.matKhau) {
-          navigation.navigate("UserTabNav", { employee: employeeData });
-        } else {
-          Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
-        }
+      const employeeData = await getEmployeeById(employeeId);
+
+      if (employeeData && password === employeeData.matKhau) {
+        navigation.navigate("UserTabNav", { employee: employeeData });
       } else {
-        Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
+        Alert.alert("Error", "User hoặc mật khẩu không đúng!");
       }
     } catch (error) {
-      Alert.alert("Error", "User hoặcMật khẩu không đúng !!!");
+      Alert.alert("Error", "Đã xảy ra lỗi khi đăng nhập.");
     }
   };
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Enter your Employee ID</Text>
+        <Text style={styles.title}>Đăng nhập</Text>
         <Ionicons
-          style={{ marginEnd: 30 }}
+          style={{ marginEnd: 10 }}
           name="person-circle-outline"
-          size={24}
+          size={30}
           color="blue"
         />
       </View>
 
       <Text style={styles.subTitle}>
-        Enter your employee ID and password to login.
+        Nhập ID công ty, ID nhân viên và mật khẩu để đăng nhập.
       </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Employee ID"
-        value={employeeId}
-        onChangeText={setEmployeeId}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      {/* Nhập ID công ty */}
+      <View style={styles.inputContainer}>
+        <Ionicons name="link-outline" size={20} color="#000" style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="ID công ty"
+          value={companyId}
+          onChangeText={setCompanyId}
+        />
+      </View>
 
+      {/* Nhập ID nhân viên */}
+      <View style={styles.inputContainer}>
+        <Ionicons name="person-outline" size={20} color="#000" style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="ID nhân viên"
+          value={employeeId}
+          onChangeText={setEmployeeId}
+        />
+      </View>
+
+      {/* Nhập mật khẩu */}
+      <View style={styles.inputContainer}>
+        <Ionicons name="lock-closed-outline" size={20} color="#000" style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Mật khẩu"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+      </View>
+
+      {/* Nút đăng nhập */}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Continue →</Text>
+        <Text style={styles.buttonText}>Đăng nhập</Text>
+      </TouchableOpacity>
+
+      {/* Dòng tạo công ty */}
+      <TouchableOpacity
+        style={styles.createCompanyContainer}
+        onPress={() => navigation.navigate("LoginCongTy")}
+      >
+        <Text style={styles.createCompanyText}>Tạo Công Ty</Text>
       </TouchableOpacity>
     </View>
   );
@@ -83,61 +111,62 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 20,
+    justifyContent: "center",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingTop: 100,
-    justifyContent: "space-between",
+    justifyContent: "center",
     marginBottom: 20,
   },
   title: {
     color: "blue",
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
   },
   subTitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#6e6e6e",
-    marginBottom: 30,
+    textAlign: "center",
+    marginBottom: 20,
   },
-  input: {
-    height: 50,
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     borderColor: "#000",
     borderWidth: 2,
     borderRadius: 7,
     marginBottom: 20,
     paddingHorizontal: 10,
+    height: 50,
+  },
+  icon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
     fontSize: 16,
   },
   button: {
     backgroundColor: "#00BFFF",
     borderRadius: 20,
     height: 50,
-    width: "80%",
-    alignItems: "center",
-    alignSelf: "center",
     justifyContent: "center",
-    marginTop: 290,
+    alignItems: "center",
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
   },
-  testButtons: {
-    marginTop: 30,
+  createCompanyContainer: {
+    marginTop: 10,
+    alignSelf: "center",
   },
-  testButton: {
-    backgroundColor: "#d3d3d3",
-    borderRadius: 15,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 5,
-  },
-  testButtonText: {
-    color: "#000",
+  createCompanyText: {
     fontSize: 16,
+    color: "blue",
+    textDecorationLine: "underline",
   },
 });

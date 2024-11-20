@@ -3,22 +3,29 @@ import {
   ref,
   set,
   get,
-  child,
   update,
   remove,
   push
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
 import { getStorage } from "firebase/storage";
+import { store } from "../redux/store"; // Import Redux store to access idCty
 
 const database = getDatabase(app);
 const storage = getStorage(app); // Khởi tạo Firebase Storage
 
+// Lấy idCty từ Redux store
+const getIdCty = () => {
+  const state = store.getState();
+  return state.congTy.idCty; // Lấy idCty từ state.congTy
+};
+
 // Thêm kỹ năng
 export const addSkill = async (skill) => {
+  const idCty = getIdCty(); // Lấy idCty từ Redux
   const skillId = skill.mask; // Sử dụng mask làm ID
   try {
-    await set(ref(database, `skills/${skillId}`), skill); // Thêm kỹ năng vào Realtime Database
+    await set(ref(database, `companies/${idCty}/skills/${skillId}`), skill); // Thêm kỹ năng vào Realtime Database
     console.log(`Skill ${skillId} added successfully!`);
   } catch (error) {
     console.error(`Error adding skill ${skillId}:`, error);
@@ -27,8 +34,9 @@ export const addSkill = async (skill) => {
 
 // Cập nhật kỹ năng
 export const updateSkill = async (mask, updatedData) => {
+  const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillRef = ref(database, `skills/${mask}`);
+    const skillRef = ref(database, `companies/${idCty}/skills/${mask}`);
     await update(skillRef, updatedData); // Cập nhật kỹ năng
     console.log(`Skill ${mask} updated successfully!`);
   } catch (error) {
@@ -39,8 +47,9 @@ export const updateSkill = async (mask, updatedData) => {
 
 // Xóa kỹ năng
 export const deleteSkill = async (mask) => {
+  const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillRef = ref(database, `skills/${mask}`);
+    const skillRef = ref(database, `companies/${idCty}/skills/${mask}`);
     await remove(skillRef); // Xóa kỹ năng
     console.log(`Skill ${mask} deleted successfully!`);
   } catch (error) {
@@ -51,8 +60,9 @@ export const deleteSkill = async (mask) => {
 
 // Đọc tất cả kỹ năng
 export const readSkills = async () => {
+  const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillsRef = ref(database, "skills");
+    const skillsRef = ref(database, `companies/${idCty}/skills`);
     const snapshot = await get(skillsRef); // Lấy dữ liệu từ Realtime Database
 
     if (snapshot.exists()) {
@@ -73,8 +83,9 @@ export const readSkills = async () => {
 
 // Đọc thông tin một kỹ năng cụ thể
 export const readSkill1 = async (mask) => {
+  const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillRef = ref(database, `skills/${mask}`);
+    const skillRef = ref(database, `companies/${idCty}/skills/${mask}`);
     const snapshot = await get(skillRef); // Lấy dữ liệu từ Realtime Database
 
     if (snapshot.exists()) {
@@ -92,19 +103,21 @@ export const readSkill1 = async (mask) => {
 
 // Thêm kỹ năng nhân viên
 export const addSkillNV = async (Skill) => {
+  const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillRef = ref(database, `skillnhanvien/${Skill.employeeId}-${Skill.mask}`);
+    const skillRef = ref(database, `companies/${idCty}/skillnhanvien/${Skill.employeeId}-${Skill.mask}`);
     await set(skillRef, Skill); // Thêm kỹ năng nhân viên
     console.log(`Employee ${Skill.employeeId} added successfully!`);
   } catch (error) {
-    console.error("Error adding employee:", error);
+    console.error("Error adding employee skill:", error);
   }
 };
 
 // Lấy danh sách kỹ năng của nhân viên
 export const readSkillNhanVien = async () => {
+  const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillNhanVienRef = ref(database, "skillnhanvien");
+    const skillNhanVienRef = ref(database, `companies/${idCty}/skillnhanvien`);
     const snapshot = await get(skillNhanVienRef); // Lấy dữ liệu từ Realtime Database
 
     if (snapshot.exists()) {
@@ -119,7 +132,7 @@ export const readSkillNhanVien = async () => {
       return null;
     }
   } catch (error) {
-    console.error("Error reading employees:", error);
+    console.error("Error reading employee skills:", error);
     return null;
   }
 };

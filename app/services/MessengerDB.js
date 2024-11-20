@@ -1,6 +1,6 @@
-// app/services/MessengerDB.js
 import { database } from '../config/firebaseconfig';
 import { ref, push, set, get, update } from 'firebase/database';
+import { store } from "../redux/store"; // Import Redux store to access idCty
 
 // Hàm tạo ID cuộc trò chuyện duy nhất
 export const generateChatID = (id1, id2) => {
@@ -9,9 +9,13 @@ export const generateChatID = (id1, id2) => {
 
 // Hàm lấy hoặc tạo cuộc trò chuyện
 export const getMessenger = async (id1, id2) => {
+  // Lấy idCty từ store
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+  
   const chatID = generateChatID(id1, id2);
-  const chatRef = ref(database, `chats/${chatID}`);
-  const messagesRef = ref(database, `messages/${chatID}`);
+  const chatRef = ref(database, `/${idCty}/chats/${chatID}`);
+  const messagesRef = ref(database, `/${idCty}/messages/${chatID}`);
 
   try {
     // Kiểm tra xem cuộc trò chuyện có tồn tại không
@@ -41,10 +45,13 @@ export const getMessenger = async (id1, id2) => {
   }
 };
 
-
 // Hàm gửi tin nhắn
 export const sendMessage = async (chatID, senderID, text) => {
-  const messageID = push(ref(database, `messages/${chatID}`)).key;
+  // Lấy idCty từ store
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+  
+  const messageID = push(ref(database, `/${idCty}/messages/${chatID}`)).key;
   const messageData = {
     sender: senderID,
     text: text,
@@ -52,11 +59,11 @@ export const sendMessage = async (chatID, senderID, text) => {
   };
 
   const updates = {};
-  updates[`/messages/${chatID}/${messageID}`] = messageData;
-  updates[`/chats/${chatID}/lastMessage`] = text;
-  updates[`/chats/${chatID}/timestamp`] = Date.now();
-  updates[`/chats/${chatID}/status`] = "0";
-  updates[`/chats/${chatID}/lastSend`] = senderID;
+  updates[`/${idCty}/messages/${chatID}/${messageID}`] = messageData;
+  updates[`/${idCty}/chats/${chatID}/lastMessage`] = text;
+  updates[`/${idCty}/chats/${chatID}/timestamp`] = Date.now();
+  updates[`/${idCty}/chats/${chatID}/status`] = "0";
+  updates[`/${idCty}/chats/${chatID}/lastSend`] = senderID;
 
   try {
     await update(ref(database), updates);
@@ -65,25 +72,29 @@ export const sendMessage = async (chatID, senderID, text) => {
     throw error;
   }
 };
+
 // Hàm lấy danh sách các cuộc trò chuyện của một nhân viên
 export const getChatList = async (employeeID) => {
-    const chatsRef = ref(database, 'chats');
-    try {
-      const chatsSnapshot = await get(chatsRef);
-      const chatList = [];
-      chatsSnapshot.forEach(childSnapshot => {
-        const chat = childSnapshot.val();
-       
-        if (chat.participants.includes(employeeID)) {
-          chatList.push({ id: childSnapshot.key, ...chat });
-          console.log("_______-"+ chat.participants)
+  // Lấy idCty từ store
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+  
+  const chatsRef = ref(database, `/${idCty}/chats`);
+  try {
+    const chatsSnapshot = await get(chatsRef);
+    const chatList = [];
+    chatsSnapshot.forEach(childSnapshot => {
+      const chat = childSnapshot.val();
 
-        }
-      });
+      if (chat.participants.includes(employeeID)) {
+        chatList.push({ id: childSnapshot.key, ...chat });
+        console.log("_______-" + chat.participants);
+      }
+    });
 
-      return chatList;
-    } catch (error) {
-      console.error('Lỗi khi lấy danh sách cuộc trò chuyện:', error);
-      throw error;
-    }
-  };
+    return chatList;
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách cuộc trò chuyện:', error);
+    throw error;
+  }
+};

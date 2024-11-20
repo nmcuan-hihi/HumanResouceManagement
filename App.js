@@ -76,7 +76,7 @@ export default function App() {
     <Provider store={store}>
     <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LoginCongTy">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="DangKyNghi" component={DangKyNghiScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DuyetNghiPhep" component={DuyetNghiPhep} options={{ headerShown: false }} />
         <Stack.Screen name="ChiTietNghiPhep" component={ChiTietNghiPhep} options={{ headerShown: false }} />

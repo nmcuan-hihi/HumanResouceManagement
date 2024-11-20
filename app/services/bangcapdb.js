@@ -1,6 +1,7 @@
-import { getDatabase, ref, set, get, update, query, equalTo, orderByChild, child } from "firebase/database";
+import { getDatabase, ref, set, get, update, query, equalTo, orderByChild } from "firebase/database";
 import { app } from "../config/firebaseconfig"; // Assumes your Firebase configuration is here
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { store } from "../redux/store"; // Import Redux store to access idCty
 
 const database = getDatabase(app);
 const storage = getStorage(app); // Initialize Firebase Storage
@@ -20,24 +21,30 @@ function random(length) {
 export async function addBangCapNV(bangCap, image) {
   const randomImg = random(20);
   try {
-    const imageRef = storageRef(storage, `bangcap/${randomImg}.jpg`);
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Get idCty from Redux store
+
+    const imageRef = storageRef(storage, `${idCty}/bangcap/${randomImg}.jpg`);
     const response = await fetch(image);
     const blob = await response.blob();
     await uploadBytes(imageRef, blob);
     const imageUrl = await getDownloadURL(imageRef);
 
     const data = { ...bangCap, imageUrl };
-    await set(ref(database, `bangcapnhanvien/${bangCap.employeeId}-${bangCap.bangcap_id}`), data);
+    await set(ref(database, `${idCty}/bangcapnhanvien/${bangCap.employeeId}-${bangCap.bangcap_id}`), data);
     console.log(`Employee ${bangCap.employeeId} added successfully!`);
   } catch (error) {
-    console.error("Error adding employee:", error);
+    console.error("Error adding employee qualification:", error);
   }
 }
 
 // Fetch qualification details by bangcap_id and employeeId
 export async function readBangCapNhanVien1(bangcap_id, employeeId) {
   try {
-    const bangCapRef = query(ref(database, "bangcapnhanvien"), orderByChild("bangcap_id"), equalTo(bangcap_id));
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Get idCty from Redux store
+
+    const bangCapRef = query(ref(database, `${idCty}/bangcapnhanvien`), orderByChild("bangcap_id"), equalTo(bangcap_id));
     const snapshot = await get(bangCapRef);
 
     if (snapshot.exists()) {
@@ -61,7 +68,10 @@ export async function readBangCapNhanVien1(bangcap_id, employeeId) {
 // Fetch all qualifications of employees
 export async function readBangCapNhanVien() {
   try {
-    const bangCapCollection = ref(database, "bangcapnhanvien");
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Get idCty from Redux store
+
+    const bangCapCollection = ref(database, `${idCty}/bangcapnhanvien`);
     const snapshot = await get(bangCapCollection);
 
     if (snapshot.exists()) {
@@ -75,14 +85,17 @@ export async function readBangCapNhanVien() {
       return null;
     }
   } catch (error) {
-    console.error("Error reading employees:", error);
+    console.error("Error reading qualifications:", error);
   }
 }
 
 // Toggle qualification verification status
 export async function toggleXacthuc(employeeId, bangcapId) {
   try {
-    const docRef = ref(database, `bangcapnhanvien/${employeeId}-${bangcapId}`);
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Get idCty from Redux store
+
+    const docRef = ref(database, `${idCty}/bangcapnhanvien/${employeeId}-${bangcapId}`);
     const snapshot = await get(docRef);
 
     if (snapshot.exists()) {
