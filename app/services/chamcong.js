@@ -1,10 +1,13 @@
 import { getDatabase, ref, get, set, update, serverTimestamp } from 'firebase/database';
 import { app } from '../config/firebaseconfig';  // Đảm bảo cấu hình đúng
+import { store, storeHRM } from "../redux/store";
 
 export const getEmployeesWithLeave = async (today) => {
   try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
     const db = getDatabase(app);
-    const employeesRef = ref(db, 'employees');  // Đường dẫn tới bảng nhân viên
+    const employeesRef = ref(db, `${idCty}/employees`);  // Đường dẫn tới bảng nhân viên
     const leaveRef = ref(db, 'nghiPhep');      // Đường dẫn tới bảng nghỉ phép
     const snapshotEmployees = await get(employeesRef);
     const snapshotLeave = await get(leaveRef);
@@ -43,8 +46,10 @@ export const getEmployeesWithLeave = async (today) => {
 
 export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) {
   try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
     const db = getDatabase(app);
-    const employeesRef = ref(db, "employees");
+    const employeesRef = ref(db, `${idCty}/employees`);
     const leaveRef = ref(db, "nghiPhep");
 
     // Đọc danh sách nhân viên
@@ -108,10 +113,11 @@ export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) 
 
 export const getEmployeesWithLeave2 = async () => {
   const db = getDatabase();
-  
+  const state = store.getState();
+  const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
   // Lấy danh sách nhân viên từ Firebase Realtime Database
-  const employeesRef = ref(db, 'employees');
-  const leavesRef = ref(db, 'nghiPhep');
+  const employeesRef = ref(db, `${idCty}/employees`);
+  const leavesRef = ref(db, `${idCty}/nghiPhep`);
   
   try {
     // Lấy tất cả dữ liệu nhân viên
@@ -159,37 +165,12 @@ export const getEmployeesWithLeave2 = async () => {
 // Lấy instance của Realtime Database
 const database = getDatabase(app);
 
-// Hàm tạo mã tự động tăng cho maChamCong
-const getNextChamCongCode = async () => {
-  try {
-    const counterRef = ref(database, 'counter/chamCongCounter'); // Sử dụng 1 document làm bộ đếm cho mã chấm công
-    const counterSnap = await get(counterRef);
 
-    if (!counterSnap.exists()) {
-      // Nếu không có document counter, tạo mới và khởi tạo giá trị đếm
-      await set(counterRef, { maChamCong: 1 });
-      return 'MCC0001';  // Mã chấm công đầu tiên
-    } else {
-      // Lấy giá trị đếm hiện tại và tăng lên
-      const currentValue = counterSnap.val().maChamCong;
-      const nextValue = currentValue + 1;
-
-      // Tạo mã chấm công mới
-      const newChamCongCode = `MCC${String(nextValue).padStart(4, '0')}`; // Đảm bảo mã có 4 chữ số
-
-      // Cập nhật lại bộ đếm
-      await update(counterRef, { maChamCong: nextValue });
-
-      return newChamCongCode;
-    }
-  } catch (error) {
-    console.error('Lỗi khi lấy mã chấm công tự động:', error);
-    return null; // Nếu có lỗi, trả về null
-  }
-};
 
 export const addChiTietChamCongToRealtime = async (attendanceData) => {
   try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
     const { employeeId, timeIn, timeOut, status, month } = attendanceData;
 
     // Kiểm tra dữ liệu
@@ -198,7 +179,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
       return;
     }
 
-    const thongTinChamCongRef = ref(database, 'thongtinchamcong');
+    const thongTinChamCongRef = ref(database, `${idCty}/thongtinchamcong`);
 
     // Lấy dữ liệu hiện tại từ Realtime Database
     const snapshot = await get(thongTinChamCongRef);
@@ -231,7 +212,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     const day = date.getDate();
 
     // Tham chiếu tới bản ghi chấm công của nhân viên
-    const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
+    const chamCongRef = ref(database, `${idCty}/chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
 
     // Lấy dữ liệu hiện tại nếu có
     const existingRecord = await get(chamCongRef);
@@ -295,9 +276,11 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
 
 export const getEmployeesByLeaveType = async (leaveType = "Có lương") => {
   try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
     const db = getDatabase(app);
-    const employeesRef = ref(db, 'employees');  // Đường dẫn tới bảng nhân viên
-    const leaveRef = ref(db, 'nghiPhep');      // Đường dẫn tới bảng nghỉ phép
+    const employeesRef = ref(db, `${idCty}/employees`);  // Đường dẫn tới bảng nhân viên
+    const leaveRef = ref(db, `${idCty}/nghiPhep`);      // Đường dẫn tới bảng nghỉ phép
     const snapshotEmployees = await get(employeesRef);
     const snapshotLeave = await get(leaveRef);
     
@@ -354,7 +337,9 @@ export const getEmployeesByLeaveType = async (leaveType = "Có lương") => {
 export async function readThongTinChamCong() {
   try {
     const db = getDatabase();
-    const chamCongRef = ref(db, "thongtinchamcong");
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
+    const chamCongRef = ref(db, `${idCty}/thongtinchamcong`);
 
     const snapshot = await get(chamCongRef);
     if (snapshot.exists()) {
@@ -372,7 +357,7 @@ export async function readThongTinChamCong() {
 export async function updateThongTinChamCong(updateData) {
   try {
     const db = getDatabase();
-    const chamCongRef = ref(db, "thongtinchamcong");
+    const chamCongRef = ref(db, `${idCty}/thongtinchamcong`);
 
     // Thực hiện cập nhật
     await update(chamCongRef, updateData);

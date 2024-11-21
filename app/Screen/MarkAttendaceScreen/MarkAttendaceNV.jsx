@@ -22,6 +22,7 @@ import { getDatabase, ref, get, set, update, serverTimestamp } from 'firebase/da
 import { getEmployeesWithLeave } from '../../services/chamcong';
 import { getEmployeesByLeaveType, getFilteredEmployeesByPhongBanAndLeave } from '../../services/chamcong';
 import { CheckBox } from 'react-native-elements';
+import { store } from '../../redux/store';
 
 export default function ChamCongNV({ navigation, route }) {
   const { phongbanId } = route.params || {};
@@ -120,13 +121,15 @@ export default function ChamCongNV({ navigation, route }) {
   useEffect(() => {
     const fetchExistingTimeIn = async (employeeId) => {
       try {
+        const state = store.getState();
+        const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
         const date = new Date(selectedMonth);
         const year = date.getFullYear();
         const monthName = date.getMonth() + 1;
         const day = date.getDate();
         
         const database = getDatabase();
-        const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
+        const chamCongRef = ref(database, `${idCty}/chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
         const snapshot = await get(chamCongRef);
         
         if (snapshot.exists()) {
