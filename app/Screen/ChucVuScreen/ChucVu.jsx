@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, Text, RefreshControl } from 'react-native';
 import BackNav from '../../Compoment/BackNav';
-import { readChucVu } from '../../services/database';
+import { readChucVu1 } from '../../services/database';
 import ItemListEmployee from '../../Compoment/ItemEmployee';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -20,7 +20,7 @@ export default function ListChucVu({ navigation }) {
     setError(null); // Reset error state
 
     try {
-      const data = await readChucVu();
+      const data = await readChucVu1();
       if (data) {
         const chucVuArray = Object.keys(data).map(key => ({
           ...data[key],

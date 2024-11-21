@@ -173,7 +173,29 @@ export const readChucVu = async () => {
   }
 };
 
+export const readChucVu1 = async () => {
+  try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
+    const chucVuRef = ref(database, `${idCty}/chucvu`);
+    const snapshot = await get(chucVuRef);
 
+    if (snapshot.exists()) {
+      const chucVus = Object.keys(snapshot.val()).map((key) => ({
+        id: key,
+        ...snapshot.val()[key],
+      }));
+
+      return chucVus; // Return list of chucVu
+    } else {
+      console.log("No data available");
+      return null; // No data found
+    }
+  } catch (error) {
+    console.error("Error reading chuc vu data:", error);
+    return null; // Handle error
+  }
+};
 // Update ChucVu
 export const updateChucVu = async (maChucVu, updatedData) => {
   try {
