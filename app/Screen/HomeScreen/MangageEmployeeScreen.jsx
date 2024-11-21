@@ -117,14 +117,23 @@ const EmployeeScreen = ({ navigation, route }) => {
               label="Nghỉ phép"
               onPress={() => navigateTo("DuyetNghiPhep")}
             />
-            <StatItem icon="money" color="#FFC107" value="0" label="Lương" />
+            <StatItem icon="money" color="#FFC107"  label="Lương" />
             <StatItem
               icon="fingerprint"
               component={MaterialIcons}
               color="#9C27B0"
-              value="0"
+              
               label="Chấm công nhân viên"
-              onPress={() => navigateTo("ChamCongNV")}
+              onPress={() => navigation.navigate("ChamCongNV", {phongbanId: employee.phongbanId})}
+            />
+           
+            <StatItem
+              icon="fingerprint"
+              component={MaterialIcons}
+              color="#9C27B0"
+              
+              label="Thông tin chấm công"
+              onPress={() => navigateTo("ThongTinChamCong")}
             />
             <StatItem icon="tasks" color="#FF9800" value="0" label="Nhiệm Vụ" />
           </View>

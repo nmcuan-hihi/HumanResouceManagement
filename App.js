@@ -54,7 +54,7 @@ import MesengerDetails from './app/Screen/MessengerScreen/MesengerDetails';
 import DanhSachLuong from './app/Screen/QuanLyLuong/DanhSachLuong';
 
 import SalaryDetailScreen from './app/Screen/QuanLyLuong/ChiTietBangLuong';
-
+import ThongTinChamCong from './app/Screen/MarkAttendaceScreen/ThongTinChamCong';
 import AddThongBao from './app/Screen/NotificeScreen/AddThongBao';
 import ChiTietThongBao from './app/Screen/NotificeScreen/ChiTietThongBao';
 
@@ -83,7 +83,7 @@ export default function App() {
         <Stack.Screen name="MesengerDetails" component={MesengerDetails} options={{ headerShown: false }} />
         
         <Stack.Screen name="LoginCongTy" component={LoginCongTy} options={{ headerShown: false }} />
-
+		<Stack.Screen name="ThongTinChamCong" component={ThongTinChamCong} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="UserTabNav" component={TabNavigation} options={{ headerShown: false }} />

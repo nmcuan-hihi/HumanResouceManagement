@@ -152,7 +152,7 @@ export default function TabNavigation({ route }) {
       return (
         <Tab.Screen
           name="SalaryManagement"
-          component={ChammCong}
+          component={EmployeeScreen}
           initialParams={{ employee }}
           options={{
             tabBarLabel: "Salary",
@@ -163,6 +163,20 @@ export default function TabNavigation({ route }) {
         />
       );
     } else if (role === "TP" && employee?.phongbanId === "NS") {
+      return (
+        <Tab.Screen
+          name="SalaryManagement"
+          component={EmployeeScreen}
+          initialParams={{ employee }}
+          options={{
+            tabBarLabel: "Nhân Sự",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome name="money" size={24} color={color} />
+            ),
+          }}
+        />
+      );
+    } else if (role === "TP" ) {
       return (
         <Tab.Screen
           name="SalaryManagement"

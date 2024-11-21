@@ -1,21 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import {TextInput, View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform , Modal,ActivityIndicator} from 'react-native';
+import {
+  TextInput,
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+  Modal,
+  ActivityIndicator
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { filterEmployeesByPhongBan } from '../../services/PhongBanDatabase';  // Hàm lọc nhân viên theo phòng ban
-import { Button } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { readPhongBanFromRealtime } from '../../services/PhongBanDatabase';
-import { readEmployeesFireStore } from '../../services/EmployeeFireBase';
-import { addChiTietChamCongToRealtime } from '../../services/chamcong';  // Import your Firestore function for adding attendance
-import { filterEmployeesByStatus } from '../../services/PhongBanDatabase';
+import { addChiTietChamCongToRealtime } from '../../services/chamcong';
 import BackNav from '../../Compoment/BackNav';
 import { searchEmployeesByNameOrId } from '../../services/PhongBanDatabase';
+import { getDatabase, ref, get, set, update, serverTimestamp } from 'firebase/database';
 import { getEmployeesWithLeave } from '../../services/chamcong';
-import { getEmployeesByLeaveType } from '../../services/chamcong';
-export default function ChamCongNV({navigation}) {
-  const [timeIn, setTimeIn] = useState(new Date());
-  const [timeOut, setTimeOut] = useState(new Date());
+import { getEmployeesByLeaveType, getFilteredEmployeesByPhongBanAndLeave } from '../../services/chamcong';
+import { CheckBox } from 'react-native-elements';
+
+export default function ChamCongNV({ navigation, route }) {
+  const { phongbanId } = route.params || {};
+  console.log(phongbanId);
+
+  const [attendanceType, setAttendanceType] = useState('timeIn'); // New state for radio buttons
+  const [timeIn, setTimeIn] = useState(() => {
+    const defaultTimeIn = new Date();
+    defaultTimeIn.setHours(9, 0, 0, 0);
+    return defaultTimeIn;
+  });
+  const [timeOut, setTimeOut] = useState(() => {
+    const defaultTimeOut = new Date();
+    defaultTimeOut.setHours(17, 0, 0, 0);
+    return defaultTimeOut;
+  });
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState({ timeIn: false, timeOut: false, month: false });
   const [employees, setEmployees] = useState([]);
@@ -25,16 +47,35 @@ export default function ChamCongNV({navigation}) {
   const [selectAll, setSelectAll] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
-  const [loading, setLoading] = useState(false); // State for loading modal
+  const [loading, setLoading] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
   const [valueStatus, setValueStatus] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [lockedEmployeeIds, setLockedEmployeeIds] = useState(new Set());
   useEffect(() => {
     async function fetchEmployees() {
       try {
-        const employeesData = await getEmployeesWithLeave();
+        const formattedDate = new Date(selectedMonth).toLocaleDateString('vi-VN');
+        const employeesData = await getFilteredEmployeesByPhongBanAndLeave(phongbanId, formattedDate);
+        
         if (employeesData) {
           setEmployees(employeesData);
+          const employeesWithCheckboxTrue = employeesData.filter(employee => employee.trangthaiCheckbox);
+          console.log("Nhân viên có trangthaiCheckbox = true:", employeesWithCheckboxTrue);
+          
+          // Tạo Set mới để lưu ID của nhân viên cần khóa
+          const newLockedIds = new Set();
+          
+          employeesWithCheckboxTrue.forEach(employee => {
+            toggleCheckmark(employee.employeeId);
+            newLockedIds.add(employee.employeeId);
+          });
+          
+          // Set locked IDs và isInitialized sau khi xử lý xong
+          setLockedEmployeeIds(newLockedIds);
+          setIsInitialized(true);
         }
       } catch (error) {
         console.error("Error fetching employees:", error);
@@ -45,7 +86,8 @@ export default function ChamCongNV({navigation}) {
       try {
         const phongBanData = await readPhongBanFromRealtime();
         if (phongBanData) {
-          setPhongBan(phongBanData);
+          const filteredPhongBan = phongBanData.filter(pban => pban.maPhongBan === phongbanId);
+          setPhongBan(filteredPhongBan);
         }
       } catch (error) {
         console.error("Error fetching phong ban:", error);
@@ -54,23 +96,63 @@ export default function ChamCongNV({navigation}) {
 
     fetchEmployees();
     fetchPhongBan();
-  }, []);
+  }, [selectedMonth, phongbanId]);
 
   useEffect(() => {
-    if (valuePhongBan) {
-      handleFilterEmployeesByPhongBan(valuePhongBan);
+    if (phongbanId) {
+      handleFilterEmployeesByPhongBan(phongbanId, selectedMonth);
     }
-    if (valueStatus) {
-      handleFilterEmployeesByStatus(valueStatus);
-    }
-  }, [valuePhongBan], [valueStatus]);
+  }, [phongbanId]);
+
   useEffect(() => {
-    
     if (valueStatus) {
       handleFilterEmployeesByStatus(valueStatus);
     }
   }, [valueStatus]);
+
+  useEffect(() => {
+    if (employees && employees.phongbanId !== phongbanId) {
+      setIsButtonDisabled(true);
+    } else {
+      setIsButtonDisabled(false);
+    }
+  }, [employees, phongbanId]);
+  useEffect(() => {
+    const fetchExistingTimeIn = async (employeeId) => {
+      try {
+        const date = new Date(selectedMonth);
+        const year = date.getFullYear();
+        const monthName = date.getMonth() + 1;
+        const day = date.getDate();
+        
+        const database = getDatabase();
+        const chamCongRef = ref(database, `chitietchamcong/${employeeId}/${year}/${monthName}/${day}`);
+        const snapshot = await get(chamCongRef);
+        
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.timeIn) {
+            // Convert timeIn string back to Date object
+            const [time, period] = data.timeIn.split(' ');
+            const [hours, minutes] = time.split(':');
+            const timeInDate = new Date(selectedMonth);
+            let hour = parseInt(hours);
+            if (period === 'PM' && hour !== 12) hour += 12;
+            if (period === 'AM' && hour === 12) hour = 0;
+            timeInDate.setHours(hour, parseInt(minutes));
+            setTimeIn(timeInDate);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching existing timeIn:", error);
+      }
+    };
   
+    if (attendanceType === 'timeOut') {
+      const selectedEmployees = employees.filter(employee => employee.trangthai === 'checked');
+      selectedEmployees.forEach(employee => fetchExistingTimeIn(employee.employeeId));
+    }
+  }, [attendanceType, selectedMonth, employees]);
   const handleSearch = async () => {
     if (searchTerm.trim() === '') {
       setFilteredData(employeeData);
@@ -83,14 +165,16 @@ export default function ChamCongNV({navigation}) {
       setEmployees(employeeArray);
     }
   };
-  const handleFilterEmployeesByPhongBan = async (phongbanId) => {
+
+  const handleFilterEmployeesByPhongBan = async (phongbanId, selecl) => {
     try {
-      const filteredEmployees = await filterEmployeesByPhongBan(phongbanId);
+      const filteredEmployees = await getFilteredEmployeesByPhongBanAndLeave(phongbanId, selecl);
       setEmployees(filteredEmployees);
     } catch (error) {
       console.error("Error filtering employees by phòng ban:", error);
     }
   };
+
   const handleFilterEmployeesByStatus = async (phongbanId) => {
     try {
       const filteredEmployees = await getEmployeesByLeaveType(phongbanId);
@@ -99,7 +183,6 @@ export default function ChamCongNV({navigation}) {
       console.error("Error filtering employees by phòng ban:", error);
     }
   };
-
 
   const handleTimeChange = (event, selectedDate, type) => {
     const currentDate = selectedDate || (type === 'timeIn' ? timeIn : timeOut);
@@ -122,6 +205,9 @@ export default function ChamCongNV({navigation}) {
   };
 
   const toggleCheckmark = (employeeId) => {
+    // Chỉ khóa những nhân viên có ID trong danh sách locked
+    if (lockedEmployeeIds.has(employeeId)) return;
+    
     setEmployees(prevEmployees =>
       prevEmployees.map(employee =>
         employee.employeeId === employeeId
@@ -136,10 +222,13 @@ export default function ChamCongNV({navigation}) {
     setEmployees(prevEmployees =>
       prevEmployees.map(employee => ({
         ...employee,
-        trangthai: !selectAll ? 'checked' : 'unchecked',
+        trangthai: selectAll
+          ? 'unchecked' // Nếu `selectAll` là `true`, bỏ chọn tất cả
+          : (employee.trangthai === 'checked' ? 'checked' : 'checked') // Nếu chưa check, chọn nó
       }))
     );
   };
+  
 
   const items = [
     { label: 'Nghỉ có lương', value: 'Có lương' },
@@ -151,182 +240,193 @@ export default function ChamCongNV({navigation}) {
     value: pban.maPhongBan,
   }));
 
-  const handleSaveAttendance = async () => {
-    setLoading(true);  // Show loading modal
-    try {
-      const selectedEmployees = employees.filter(employee => employee.trangthai === 'checked');
-      if (selectedEmployees.length === 0) {
-        alert('Vui lòng chọn ít nhất một nhân viên để chấm công');
-        setLoading(false); // Hide loading modal
-        return;
-      }
-
-      const attendanceData = selectedEmployees.map(employee => ({
-        employeeId: employee.employeeId,
-        timeIn,
-        timeOut,
-        status: "di_lam",
-        month: selectedMonth,
-      }));
-
-      for (const data of attendanceData) {
-        await addChiTietChamCongToRealtime(data);
-      }
-      alert('Chấm công thành công!');
-    } catch (error) {
-      console.error("Error saving attendance:", error);
-      alert('Đã xảy ra lỗi khi chấm công.');
-    } finally {
-      setLoading(false); // Hide loading modal
-    }
-  };
   
+// Cập nhật trong component ChamCongNV
+const handleSaveAttendance = async () => {
+  setLoading(true);
+  try {
+    const selectedEmployees = employees.filter(employee => employee.trangthai === 'checked');
+    if (selectedEmployees.length === 0) {
+      alert('Vui lòng chọn ít nhất một nhân viên để chấm công');
+      setLoading(false);
+      return;
+    }
+
+    const errors = [];
+    for (const employee of selectedEmployees) {
+      try {
+        const attendanceData = {
+          employeeId: employee.employeeId,
+          status: "di_lam",
+          month: selectedMonth,
+          ...(attendanceType === 'timeIn' 
+            ? { timeIn } 
+            : { timeIn: null, timeOut }),
+        };
+        await addChiTietChamCongToRealtime(attendanceData);
+      } catch (error) {
+        errors.push(error.message);
+      }
+    }
+
+    if (errors.length > 0) {
+      alert(`Có lỗi xảy ra:\n${errors.join('\n')}`);
+    } else {
+      alert('Chấm công thành công!');
+    }
+  } catch (error) {
+    console.error("Error saving attendance:", error);
+    alert('Đã xảy ra lỗi khi chấm công.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
-    <BackNav navigation={navigation} name={"Chấm công"} btn={"Lưu"} onEditPress={handleSaveAttendance} />
+      <BackNav navigation={navigation} name={"Chấm công"} btn={"Lưu"} onEditPress={handleSaveAttendance} />
+      <SafeAreaView style={styles.container}>
+        {/* Time Section */}
+        <View style={styles.timeSection}>
+          <View style={styles.radioContainer}>
+            <TouchableOpacity 
+              style={styles.radioButton} 
+              onPress={() => setAttendanceType('timeIn')}
+            >
+              <View style={styles.radio}>
+                {attendanceType === 'timeIn' && <View style={styles.radioSelected} />}
+              </View>
+              <Text style={styles.radioText}>Vào</Text>
+            </TouchableOpacity>
 
-    <SafeAreaView style={styles.container}>
-      {/* Header Section */}
-
-      {/* Time Section */}
-      <View style={styles.timeSection}>
-        <View style={styles.timeInputs}>
-          <Text style={styles.timeLabel}>Thời gian</Text>
-          <TouchableOpacity style={styles.monthSelector} onPress={() => handleTimePickerVisibility('month')}>
-            <Text style={styles.monthText}>{selectedMonth.toLocaleDateString([], { day: '2-digit', month: 'long', year: 'numeric' })}</Text>
-            <Icon name="arrow-drop-down" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.timeInputs}>
-          <View style={styles.timeInputContainer}>
-            <Text style={styles.timeLabel}>Vào</Text>
-            <TouchableOpacity onPress={() => handleTimePickerVisibility('timeIn')}>
-              <Text style={styles.timeText}>{timeIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            <TouchableOpacity 
+              style={styles.radioButton} 
+              onPress={() => setAttendanceType('timeOut')}
+            >
+              <View style={styles.radio}>
+                {attendanceType === 'timeOut' && <View style={styles.radioSelected} />}
+              </View>
+              <Text style={styles.radioText}>Ra</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.timeInputContainer}>
-            <Text style={styles.timeLabel}>Ra</Text>
-            <TouchableOpacity onPress={() => handleTimePickerVisibility('timeOut')}>
-              <Text style={styles.timeText}>{timeOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+
+          <View style={styles.timeInputs}>
+            <Text style={styles.timeLabel}>Thời gian</Text>
+            <TouchableOpacity style={styles.monthSelector} onPress={() => handleTimePickerVisibility('month')}>
+              <Text style={styles.monthText}>
+                {selectedMonth.toLocaleDateString([], { day: '2-digit', month: 'long', year: 'numeric' })}
+              </Text>
+              <Icon name="arrow-drop-down" size={24} color="black" />
             </TouchableOpacity>
           </View>
+          <View style={styles.timeInputs}>
+            {attendanceType === 'timeIn' && (
+              <View style={styles.timeInputContainer}>
+                <Text style={styles.timeLabel}>Vào</Text>
+                <TouchableOpacity onPress={() => handleTimePickerVisibility('timeIn')}>
+                  <Text style={styles.timeText}>
+                    {timeIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {attendanceType === 'timeOut' && (
+              <View style={styles.timeInputContainer}>
+                <Text style={styles.timeLabel}>Ra</Text>
+                <TouchableOpacity onPress={() => handleTimePickerVisibility('timeOut')}>
+                  <Text style={styles.timeText}>
+                    {timeOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
-      <View style={styles.searchSection}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm kiếm theo tên hoặc mã nhân viên"
-            value={searchTerm}
-            onChangeText={setSearchTerm}
-          />
-          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-            <Text style={styles.buttonText}>Tìm kiếm</Text>
+
+        
+
+        <View style={styles.selectAllContainer}>
+          <Text style={styles.selectAllText}>Chọn tất cả</Text>
+          <TouchableOpacity onPress={toggleSelectAll}>
+            <Icon
+              name={selectAll ? "check-box" : "check-box-outline-blank"}
+              size={24}
+              color={selectAll ? 'green' : 'gray'}
+            />
           </TouchableOpacity>
         </View>
-      {/* Dropdowns Section */}
-      <View style={styles.dropdownContainer}>
-      <View style={styles.dropdownWrapper}>
-          <Text style={styles.label}>Trạng thái</Text>
-          <DropDownPicker
-            open={openStatus}
-            value={valueStatus}
-            items={items}
-            setOpen={setOpenStatus}
-            setValue={setValueStatus}
-            placeholder="Chọn trạng thái"
-            style={styles.dropdown} />
-        </View>
 
-        <View style={styles.dropdownWrapper}>
-          <Text style={styles.label}>Phòng ban</Text>
-          <DropDownPicker
-            open={openPhongBan}
-            value={valuePhongBan}
-            items={phongBanItems}
-            setOpen={setOpenPhongBan}
-            setValue={setValuePhongBan}
-            placeholder="Chọn phòng ban"
-            style={styles.dropdown} />
-        </View>
-      </View>
-
-      {/* Select All Checkbox */}
-      <View style={styles.selectAllContainer}>
-        <Text style={styles.selectAllText}>Chọn tất cả</Text>
-        <TouchableOpacity onPress={toggleSelectAll}>
-          <Icon
-            name={selectAll ? "check-box" : "check-box-outline-blank"}
-            size={24}
-            color={selectAll ? 'green' : 'gray'} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Employee List */}
-      <ScrollView style={styles.employeeList}>
-        {employees.map((employee, index) => (
-          <View key={index} style={[styles.employeeItem, index % 2 === 0 ? styles.evenItem : styles.oddItem]}>
-            <View>
-              <Text style={styles.employeeName}>{employee.employeeId} {employee.name}</Text>
-              <Text style={styles.employeeDepartment}>{employee.phongbanId}</Text>
+        <ScrollView style={styles.employeeList}>
+          {employees.map((employee, index) => (
+            <View key={index} style={[styles.employeeItem, index % 2 === 0 ? styles.evenItem : styles.oddItem]}>
+              <View>
+                <Text style={styles.employeeName}>{employee.employeeId} {employee.name}</Text>
+                <Text style={styles.employeeDepartment}>{employee.phongbanId}</Text>
+              </View>
+              <TouchableOpacity onPress={() => toggleCheckmark(employee.employeeId)}>
+                <Icon
+                  name={employee.trangthai === 'checked' ? "check-box" : "check-box-outline-blank"}
+                  size={24}
+                  color={employee.trangthai === 'checked' ? 'green' : 'gray'}
+                />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => toggleCheckmark(employee.employeeId)}>
-              <Icon
-                name={employee.trangthai === 'checked' ? "check-box" : "check-box-outline-blank"}
-                size={24}
-                color={employee.trangthai === 'checked' ? 'green' : 'gray'} />
-            </TouchableOpacity>
-          </View>
-        ))}
-      </ScrollView>
-      <Modal
-        transparent={true}
-        visible={loading}
-        animationType="fade"
-        onRequestClose={() => setLoading(false)}
-      >
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <ActivityIndicator size="large" color="#007BFF" />
-            <Text style={styles.loadingText}>Đang chấm công...</Text>
-          </View>
-        </View>
-      </Modal>
-      {/* Time Pickers */}
-      {showTimePicker.timeIn && (
-        <DateTimePicker
-          value={timeIn}
-          mode="time"
-          display="default"
-          onChange={(event, date) => handleTimeChange(event, date, 'timeIn')} />
-      )}
+          ))}
+        </ScrollView>
 
-      {showTimePicker.timeOut && (
-        <DateTimePicker
-          value={timeOut}
-          mode="time"
-          display="default"
-          onChange={(event, date) => handleTimeChange(event, date, 'timeOut')} />
-      )}
+        <Modal
+          transparent={true}
+          visible={loading}
+          animationType="fade"
+          onRequestClose={() => setLoading(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <ActivityIndicator size="large" color="#007BFF" />
+              <Text style={styles.loadingText}>Đang chấm công...</Text>
+            </View>
+          </View>
+        </Modal>
 
-      {showTimePicker.month && (
-        <DateTimePicker
-          value={selectedMonth}
-          mode="date"
-          display="default"
-          onChange={handleMonthChange} />
-      )}
-    </SafeAreaView></>
+        {showTimePicker.timeIn && (
+          <DateTimePicker
+            value={timeIn}
+            mode="time"
+            display="default"
+            onChange={(event, date) => handleTimeChange(event, date, 'timeIn')}
+          />
+        )}
+
+        {showTimePicker.timeOut && (
+          <DateTimePicker
+            value={timeOut}
+            mode="time"
+            display="default"
+            onChange={(event, date) => handleTimeChange(event, date, 'timeOut')}
+          />
+        )}
+
+        {showTimePicker.month && (
+          <DateTimePicker
+            value={selectedMonth}
+            mode="date"
+            display="default"
+            onChange={handleMonthChange}
+          />
+        )}
+      </SafeAreaView>
+    </>
   );
 }
 
-
 const styles = StyleSheet.create({
+  // Styles hiện có
   searchSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+    paddingHorizontal: 16,
   },
   searchInput: {
     flex: 1,
@@ -348,6 +448,40 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
+  // Thêm styles mới cho radio buttons
+  radioContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 15,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 8,
+  },
+  radioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radio: {
+    height: 24,
+    width: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#007AFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  radioSelected: {
+    height: 12,
+    width: 12,
+    borderRadius: 6,
+    backgroundColor: '#007AFF',
+  },
+  radioText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  // Styles hiện có tiếp theo
   filterWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -381,7 +515,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   container: {
-    flex: 9,
+    flex: 15,
     backgroundColor: '#f5f5f5',
   },
   header: {
@@ -437,26 +571,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
     color: '#333',
   },
-  searchSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: 16,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 8,
-    borderRadius: 4,
-  },
   dropdownContainer: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     marginTop: 20,
+    zIndex: 1000,
   },
   dropdownWrapper: {
     flex: 1,
@@ -498,6 +617,18 @@ const styles = StyleSheet.create({
   },
   employeeDepartment: {
     color: '#777',
-  },selectAllContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#e0e0e0' },
-  selectAllText: { fontSize: 16 },
+  },
+  selectAllContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    marginTop: 80,
+  },
+  selectAllText: {
+    fontSize: 16
+  },
 });
