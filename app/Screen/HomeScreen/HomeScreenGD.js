@@ -81,6 +81,15 @@ export default function HomeScreenGD({ navigation, route }) {
           <TouchableOpacity
             style={styles.statItem}
             onPress={() => {
+              navigation.navigate("TaskScreen", { employee });
+            }}
+          >
+            <Icon name="task" size={24} color="#4CAF50" />
+            <Text style={styles.statValue}>Nhiệm vụ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => {
               navigation.navigate("AddThongBao", { employee });
             }}
           >

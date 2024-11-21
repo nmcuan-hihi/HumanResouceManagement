@@ -108,6 +108,7 @@ export async function readEmployeesFireStore() {
     throw error;
   }
 }
+// hàm ;lấy nhân viên có chức vụ là trưởng phòng
 
 // Function to get an employee by ID from Realtime Database
 export async function getEmployeeById(employeeId) {

@@ -58,6 +58,10 @@ import ThongTinChamCong from './app/Screen/MarkAttendaceScreen/ThongTinChamCong'
 import AddThongBao from './app/Screen/NotificeScreen/AddThongBao';
 import ChiTietThongBao from './app/Screen/NotificeScreen/ChiTietThongBao';
 
+import TaskScreen from './app/Screen/TaskScreen/TaskScreen';
+import AddTask from './app/Screen/TaskScreen/AddTask';
+import TaskDetail from './app/Screen/TaskScreen/TaskDetail';
+
 import { Provider } from "react-redux";
 import { store } from "./app/redux/store";
 
@@ -100,7 +104,9 @@ export default function App() {
         <Stack.Screen name="AddThongBao" component={AddThongBao} options={{ headerShown: false }} />
         <Stack.Screen name="ChiTietThongBao" component={ChiTietThongBao} options={{ headerShown: false }} />
  
-
+        <Stack.Screen name="TaskScreen" component={TaskScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="AddTask" component={AddTask} options={{ headerShown: false }} />
+        <Stack.Screen name="TaskDetail" component={TaskDetail} options={{ headerShown: false }} />
 
         <Stack.Screen name="ChamCong" component={ChamCong} options={{ headerShown: false }} />
         <Stack.Screen name="ChamCongNV" component={ChamCongNV} options={{ headerShown: false }} />

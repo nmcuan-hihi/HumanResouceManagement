@@ -1,30 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-  Platform,
-  Image,
-  ScrollView,
+  View, Text, StyleSheet, SafeAreaView, 
+  TouchableOpacity, ActivityIndicator, 
+  Platform, Image, ScrollView
 } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import dayjs from 'dayjs';
-import { getEmployeeSalaryAndAttendance, getCongThucLuong } from '../../services/quanLyMucLuongFirebase';
+import utc from 'dayjs/plugin/utc';  // Import the UTC plugin
+
+dayjs.extend(utc);  // Apply the UTC plugin to dayjs
+
 import { getEmployeeById } from '../../services/EmployeeFireBase';
-import { getChamCongDetailsByMonth } from '../../services/quanLyMucLuongFirebase';
+import { layDanhSachBangLuongTheoThang, getChamCongByMonth1 } from '../../services/quanLyMucLuongFirebase';
 
 const SalaryDetailScreen = ({ navigation, route }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [employeeData, setEmployeeData] = useState(null);
-  const [salaryData, setSalaryData] = useState({});
+  const [salaryData, setSalaryData] = useState(null);
   const [attendanceData, setAttendanceData] = useState([]);
-  const employeeId = route.params?.employeeId || 'NV001';
+  const [noSalaryData, setNoSalaryData] = useState(false); // State to track if there's no salary data
+  const [noAttendanceData, setNoAttendanceData] = useState(false); // State to track if there's no attendance data
+  const employeeId = route.params?.employeeId;
 
+  // Month Year Picker Component
   const MonthYearPicker = ({ currentDate, onChangeMonth }) => {
     const handlePrevMonth = () => {
       const newDate = dayjs(currentDate).subtract(1, 'month');
@@ -58,25 +57,38 @@ const SalaryDetailScreen = ({ navigation, route }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      setNoSalaryData(false);
+      setNoAttendanceData(false);
+
+      // Fetch employee details
       const employee = await getEmployeeById(employeeId);
       setEmployeeData(employee);
-  
-      const { salary } = await getEmployeeSalaryAndAttendance(
-        employeeId,
-        dayjs(currentDate).format("M-YYYY")
-      );
-  
-      const salaryFormula = await getCongThucLuong();
-      if (salaryFormula) {
-        console.log("Fetched Salary Formula:", salaryFormula);
+
+      // Get salary data for the selected month and year
+      
+      const month = dayjs(currentDate).format("M");
+      const year = dayjs(currentDate).format("YYYY");
+
+      // Fetch salary data (assuming function already exists)
+      const salaryList = await layDanhSachBangLuongTheoThang(year, month);
+
+      // Find salary data for the specific employee
+      const employeeSalary = salaryList.find(salary => salary.employeeId === employeeId);
+      if (employeeSalary) {
+        setSalaryData(employeeSalary);
+      } else {
+setNoSalaryData(true); // No salary data found
       }
-  
-      const attendanceDetails = await getChamCongDetailsByMonth(
-        employeeId,
-        dayjs(currentDate).format("M-YYYY")
-      );
-      setAttendanceData(attendanceDetails);
-      setSalaryData(salary);
+
+      // Fetch attendance details using the new function
+      getChamCongByMonth1(year, month, employeeId, (attendanceDetails) => {
+        if (attendanceDetails && attendanceDetails.length > 0) {
+          setAttendanceData(attendanceDetails);
+        } else {
+          setNoAttendanceData(true); // No attendance data found
+        }
+      });
+
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -88,13 +100,19 @@ const SalaryDetailScreen = ({ navigation, route }) => {
     return amount?.toLocaleString('vi-VN') + ' đ' || '0 đ';
   };
 
-  const renderAttendanceItem = ({ item }) => (
-    <View style={styles.attendanceItem}>
-      <Text style={styles.attendanceDate}>{`${item.date}-${item.month}-${item.year}`}</Text>
-      <Text style={styles.attendanceTime}>{item.timeIn}</Text>
-      <Text style={styles.attendanceTime}>{item.timeOut}</Text>
-    </View>
-  );
+  const renderAttendanceItem = (item) => {
+    // Convert the date to DD/MM/YYYY format
+    const itemDate = new Date(item.date);
+    const formattedDate = `${itemDate.getDate().toString().padStart(2, '0')}/${(itemDate.getMonth() + 1).toString().padStart(2, '0')}/${itemDate.getFullYear()}`;
+    
+    return (
+      <View style={styles.attendanceItem} key={item.id}>
+        <Text style={styles.attendanceDate}>{formattedDate}</Text>
+        <Text style={styles.attendanceTime}>{item.timeIn}</Text>
+        <Text style={styles.attendanceTime}>{item.timeOut}</Text>
+      </View>
+    );
+  };
 
   if (loading) {
     return (
@@ -106,7 +124,6 @@ const SalaryDetailScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Fixed Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <ArrowLeft size={24} color="#1F2937" />
@@ -114,16 +131,13 @@ const SalaryDetailScreen = ({ navigation, route }) => {
         <Text style={styles.headerTitle}>Chi tiết lương & chấm công</Text>
       </View>
 
-      {/* Scrollable Content */}
       <ScrollView 
         style={styles.scrollContainer}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Month Picker */}
         <MonthYearPicker currentDate={currentDate} onChangeMonth={setCurrentDate} />
 
-        {/* Employee Info */}
         <View style={styles.employeeCard}>
           <Image
             source={{ uri: employeeData?.imageUrl }}
@@ -135,47 +149,52 @@ const SalaryDetailScreen = ({ navigation, route }) => {
           </View>
         </View>
 
-        {/* Salary Info */}
-        <View style={styles.salaryCard}>
-          <Text style={styles.cardTitle}>Thông tin lương</Text>
-          <View style={styles.salaryInfo}>
-            <View style={styles.salaryRow}>
-              <Text style={styles.salaryLabel}>Lương:</Text>
-              <Text style={styles.salaryValue}>{formatCurrency(salaryData?.luong)}</Text>
-            </View>
-            <View style={styles.salaryRow}>
-              <Text style={styles.salaryLabel}>Phụ cấp:</Text>
-              <Text style={styles.salaryValue}>{formatCurrency(salaryData?.phucap)}</Text>
-            </View>
-            <View style={styles.salaryRow}>
-              <Text style={styles.salaryLabel}>Ngày công:</Text>
-              <Text style={styles.salaryValue}>{salaryData?.ngaycong}</Text>
-            </View>
-            <View style={styles.salaryRow}>
-              <Text style={styles.salaryLabel}>Chuyên cần:</Text>
-              <Text style={styles.salaryValue}>{salaryData?.chuyencan}</Text>
-            </View>
-            <View style={styles.salaryRow}>
-              <Text style={styles.salaryLabel}>Tăng ca:</Text>
-              <Text style={styles.salaryValue}>{formatCurrency(salaryData?.tangca)}</Text>
-            </View>
-            <View style={styles.salaryRow}>
-              <Text style={styles.salaryLabel}>Thực nhận:</Text>
-              <Text style={[styles.salaryValue, styles.netValue]}>{formatCurrency(salaryData?.thucnhan)}</Text>
-            </View>
+        {noSalaryData && (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.noDataText}>Không có bảng lương cho tháng này</Text>
           </View>
-        </View>
+        )}
 
-        {/* Attendance Info */}
-        <View style={styles.attendanceCard}>
-          <Text style={styles.cardTitle}>Chi tiết chấm công</Text>
-          <View style={styles.attendanceHeader}>
-            <Text style={styles.headerCell}>Ngày công</Text>
-            <Text style={styles.headerCell}>Giờ Vào</Text>
-            <Text style={styles.headerCell}>Giờ Ra</Text>
+        {salaryData && !noSalaryData && (
+          <View style={styles.salaryCard}>
+            <Text style={styles.cardTitle}>Thông tin lương</Text>
+            <View style={styles.salaryInfo}>
+              {[ 
+                { label: 'Lương cơ bản:', value: salaryData?.luong },
+                { label: 'Phụ cấp:', value: salaryData?.phucap },
+{ label: 'Ngày công:', value: salaryData?.ngaycong || 0 },
+                { label: 'Chuyên cần:', value: salaryData?.chuyencan },
+                { label: 'Tăng ca:', value: salaryData?.tangca },
+                { label: 'Thực nhận:', value: salaryData?.thucnhan, highlight: true }
+              ].map((item, index) => (
+                <View key={index} style={styles.salaryRow}>
+                  <Text style={styles.salaryLabel}>{item.label}</Text>
+                  <Text style={[styles.salaryValue, item.highlight && styles.netValue]}>
+                    {item.label.includes('Ngày công') ? item.value : formatCurrency(item.value)}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
-          {attendanceData.map((item, index) => renderAttendanceItem({ item, index }))}
-        </View>
+        )}
+
+        {noAttendanceData && (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.noDataText}>Không có dữ liệu chấm công cho tháng này</Text>
+          </View>
+        )}
+
+        {attendanceData.length > 0 && !noAttendanceData && (
+          <View style={styles.attendanceCard}>
+            <Text style={styles.cardTitle}>Chi tiết chấm công</Text>
+            <View style={styles.attendanceHeader}>
+              <Text style={styles.headerCell}>Ngày công</Text>
+              <Text style={styles.headerCell}>Giờ Vào</Text>
+              <Text style={styles.headerCell}>Giờ Ra</Text>
+            </View>
+            {attendanceData.map(renderAttendanceItem)}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -259,7 +278,7 @@ const styles = StyleSheet.create({
   },
   employeeInfo: {
     flex: 1,
-  },
+},
   employeeName: {
     fontSize: 16,
     fontWeight: '600',

@@ -7,10 +7,11 @@ import {
   orderByChild,
   equalTo,
   push,
+  onValue 
 } from "firebase/database";
 import { app } from "../config/firebaseconfig"; // Đảm bảo bạn đã cấu hình đúng
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
-import { store } from "../redux/store"; // Import Redux store to access idCty
+import { store } from "../redux/store"; 
 const db = getDatabase(app);
 
 // Lấy công thức lương từ Realtime Database
@@ -220,35 +221,105 @@ export async function getBangLuong() {
   }
 }
 
-export async function getChamCongByMonth(thang) {
+// Retrieve attendance details for a specific month
+
+
+export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
   try {
-    const chamCongRef = ref(db, "chitietchamcong");
-    const snapshot = await get(chamCongRef);
+    const db = getDatabase();
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
 
-    const data = [];
-    snapshot.forEach((doc) => {
-      const key = doc.key;
-      const [employeeId, day, month, year] = key.split("-");
+    // Convert month number to "Tháng X" format
+    const monthString = `Tháng ${thang}`;
 
-      if (`${month}-${year}` === thang) {
-        data.push(doc.val());
+    // Construct the database reference path
+    const reference = ref(db, `${idCty}/chitietchamcong/${employeeId}/${nam}/${monthString}`);
+
+    // Attach a listener to fetch data
+    onValue(reference, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const today = new Date(); // Current date
+
+        // Process and filter attendance data
+        const attendanceDetails = Object.keys(data)
+          .map((key) => {
+            const day = key; // Day from the database
+            const fullDateString = `${nam}-${String(thang).padStart(2, "0")}-${day.padStart(2, "0")}`;
+            return {
+              ...data[key],
+              date: fullDateString, // Format as YYYY-MM-DD
+            };
+          })
+          .filter((item) => {
+            const itemDate = new Date(item.date);
+            return itemDate <= today; // Exclude future dates
+          });
+
+        console.log("Filtered attendance details: ", attendanceDetails);
+        callback(attendanceDetails);
+      } else {
+        console.warn("No data found for the specified month.");
+        callback([]); // Return an empty array if no data
       }
     });
-
-
-    return data;
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ Realtime Database:", error);
-    throw new Error("Không thể lấy dữ liệu chấm công.");
+    console.error("Error fetching attendance details: ", error);
+    callback([]); // Handle errors gracefully
   }
 }
 
+
+
+
+
+
+
+
+
+
+//-------------------------------------Các hàm trong danh sách lương - By Thu pro-----------------------
+
+// lấy danh sách bảng công của tất cả nhân viên trong 1 tháng
+
+
+export async function getChamCongByMonth(nam, thang, callback) {
+  const db = getDatabase();
+  const reference = ref(db, "chitietchamcong");
+  const unsubscribe = onValue(reference, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const results = [];
+
+      for (const employeeId in data) {
+        if (data[employeeId][nam] && data[employeeId][nam][thang]) {
+          const records = data[employeeId][nam][thang];
+          for (const day in records) {
+            results.push(records[day]);
+          }
+        }
+      }
+      callback(results);
+    } else {
+      console.log("Không tìm thấy dữ liệu chấm công");
+
+      callback([]);
+    }
+  });
+
+  return unsubscribe;
+}
+
 // Lưu danh sách lương vào Realtime Database
-export async function luuDanhSachLuongFirebase(salaryList) {
+export async function luuDanhSachLuongFirebase(salaryList, nam, thang) {
   try {
     for (const salaryEntry of salaryList) {
-      const documentKey = `${salaryEntry.employeeId}-${salaryEntry.thang}`;
-      const salaryRef = ref(db, `bangluongnhanvien/${documentKey}`);
+      const documentKey = `${salaryEntry.employeeId}`;
+      const salaryRef = ref(
+        db,
+        `bangluongnhanvien/${documentKey}/${nam}/${thang}`
+      );
 
       await update(salaryRef, salaryEntry);
       console.log("Document successfully written for key:", documentKey);
@@ -259,23 +330,22 @@ export async function luuDanhSachLuongFirebase(salaryList) {
 }
 
 // Lấy danh sách bảng lương theo tháng
-
-export async function layDanhSachBangLuongTheoThang(thang) {
+export async function layDanhSachBangLuongTheoThang(nam, thang) {
   try {
     const bangLuongRef = query(ref(db, "bangluongnhanvien"));
     const snapshot = await get(bangLuongRef);
+    const results = [];
 
-    const salaryList = [];
-    snapshot.forEach((doc) => {
-      const key = doc.key;
-      const [employeeId, month, year] = key.split("-");
+    if (snapshot.exists()) {
+      const data = snapshot.val();
 
-      if (`${month}-${year}` === thang) {
-        salaryList.push(doc.val());
+      for (const employeeId in data) {
+        if (data[employeeId][nam] && data[employeeId][nam][thang]) {
+          results.push(data[employeeId][nam][thang]);
+        }
       }
-    });
-
-    return salaryList;
+    }
+    return results;
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu từ collection:", error);
     throw error;
