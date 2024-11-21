@@ -155,12 +155,14 @@ export const readChucVu = async () => {
     const snapshot = await get(chucVuRef);
 
     if (snapshot.exists()) {
-      const chucVus = Object.keys(snapshot.val()).map((key) => ({
-        id: key,
-        ...snapshot.val()[key],
-      }));
+      const chucVus = Object.keys(snapshot.val())
+        .map((key) => ({
+          id: key,
+          ...snapshot.val()[key],
+        }))
+        .filter((item) => item.chucvu_id !== "GD"); // Loại bỏ chucvu_id = GD
 
-      return chucVus; // Return list of chucVu
+      return chucVus; // Return filtered list of chucVu
     } else {
       console.log("No data available");
       return null; // No data found
@@ -170,6 +172,7 @@ export const readChucVu = async () => {
     return null; // Handle error
   }
 };
+
 
 // Update ChucVu
 export const updateChucVu = async (maChucVu, updatedData) => {
