@@ -251,7 +251,7 @@ export default function EditMember({ route, navigation }) {
 
     const fetchChucVu = async () => {
       try {
-        const data = await readChucVu();
+        const data = await readChucVu(1);
         if (data) {
           const chucVuArr = Object.values(data).map((p) => ({
             label: p.loaichucvu,

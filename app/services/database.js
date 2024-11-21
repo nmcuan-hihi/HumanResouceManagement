@@ -146,8 +146,8 @@ export const createChucVu = async (chucvu_id, chucVu) => {
   }
 };
 
-// Read ChucVu
-export const readChucVu = async () => {
+// Read ChucVu with option to filter
+export const readChucVu = async (filter = 0) => {
   try {
     const state = store.getState();
     const idCty = state.congTy.idCty;
@@ -155,38 +155,17 @@ export const readChucVu = async () => {
     const snapshot = await get(chucVuRef);
 
     if (snapshot.exists()) {
-      const chucVus = Object.keys(snapshot.val())
-        .map((key) => ({
-          id: key,
-          ...snapshot.val()[key],
-        }))
-        .filter((item) => item.chucvu_id !== "GD"); // Loại bỏ chucvu_id = GD
-
-      return chucVus; // Return filtered list of chucVu
-    } else {
-      console.log("No data available");
-      return null; // No data found
-    }
-  } catch (error) {
-    console.error("Error reading chuc vu data:", error);
-    return null; // Handle error
-  }
-};
-
-export const readChucVu1 = async () => {
-  try {
-    const state = store.getState();
-    const idCty = state.congTy.idCty;
-    const chucVuRef = ref(database, `${idCty}/chucvu`);
-    const snapshot = await get(chucVuRef);
-
-    if (snapshot.exists()) {
-      const chucVus = Object.keys(snapshot.val()).map((key) => ({
+      let chucVus = Object.keys(snapshot.val()).map((key) => ({
         id: key,
         ...snapshot.val()[key],
       }));
 
-      return chucVus; // Return list of chucVu
+      // Nếu filter = 1, loại bỏ chucvu_id = "GD"
+      if (filter === 1) {
+        chucVus = chucVus.filter((item) => item.chucvu_id !== "GD");
+      }
+
+      return chucVus; // Return filtered or full list of chucVu
     } else {
       console.log("No data available");
       return null; // No data found
@@ -196,6 +175,7 @@ export const readChucVu1 = async () => {
     return null; // Handle error
   }
 };
+
 // Update ChucVu
 export const updateChucVu = async (maChucVu, updatedData) => {
   try {
