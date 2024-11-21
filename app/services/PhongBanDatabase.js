@@ -14,7 +14,7 @@ const getIdCty = () => {
 export async function filterEmployeesByPhongBan(phongbanId) {
   try {
     const idCty = getIdCty(); // Lấy idCty từ Redux
-    const employeesRef = ref(database, `companies/${idCty}/employees`);
+    const employeesRef = ref(database, `${idCty}/employees`);
     const q = query(employeesRef, orderByChild("phongbanId"), equalTo(phongbanId));
     const snapshot = await get(q);
 
@@ -38,7 +38,7 @@ export async function filterEmployeesByPhongBan(phongbanId) {
 export async function filterEmployeesByGender(gender) {
   try {
     const idCty = getIdCty(); // Lấy idCty từ Redux
-    const employeesRef = ref(database, `companies/${idCty}/employees`);
+    const employeesRef = ref(database, `${idCty}/employees`);
     const q = query(employeesRef, orderByChild("gioitinh"), equalTo(gender));
     const snapshot = await get(q);
 
@@ -58,7 +58,7 @@ export async function filterEmployeesByGender(gender) {
 export async function filterEmployeesByStatus(status) {
   try {
     const idCty = getIdCty(); // Lấy idCty từ Redux
-    const employeesRef = ref(database, `companies/${idCty}/employees`);
+    const employeesRef = ref(database, `${idCty}/employees`);
     const q = query(employeesRef, orderByChild("trangthai"), equalTo(status));
     const snapshot = await get(q);
 
@@ -78,7 +78,7 @@ export async function filterEmployeesByStatus(status) {
 export async function searchEmployeesByNameOrId(searchTerm) {
   try {
     const idCty = getIdCty(); // Lấy idCty từ Redux
-    const employeesRef = ref(database, `companies/${idCty}/employees`);
+    const employeesRef = ref(database, `${idCty}/employees`);
     const snapshot = await get(employeesRef);
 
     const searchResults = {};
@@ -106,7 +106,7 @@ export async function searchEmployeesByNameOrId(searchTerm) {
 export async function readPhongBanFromRealtime() {
   try {
     const idCty = getIdCty(); // Lấy idCty từ Redux
-    const phongBanRef = ref(database, `companies/${idCty}/phongban`);
+    const phongBanRef = ref(database, `${idCty}/phongban`);
     const snapshot = await get(phongBanRef);
 
     const phongBanData = [];
@@ -129,7 +129,7 @@ export async function readPhongBanFromRealtime() {
 export async function searchEmployeesById(employeeId) {
   try {
     const idCty = getIdCty(); // Lấy idCty từ Redux
-    const employeesRef = ref(database, `companies/${idCty}/employees`);
+    const employeesRef = ref(database, `${idCty}/employees`);
     const q = query(employeesRef, orderByChild("employeeId"), equalTo(employeeId));
     const snapshot = await get(q);
 
@@ -149,7 +149,7 @@ export async function searchEmployeesById(employeeId) {
 export async function filterEmployees({ phongbanId, gender, status }) {
   try {
     const idCty = getIdCty(); // Lấy idCty từ Redux
-    const employeesRef = ref(database, `companies/${idCty}/employees`);
+    const employeesRef = ref(database, `${idCty}/employees`);
     let q = employeesRef;
 
     if (phongbanId) {
