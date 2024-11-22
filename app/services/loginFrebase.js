@@ -82,8 +82,39 @@ export const addCompany = async (idCongTy, tenCongTy, tenGiamDoc, sdt) => {
     trangthai: "true",
     }
     await addEmployeeFireStore(emp)
-    console.log("Thêm công ty thành công!");
-    return true; // Thêm thành công
+
+    // tạo fgroupchat cho cyty
+
+    const chatID = "GROUP_CHAT_"+idCongTy;
+    const chatRef = ref(database, `${idCongTy}/chats/${chatID}`);
+    const messagesRef = ref(database, `${idCongTy}/messages/${chatID}`);
+
+    try {
+      const chatSnapshot = await get(chatRef);
+      if (chatSnapshot.exists()) {
+        const messagesSnapshot = await get(messagesRef);
+        const messages = [];
+        messagesSnapshot.forEach(childSnapshot => {
+          messages.push({ id: childSnapshot.key, ...childSnapshot.val() });
+        });
+        return { chatID, messages };
+      } else {
+        await set(chatRef, {
+          participants: "ALL",
+          lastMessage: 'Wellcome To '+idCongTy,
+          timestamp: Date.now(),
+          status: false,
+          lastSend: "NV000",
+        });
+        return true; // Thêm thành công
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy hoặc tạo cuộc trò chuyện:', error);
+      throw error;
+    }
+
+    // console.log("Thêm công ty thành công!");
+    // return true; // Thêm thành công
   } catch (error) {
     console.error("Lỗi khi thêm công ty:", error);
     return false; // Thêm thất bại

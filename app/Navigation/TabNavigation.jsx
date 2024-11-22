@@ -16,6 +16,7 @@ import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
 import HomeMessenger from "../Screen/MessengerScreen/HomeMessenger";
 import { listenForNotifications } from "../services/thongBaoFirebase";
 import { database } from "../config/firebaseconfig";
+import { store } from "../redux/store";
 
 const Tab = createBottomTabNavigator();
 
@@ -24,7 +25,9 @@ export default function TabNavigation({ route }) {
   const role = employee?.chucvuId; // Kiểm tra role từ params
   const userID = employee.employeeId;
   const [unreadCount, setUnreadCount] = useState(0);
-
+  // Lấy idCty từ store
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
@@ -38,12 +41,12 @@ export default function TabNavigation({ route }) {
 
     listenForNotifications(employee.employeeId, callback);
 
-    return () => {};
+    return () => { };
   }, [employee.employeeId]);
 
   useEffect(() => {
     // Set up a listener for changes in the "chats" node
-    const chatsRef = ref(database, "chats");
+    const chatsRef = ref(database, `${idCty}/chats`);
     const unsubscribe = onValue(chatsRef, (snapshot) => {
       if (snapshot.exists()) {
         let count = 0;
@@ -65,8 +68,7 @@ export default function TabNavigation({ route }) {
     return () => unsubscribe();
   }, [userID]);
 
-  // Example unread counts
-  const unreadMessages = 3;
+
 
   const IconWithBadge = ({ name, badgeCount, color, size, iconType }) => {
     const IconComponent =
@@ -176,7 +178,7 @@ export default function TabNavigation({ route }) {
           }}
         />
       );
-    } else if (role === "TP" ) {
+    } else if (role === "TP") {
       return (
         <Tab.Screen
           name="SalaryManagement"

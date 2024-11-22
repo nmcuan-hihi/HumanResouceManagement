@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { sendMessage, generateChatID } from '../../services/MessengerDB';
+import { sendMessage } from '../../services/MessengerDB';
 import BackNav from '../../Compoment/BackNav';
 import { database } from '../../config/firebaseconfig';
 import { ref, get, set, onValue } from 'firebase/database';
@@ -8,20 +8,18 @@ import moment from 'moment';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { store } from '../../redux/store';
 
-
-
-export default function MesengerDetails({ navigation, route }) {
-  const { empFrom, empTo } = route.params;
+export default function MessengerGroupDetails({ navigation, route }) {
+  const { empFrom, chatID } = route.params;
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const flatListRef = useRef(null);
-  const chatID = generateChatID(empFrom.employeeId, empTo.employeeId);
- // Lấy idCty từ store
- const state = store.getState();
- const idCty = state.congTy.idCty;
-  const getMessenger = async (id1, id2) => {
 
-    const chatID = generateChatID(id1, id2);
+  // Lấy idCty từ store
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+
+  // Hàm lấy tin nhắn hoặc tạo cuộc trò chuyện mới
+  const getMessenger = async () => {
     const chatRef = ref(database, `${idCty}/chats/${chatID}`);
     const messagesRef = ref(database, `${idCty}/messages/${chatID}`);
 
@@ -33,16 +31,17 @@ export default function MesengerDetails({ navigation, route }) {
         messagesSnapshot.forEach(childSnapshot => {
           messages.push({ id: childSnapshot.key, ...childSnapshot.val() });
         });
-        return { chatID, messages };
+        return messages;
       } else {
+        // Tạo mới cuộc trò chuyện
         await set(chatRef, {
-          participants: [id1, id2],
-          lastMessage: 'Start Chat !!!!!!!!!',
+          participants: "ALL",
+          lastMessage: 'Start Chat!',
           timestamp: Date.now(),
           status: false,
-          lastSend: id1,
+          lastSend: empFrom.employeeId,
         });
-        return { chatID, messages: [] };
+        return [];
       }
     } catch (error) {
       console.error('Lỗi khi lấy hoặc tạo cuộc trò chuyện:', error);
@@ -53,21 +52,20 @@ export default function MesengerDetails({ navigation, route }) {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-       
-        const { messages } = await getMessenger(empFrom.employeeId, empTo.employeeId);
-        setMessages(messages);
+        const initialMessages = await getMessenger();
+        setMessages(initialMessages);
 
-        const messagesRef = ref(database, `${idCty}/messages/` + chatID);
+        // Lắng nghe dữ liệu theo thời gian thực
+        const messagesRef = ref(database, `${idCty}/messages/${chatID}`);
         const unsubscribe = onValue(messagesRef, (snapshot) => {
           const data = snapshot.val();
           if (data) {
             const messageList = Object.keys(data).map((key) => ({
               id: key,
-              sender: data[key].sender,
-              text: data[key].text,
-              timestamp: data[key].timestamp,
+              ...data[key],
             }));
             setMessages(messageList);
+            console.log(messageList)
           } else {
             setMessages([]);
           }
@@ -82,6 +80,7 @@ export default function MesengerDetails({ navigation, route }) {
     fetchMessages();
   }, []);
 
+  // Gửi tin nhắn
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       try {
@@ -93,8 +92,9 @@ export default function MesengerDetails({ navigation, route }) {
     }
   };
 
+  // Cuộn xuống cuối khi có tin nhắn mới
   useEffect(() => {
-    if (flatListRef.current) {
+    if (flatListRef.current && messages.length > 0) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
@@ -105,12 +105,12 @@ export default function MesengerDetails({ navigation, route }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
-      <BackNav name={empTo.name} />
-      <View style={{ flex: 14 }}>
+      <BackNav name="Công Ty Chat" />
+      <View style={{ flex: 1 }}>
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={(item) => item.timestamp}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View
               style={[
@@ -133,7 +133,7 @@ export default function MesengerDetails({ navigation, route }) {
           onChangeText={setNewMessage}
         />
         <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-        <FontAwesome name="send-o" size={20} color="white" />
+          <FontAwesome name="send-o" size={20} color="white" />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -142,7 +142,7 @@ export default function MesengerDetails({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 15,
+    flex: 1,
     padding: 10,
     backgroundColor: '#fff',
   },
@@ -164,9 +164,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   timestamp: {
-    fontSize: 8,
+    fontSize: 10,
     color: '#888',
     alignSelf: 'flex-end',
+    marginTop: 5,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -174,7 +175,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
-  
   },
   input: {
     flex: 1,
@@ -185,16 +185,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   sendButton: {
-
     alignItems: "center",
     width: "17%",
     marginLeft: 10,
     backgroundColor: '#1E88E5',
     borderRadius: 5,
     padding: 10,
-  },
-  sendButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });

@@ -37,6 +37,7 @@ export default function AddCongTy({ navigation }) {
         dispatch(saveIdCty(idCongTy));
       // Thêm công ty vào Firebase
       const success = await addCompany(idCongTy, companyName, directorName, phoneNumber);
+
       if (success) {
         Alert.alert("Thành công", "Công ty đã được tạo thành công! ");
         navigation.goBack(); // Quay về màn hình trước đó

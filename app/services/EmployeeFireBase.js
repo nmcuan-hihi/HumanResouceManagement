@@ -114,15 +114,14 @@ export async function getEmployeeById(employeeId) {
   try {
     const state = store.getState();
     const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
-    console.log("ID Công ty:", idCty);
+ 
 
-    console.log("Fetching employee with ID:", employeeId); // Debug log
     const employeeRef = ref(database, `${idCty}/employees/${employeeId}`);
  
     const snapshot = await get(employeeRef);
 
     if (snapshot.exists()) {
-      console.log("Employee data found:", snapshot.val()); // Debug log
+     
       return { id: employeeId, ...snapshot.val() };
     } else {
       console.log("No such employee!");
