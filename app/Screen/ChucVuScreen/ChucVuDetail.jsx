@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,18 +9,22 @@ import {
   TextInput,
   Modal,
   Alert,
-} from 'react-native';
-import BackNav from '../../Compoment/BackNav';
-import Feather from 'react-native-vector-icons/Feather';
-import { readChucVu, updateChucVu, deleteChucVu } from '../../services/database';
+} from "react-native";
+import BackNav from "../../Compoment/BackNav";
+import Feather from "react-native-vector-icons/Feather";
+import {
+  readChucVu,
+  updateChucVu,
+  deleteChucVu,
+} from "../../services/database";
 
 export default function ChucVuDetail({ route, navigation }) {
   const { chucVuId, chucvu_id } = route.params;
   const [isEditing, setIsEditing] = useState(false);
-  const [currentChucVu, setCurrentChucVu] = useState('');
-  const [editedChucVu, setEditedChucVu] = useState('');
-  const [currentHeSo, setCurrentHeSo] = useState('');
-  const [editedHeSo, setEditedHeSo] = useState('');
+  const [currentChucVu, setCurrentChucVu] = useState("");
+  const [editedChucVu, setEditedChucVu] = useState("");
+  const [currentHeSo, setCurrentHeSo] = useState("");
+  const [editedHeSo, setEditedHeSo] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -37,8 +41,8 @@ export default function ChucVuDetail({ route, navigation }) {
           setEditedHeSo(chucVu.hschucvu);
         }
       } catch (error) {
-        Alert.alert('Lỗi', 'Không thể tải dữ liệu chức vụ.');
-        console.error('Lỗi khi lấy dữ liệu chức vụ:', error);
+        Alert.alert("Lỗi", "Không thể tải dữ liệu chức vụ.");
+        console.error("Lỗi khi lấy dữ liệu chức vụ:", error);
       } finally {
         setLoading(false);
       }
@@ -67,7 +71,7 @@ export default function ChucVuDetail({ route, navigation }) {
       setIsEditing(false);
     } catch (error) {
       Alert.alert("Lỗi", "Không thể lưu thông tin chức vụ.");
-      console.error('Lỗi khi lưu thông tin chức vụ:', error);
+      console.error("Lỗi khi lưu thông tin chức vụ:", error);
     }
   };
 
@@ -82,7 +86,7 @@ export default function ChucVuDetail({ route, navigation }) {
       navigation.goBack();
     } catch (error) {
       Alert.alert("Lỗi", "Không thể xóa chức vụ.");
-      console.error('Lỗi khi xóa chức vụ:', error);
+      console.error("Lỗi khi xóa chức vụ:", error);
       setConfirmDelete(false);
     }
   };
@@ -141,9 +145,15 @@ export default function ChucVuDetail({ route, navigation }) {
                   <Text style={styles.nameBtn}>Lưu</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
-                  <Text style={styles.nameBtn}>Xóa</Text>
-                </TouchableOpacity>
+                chucVuId !== "TP" &&
+                chucVuId !== "NV" && (
+                  <TouchableOpacity
+                    style={styles.btnXoa}
+                    onPress={handleDelete}
+                  >
+                    <Text style={styles.nameBtn}>Xóa</Text>
+                  </TouchableOpacity>
+                )
               )}
             </View>
           </ScrollView>
@@ -156,10 +166,16 @@ export default function ChucVuDetail({ route, navigation }) {
                 Bạn có chắc chắn muốn xóa chức vụ này không?
               </Text>
               <View style={styles.modalBtnContainer}>
-                <TouchableOpacity style={styles.modalBtn} onPress={confirmDeleteYes}>
+                <TouchableOpacity
+                  style={styles.modalBtn}
+                  onPress={confirmDeleteYes}
+                >
                   <Text style={styles.modalBtnText}>Có</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.modalBtn} onPress={confirmDeleteNo}>
+                <TouchableOpacity
+                  style={styles.modalBtn}
+                  onPress={confirmDeleteNo}
+                >
                   <Text style={styles.modalBtnText}>Không</Text>
                 </TouchableOpacity>
               </View>
@@ -174,17 +190,17 @@ export default function ChucVuDetail({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: "#F2F2F7",
     margin: 10,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
   },
   infoSection: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
     marginHorizontal: 16,
@@ -192,7 +208,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 12,
   },
   sectionTitle1: {
@@ -200,81 +216,80 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   inlineEditContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   editBtn: {
     padding: 8,
-    backgroundColor: '#FFA500',
+    backgroundColor: "#FFA500",
     borderRadius: 5,
   },
   textInput: {
     fontSize: 18,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
   },
   buttonSection: {
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   btnSave: {
-    width: '90%',
+    width: "90%",
     height: 50,
     borderRadius: 10,
-    backgroundColor: '#4CAF50',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#4CAF50",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
   },
   btnXoa: {
-    width: '90%',
+    width: "90%",
     height: 50,
     borderRadius: 10,
-    backgroundColor: '#FF6347',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FF6347",
+    alignItems: "center",
+    justifyContent: "center",
   },
   nameBtn: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   modalCtn: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   bodyModal: {
-    width: '80%',
+    width: "80%",
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   confirmText: {
     fontSize: 18,
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalBtnContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
   modalBtn: {
     padding: 10,
-    backgroundColor: '#007BFF',
+    backgroundColor: "#007BFF",
     borderRadius: 5,
-    width: '45%',
-    alignItems: 'center',
+    width: "45%",
+    alignItems: "center",
   },
   modalBtnText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
 });
-
