@@ -7,6 +7,7 @@ import {
   orderByChild,
   equalTo,
   push,
+  onValue,
 } from "firebase/database";
 import { app } from "../config/firebaseconfig"; // Đảm bảo bạn đã cấu hình đúng
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
@@ -37,13 +38,15 @@ export async function getEmployeeSalaryAndAttendance(employeeId, month) {
     // Parse month string to Date object
     const targetMonth = dayjs(month, "M-YYYY");
     if (!targetMonth.isValid()) {
-      throw new Error("Định dạng tháng không hợp lệ. Sử dụng định dạng MM-YYYY");
+      throw new Error(
+        "Định dạng tháng không hợp lệ. Sử dụng định dạng MM-YYYY"
+      );
     }
 
     // 1. Lấy bảng lương
     const bangLuongRef = query(ref(db, "bangluongnhanvien"));
     const bangLuongSnapshot = await get(bangLuongRef);
-    
+
     let salaryData = null;
     bangLuongSnapshot.forEach((doc) => {
       const data = doc.val();
@@ -59,59 +62,67 @@ export async function getEmployeeSalaryAndAttendance(employeeId, month) {
       }
     });
 
-   // 2. Lấy chi tiết chấm công
-const chamCongRef = query(ref(db, "chitietchamcong"));
-const chamCongSnapshot = await get(chamCongRef);
+    // 2. Lấy chi tiết chấm công
+    const chamCongRef = query(ref(db, "chitietchamcong"));
+    const chamCongSnapshot = await get(chamCongRef);
 
-const attendanceData = [];
-chamCongSnapshot.forEach((doc) => {
-  const docData = doc.val();
-  const docMonth = dayjs(docData.month);
+    const attendanceData = [];
+    chamCongSnapshot.forEach((doc) => {
+      const docData = doc.val();
+      const docMonth = dayjs(docData.month);
 
-  if (
-    docData.employeeId === employeeId &&
-    docMonth.format("YYYY-M-D") === targetMonth.format("YYYY-M-D")
-  ) {
-    // Lấy thời gian vào và ra, giữ dưới dạng chuỗi mà không định dạng
-    const checkIn = docData.timeIn ? String(docData.timeIn) : "";
-    const checkOut = docData.timeOut ? String(docData.timeOut) : "";
+      if (
+        docData.employeeId === employeeId &&
+        docMonth.format("YYYY-M-D") === targetMonth.format("YYYY-M-D")
+      ) {
+        // Lấy thời gian vào và ra, giữ dưới dạng chuỗi mà không định dạng
+        const checkIn = docData.timeIn ? String(docData.timeIn) : "";
+        const checkOut = docData.timeOut ? String(docData.timeOut) : "";
 
-    // Tính số giờ làm việc
-    let hoursWorked = 0;
-    if (checkIn && checkOut) {
-      const checkInDate = dayjs(checkIn * 1000);
-      const checkOutDate = dayjs(checkOut * 1000);
-      hoursWorked = checkOutDate.diff(checkInDate, 'hour', true);
-    }
-console.log(`Checking attendance for employee: ${docData.employeeId}, month: ${docMonth.format("YYYY-M-D")}`);
-    attendanceData.push({
-      id: doc.key,
-      date: docMonth.format("YYYY-M-D"),
-      timeIn: checkIn,  // Giữ dưới dạng chuỗi
-      timeOut: checkOut,  // Giữ dưới dạng chuỗi
-      hoursWorked: hoursWorked.toFixed(2),
-      status: docData.status || "unknown",
-      maChamCong: docData.maChamCong
+        // Tính số giờ làm việc
+        let hoursWorked = 0;
+        if (checkIn && checkOut) {
+          const checkInDate = dayjs(checkIn * 1000);
+          const checkOutDate = dayjs(checkOut * 1000);
+          hoursWorked = checkOutDate.diff(checkInDate, "hour", true);
+        }
+        console.log(
+          `Checking attendance for employee: ${
+            docData.employeeId
+          }, month: ${docMonth.format("YYYY-M-D")}`
+        );
+        attendanceData.push({
+          id: doc.key,
+          date: docMonth.format("YYYY-M-D"),
+          timeIn: checkIn, // Giữ dưới dạng chuỗi
+          timeOut: checkOut, // Giữ dưới dạng chuỗi
+          hoursWorked: hoursWorked.toFixed(2),
+          status: docData.status || "unknown",
+          maChamCong: docData.maChamCong,
+        });
+      }
     });
-  }
-});
 
-// 3. Tổng hợp thông tin
-const summary = {
-  totalDays: attendanceData.length,
-  workingDays: attendanceData.filter(d => d.status === "di_lam").length,
-  totalHours: attendanceData.reduce((sum, curr) => sum + parseFloat(curr.hoursWorked), 0),
-  month: month,
-  employeeId: employeeId
-};
+    // 3. Tổng hợp thông tin
+    const summary = {
+      totalDays: attendanceData.length,
+      workingDays: attendanceData.filter((d) => d.status === "di_lam").length,
+      totalHours: attendanceData.reduce(
+        (sum, curr) => sum + parseFloat(curr.hoursWorked),
+        0
+      ),
+      month: month,
+      employeeId: employeeId,
+    };
 
-// 4. Trả về kết quả tổng hợp
-return {
-  salary: salaryData,
-  attendance: attendanceData.sort((a, b) => new Date(a.date) - new Date(b.date)),
-  summary: summary
-};
-
+    // 4. Trả về kết quả tổng hợp
+    return {
+      salary: salaryData,
+      attendance: attendanceData.sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      ),
+      summary: summary,
+    };
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error);
     throw error;
@@ -143,17 +154,16 @@ export async function getChamCongDetailsByEmployeeId(employeeId) {
     snapshot.forEach((doc) => {
       const docData = doc.val();
 
-        const checkIn = new Date(docData.timeIn);
-        const checkOut = new Date(docData.timeOut);
-        const hoursWorked = (checkOut - checkIn) / (1000 * 60 * 60);
-        data.push({
-          id: doc.key,
-          month: dayjs().format("YYYY-M-D"),
-          checkIn: dayjs().format("HH:mm"),
-          checkOut: dayjs().format("HH:mm"),
-          hoursWorked: hoursWorked.toFixed(2),
-        });
-      
+      const checkIn = new Date(docData.timeIn);
+      const checkOut = new Date(docData.timeOut);
+      const hoursWorked = (checkOut - checkIn) / (1000 * 60 * 60);
+      data.push({
+        id: doc.key,
+        month: dayjs().format("YYYY-M-D"),
+        checkIn: dayjs().format("HH:mm"),
+        checkOut: dayjs().format("HH:mm"),
+        hoursWorked: hoursWorked.toFixed(2),
+      });
     });
 
     return data;
@@ -176,7 +186,7 @@ export async function getChamCongDetailsByMonth(employeeId, thang) {
       // Filter by employeeId and month-year
       if (employeeIdFromDB === employeeId && `${month}-${year}` === thang) {
         const record = doc.val();
-        
+
         // Add other fields like status, diMuon, etc., if needed
         data.push({
           ...record,
@@ -194,9 +204,6 @@ export async function getChamCongDetailsByMonth(employeeId, thang) {
     throw new Error("Không thể lấy dữ liệu chấm công.");
   }
 }
-
-
-
 
 // Lấy bảng lương
 export async function getBangLuong() {
@@ -220,35 +227,49 @@ export async function getBangLuong() {
   }
 }
 
-export async function getChamCongByMonth(thang) {
-  try {
-    const chamCongRef = ref(db, "chitietchamcong");
-    const snapshot = await get(chamCongRef);
 
-    const data = [];
-    snapshot.forEach((doc) => {
-      const key = doc.key;
-      const [employeeId, day, month, year] = key.split("-");
 
-      if (`${month}-${year}` === thang) {
-        data.push(doc.val());
+//-------------------------------------Các hàm trong danh sách lương - By Thu pro-----------------------
+
+// lấy danh sách bảng công của tất cả nhân viên trong 1 tháng
+
+
+export async function getChamCongByMonth(nam, thang, callback) {
+  const db = getDatabase();
+  const reference = ref(db, "chitietchamcong");
+  const unsubscribe = onValue(reference, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const results = [];
+
+      for (const employeeId in data) {
+        if (data[employeeId][nam] && data[employeeId][nam][thang]) {
+          const records = data[employeeId][nam][thang];
+          for (const day in records) {
+            results.push(records[day]);
+          }
+        }
       }
-    });
+      callback(results);
+    } else {
+      console.log("Không tìm thấy dữ liệu chấm công");
 
+      callback([]);
+    }
+  });
 
-    return data;
-  } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ Realtime Database:", error);
-    throw new Error("Không thể lấy dữ liệu chấm công.");
-  }
+  return unsubscribe;
 }
 
 // Lưu danh sách lương vào Realtime Database
-export async function luuDanhSachLuongFirebase(salaryList) {
+export async function luuDanhSachLuongFirebase(salaryList, nam, thang) {
   try {
     for (const salaryEntry of salaryList) {
-      const documentKey = `${salaryEntry.employeeId}-${salaryEntry.thang}`;
-      const salaryRef = ref(db, `bangluongnhanvien/${documentKey}`);
+      const documentKey = `${salaryEntry.employeeId}`;
+      const salaryRef = ref(
+        db,
+        `bangluongnhanvien/${documentKey}/${nam}/${thang}`
+      );
 
       await update(salaryRef, salaryEntry);
       console.log("Document successfully written for key:", documentKey);
@@ -260,22 +281,22 @@ export async function luuDanhSachLuongFirebase(salaryList) {
 
 // Lấy danh sách bảng lương theo tháng
 
-export async function layDanhSachBangLuongTheoThang(thang) {
+export async function layDanhSachBangLuongTheoThang(nam, thang) {
   try {
     const bangLuongRef = query(ref(db, "bangluongnhanvien"));
     const snapshot = await get(bangLuongRef);
+    const results = [];
 
-    const salaryList = [];
-    snapshot.forEach((doc) => {
-      const key = doc.key;
-      const [employeeId, month, year] = key.split("-");
+    if (snapshot.exists()) {
+      const data = snapshot.val();
 
-      if (`${month}-${year}` === thang) {
-        salaryList.push(doc.val());
+      for (const employeeId in data) {
+        if (data[employeeId][nam] && data[employeeId][nam][thang]) {
+          results.push(data[employeeId][nam][thang]);
+        }
       }
-    });
-
-    return salaryList;
+    }
+    return results;
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu từ collection:", error);
     throw error;
