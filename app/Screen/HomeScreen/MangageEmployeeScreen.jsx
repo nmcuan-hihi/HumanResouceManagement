@@ -135,7 +135,7 @@ const EmployeeScreen = ({ navigation, route }) => {
               label="Thông tin chấm công"
               onPress={() => navigateTo("ThongTinChamCong")}
             />
-            <StatItem icon="tasks" color="#FF9800" value="0" label="Nhiệm Vụ" />
+            <StatItem icon="tasks" color="#FF9800" value="0" label="Nhiệm Vụ" onPress={() => navigateTo("TaskScreen")} />
           </View>
         </View>
       </ScrollView>

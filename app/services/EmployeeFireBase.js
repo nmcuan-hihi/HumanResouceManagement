@@ -109,6 +109,52 @@ export async function readEmployeesFireStore() {
   }
 }
 // hàm ;lấy nhân viên có chức vụ là trưởng phòng
+export async function getEmployeesInSameDepartmentForHead(employeeId) {
+  try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy ID công ty từ Redux store
+    const currentUser = state.congTy.employees[employeeId]; // Lấy thông tin người dùng hiện tại từ Redux store
+
+    // Kiểm tra xem người dùng có tồn tại không
+    if (!currentUser) {
+      console.error("No current user found in the Redux store.");
+      return null; // Hoặc xử lý lỗi này như mong muốn
+    }
+
+    // Tham chiếu đến bảng dữ liệu nhân viên trong Firebase
+    const employeeRef = ref(database, `${idCty}/employees`);
+    const snapshot = await get(employeeRef);
+
+    if (snapshot.exists()) {
+      const employees = [];
+
+      // Lặp qua danh sách nhân viên để tìm những người cùng phòng ban với "Trưởng phòng"
+      snapshot.forEach((childSnapshot) => {
+        const employee = { id: childSnapshot.key, ...childSnapshot.val() };
+
+        // Nếu người dùng hiện tại là "Trưởng phòng" (TP), tìm nhân viên cùng phòng ban
+        if (currentUser.chucvuId === "TP" && employee.phongbanId === currentUser.phongbanId) {
+          employees.push({ label: employee.name, value: employee.employeeId });
+        }
+      });
+
+      // Nếu không tìm thấy nhân viên
+      if (employees.length === 0) {
+        console.log("No employees found in the same department.");
+        return null;
+      }
+
+      return employees;
+    } else {
+      console.log("No data available");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error reading employees:", error);
+    throw error;
+  }
+}
+
 
 // Function to get an employee by ID from Realtime Database
 export async function getEmployeeById(employeeId) {
