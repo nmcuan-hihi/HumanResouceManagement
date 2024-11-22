@@ -145,8 +145,7 @@ export default function ChucVuDetail({ route, navigation }) {
                   <Text style={styles.nameBtn}>Lưu</Text>
                 </TouchableOpacity>
               ) : (
-                chucVuId !== "TP" &&
-                chucVuId !== "NV" && (
+                !(chucvu_id === "TP" || chucvu_id === "NV") && (
                   <TouchableOpacity
                     style={styles.btnXoa}
                     onPress={handleDelete}
