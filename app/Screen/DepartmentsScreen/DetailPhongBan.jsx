@@ -17,11 +17,9 @@ import {
   removePhongBan,
 } from "../../services/database";
 
-import {
-  getEmployeeById,
-  readEmployees,
-  updateEmployee,
-} from "../../services/database";
+import { readEmployees, updateEmployee } from "../../services/database";
+
+import { getEmployeeById } from "../../services/EmployeeFireBase";
 import { SelectList } from "react-native-dropdown-select-list";
 export default function DetailPB({ navigation, route }) {
   const { maPhongBan } = route.params;
