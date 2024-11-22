@@ -34,7 +34,7 @@ const EmployeeScreen = ({ navigation, route }) => {
       (nv) => nv.phongbanId == employee.phongbanId
     );
     setListEmployeeMyPB(newData);
-    console.log(newData);
+    console.log("DATA:",newData);
   };
 
   // Lấy danh sách phòng ban
@@ -135,7 +135,12 @@ const EmployeeScreen = ({ navigation, route }) => {
               label="Thông tin chấm công"
               onPress={() => navigateTo("ThongTinChamCong")}
             />
-            <StatItem icon="tasks" color="#FF9800" value="0" label="Nhiệm Vụ" onPress={() => navigateTo("TaskScreen")} />
+            <StatItem 
+            icon="tasks" 
+            color="#FF9800" 
+            value="0" 
+            label="Nhiệm Vụ" 
+            onPress={() => navigateTo("TaskScreen",{ employee })} />
           </View>
         </View>
       </ScrollView>

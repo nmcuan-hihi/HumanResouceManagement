@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from 'react-redux';
 import {
   View,
   Text,
@@ -13,47 +14,69 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import BackNav from "../../Compoment/BackNav";
 import CalendarModal from "../../Compoment/CalendarModal";
-import { getEmployeesInSameDepartmentForHead } from "../../services/EmployeeFireBase";
+import {getEmployeeById, readEmployeesFireStore } from "../../services/EmployeeFireBase";
 import { taoTaskDataBase, themTaskPhanCong } from "../../services/Task";
 
-const AddTask = ({ navigation }) => {
+const AddTask = ({ navigation ,route}) => {
+  
+
   const [taskName, setTaskName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedDateType, setSelectedDateType] = useState("start");
-
   const [open, setOpen] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
-
+  // useEffect(() => {
+  //   console.log('Route params:', route.params);
+  //   console.log('Employee ID:', employeeId);
+  // }, [route.params]);
+  // Fetch employees data and initialize dates
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const employeesData = await getEmployeesInSameDepartmentForHead();
-
-        if (employeesData) {
-          setEmployees(employeesData);
-          setFilteredEmployees(employeesData);
+      const fetchEmployees = async () => {
+        try {
+          const employeesData = await readEmployeesFireStore();
+          if (employeesData && employeesData.length > 0) {
+            // Lọc nhân viên không có chức vụ GD hoặc TP
+            const filteredEmployees = employeesData.filter(emp => emp.chucvuId !== "GD" && emp.chucvuId !== "TP");
+            
+            setEmployees(filteredEmployees); // Set danh sách nhân viên đã lọc
+            setFilteredEmployees(filteredEmployees); // Set danh sách nhân viên đã lọc ban đầu
+          } else {
+            Alert.alert("Thông báo", "Không có nhân viên nào trong công ty.");
+          }
+        } catch (error) {
+          console.error("Lỗi khi lấy danh sách nhân viên:", error);
+          Alert.alert("Lỗi", "Không thể lấy danh sách nhân viên: " + error.message);
         }
-      } catch (error) {
-        console.error("Lỗi khi lấy danh sách nhân viên:", error);
-      }
-    };
+      };
 
     fetchEmployees();
 
-    // Set default start and end dates
-    const today = new Date();
-    setStartDate(formatDate(today));
+    const initializeDates = () => {
+      const today = new Date();
+      setStartDate(formatDate(today));
 
-    const nextDay = new Date(today);
-    nextDay.setDate(today.getDate() + 1);
-    setEndDate(formatDate(nextDay));
-  }, []);
+      const nextDay = new Date(today);
+      nextDay.setDate(today.getDate() + 1);
+      setEndDate(formatDate(nextDay));
+    };
 
+    initializeDates();
+  }, []); // Dependency on currentUser
+
+  // Format Date helper function
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Handle task creation and validation
   const handleAddTask = async () => {
     if (!taskName.trim()) {
       Alert.alert("Lỗi", "Vui lòng nhập tên nhiệm vụ.");
@@ -68,7 +91,6 @@ const AddTask = ({ navigation }) => {
       return;
     }
 
-    // Prepare task data to be created in Firebase
     const newTask = {
       taskName,
       description,
@@ -78,10 +100,8 @@ const AddTask = ({ navigation }) => {
     };
 
     try {
-      // Step 1: Create the task in the database
       const taskData = await taoTaskDataBase(newTask);
 
-      // Step 2: Assign the task to the selected employees
       for (const employeeId of selectedEmployees) {
         await themTaskPhanCong(employeeId, taskData.manhiemvu);
       }
@@ -95,6 +115,7 @@ const AddTask = ({ navigation }) => {
     }
   };
 
+  // Handle calendar open and date change
   const handleOpenCalendar = (dateType) => {
     setSelectedDateType(dateType);
     setCalendarVisible(true);
@@ -104,22 +125,13 @@ const AddTask = ({ navigation }) => {
     const formattedDate = formatDate(new Date(newDate));
     if (selectedDateType === "start") {
       setStartDate(formattedDate);
-      const startDateObj = parseDate(formattedDate);
-      if (startDateObj) {
-        startDateObj.setDate(startDateObj.getDate() + 1);
-        setEndDate(formatDate(startDateObj));
-      }
+      const startDateObj = new Date(formattedDate);
+      startDateObj.setDate(startDateObj.getDate() + 1); // Default end date as next day
+      setEndDate(formatDate(startDateObj));
     } else {
       setEndDate(formattedDate);
     }
     setCalendarVisible(false);
-  };
-
-  const formatDate = (date) => {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
   };
 
   return (
@@ -127,14 +139,11 @@ const AddTask = ({ navigation }) => {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView
-        style={styles.container}
-        nestedScrollEnabled={true}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
+      <ScrollView style={styles.container} nestedScrollEnabled contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.header}>
           <BackNav name={"Giao nhiệm vụ"} />
         </View>
+      
 
         <View style={styles.section}>
           <Text style={styles.label}>Tên nhiệm vụ</Text>
@@ -148,20 +157,14 @@ const AddTask = ({ navigation }) => {
 
         <View style={styles.section}>
           <Text style={styles.label}>Ngày bắt đầu</Text>
-          <TouchableOpacity
-            onPress={() => handleOpenCalendar("start")}
-            style={styles.datePicker}
-          >
+          <TouchableOpacity onPress={() => handleOpenCalendar("start")} style={styles.datePicker}>
             <Text>{startDate}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.label}>Ngày kết thúc</Text>
-          <TouchableOpacity
-            onPress={() => handleOpenCalendar("end")}
-            style={styles.datePicker}
-          >
+          <TouchableOpacity onPress={() => handleOpenCalendar("end")} style={styles.datePicker}>
             <Text>{endDate}</Text>
           </TouchableOpacity>
         </View>
@@ -180,7 +183,7 @@ const AddTask = ({ navigation }) => {
             placeholder="Nhập mô tả"
             value={description}
             onChangeText={setDescription}
-            multiline={true}
+            multiline
             numberOfLines={4}
           />
         </View>
@@ -189,21 +192,19 @@ const AddTask = ({ navigation }) => {
           <Text style={styles.label}>Chỉ định cho</Text>
           <DropDownPicker
             open={open}
-            value={employees}
-            items={filteredEmployees}
-            multiple={true}
+            value={selectedEmployees}
+            items={employees.map(emp => ({ label: emp.name, value: emp.employeeId }))}
+            multiple
             setOpen={setOpen}
             setValue={setSelectedEmployees}
             setItems={setFilteredEmployees}
             placeholder="Chọn nhân viên"
             style={styles.dropdown}
-            dropDownContainerStyle={{
-              ...styles.dropdownList,
-              maxHeight: 150,
-            }}
+            dropDownContainerStyle={styles.dropdownList}
             listMode="SCROLLVIEW"
-            nestedScrollEnabled={true}
+            nestedScrollEnabled
           />
+
         </View>
 
         <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>

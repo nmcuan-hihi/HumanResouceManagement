@@ -2,6 +2,7 @@ import {
   getDatabase,
   ref,
   set,
+  get ,
   push
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
@@ -16,6 +17,7 @@ const getIdCty = () => {
   const state = store.getState();
   return state.congTy.idCty; // Lấy idCty từ state.congTy
 };
+
 
 // Tạo thông báo mới cho nhiệm vụ
 export async function taoTaskDataBase(nhiemvu) {
@@ -42,8 +44,46 @@ export async function taoTaskDataBase(nhiemvu) {
     throw error;
   }
 }
+export async function layTatCaNhiemVu() {
+  const idCty = getIdCty(); // Get the company ID from Redux store
 
+  try {
+    const tasksRef = ref(database, `${idCty}/nhiemvu`);
+    const snapshot = await get(tasksRef);
 
+    if (snapshot.exists()) {
+      return snapshot.val();  // Return all tasks
+    } else {
+      console.log("No tasks found");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    throw error;
+  }
+}
+export async function layNhiemVuById(manhiemvu) {
+  const idCty = getIdCty(); // Lấy idCty từ Redux
+  try {
+    // Tạo tham chiếu đến nhiệm vụ trong Firebase Realtime Database
+    const notificationRef = ref(database, `${idCty}/nhiemvu/${manhiemvu}`);
+
+    // Lấy snapshot từ Firebase
+    const snapshot = await get(notificationRef);
+
+    // Kiểm tra xem nhiệm vụ có tồn tại không
+    if (!snapshot.exists()) {
+      console.log(`Không tìm thấy nhiệm vụ với key: ${manhiemvu}`);
+      return null; // Trả về null nếu không tìm thấy
+    }
+
+    const nhiemvu = snapshot.val(); // Lấy dữ liệu nhiệm vụ từ snapshot
+    return nhiemvu; // Trả về dữ liệu nhiệm vụ
+  } catch (error) {
+    console.error("Lỗi khi lấy nhiệm vụ theo key:", error);
+    throw error; // Ném lỗi nếu có lỗi xảy ra
+  }
+}
 // Thêm thông báo cho nhân viên
 export async function themTaskPhanCong(employeeId, manhiemvu) {
   const idCty = getIdCty(); // Lấy idCty từ Redux

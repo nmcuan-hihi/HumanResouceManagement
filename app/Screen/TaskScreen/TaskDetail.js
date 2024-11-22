@@ -1,12 +1,12 @@
-import React ,{useEffect,useState} from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-
-import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import BackNav from "../../Compoment/BackNav";
-const TaskDetail = (navigation) => {
+
+const TaskDetail = ({ route }) => {
+  const { task } = route.params;  // Access the task passed via navigation
+
   return (
     <View style={styles.container}>
-      
       <View style={styles.header}>
         <BackNav name={"Chi tiết nhiệm vụ"} />
       </View>
@@ -14,18 +14,24 @@ const TaskDetail = (navigation) => {
       {/* Task Details */}
       <View style={styles.section}>
         <Text style={styles.label}>Tên nhiệm vụ</Text>
-        <Text style={styles.value}>Nhiệm vụ 1</Text>
+        <Text style={styles.value}>{task.taskName}</Text>
       </View>
-      <View style={styles.section}>
-        <Text style={styles.label}>Start Date and Time</Text>
-        <Text style={styles.value}>03/10/2022, 3:44 am</Text>
+
+      {/* Time details in row */}
+      <View style={styles.rowSection}>
+        <View style={styles.timeSection}>
+          <Text style={styles.label}>Thời gian bắt đầu</Text>
+          <Text style={styles.value}>{task.startDate}</Text>
+        </View>
+        <View style={styles.timeSection}>
+          <Text style={styles.label}>Thời gian kết thúc</Text>
+          <Text style={styles.value}>{task.endDate}</Text>
+        </View>
       </View>
+
       <View style={styles.section}>
         <Text style={styles.label}>Chi tiết</Text>
-        <Text style={styles.value}>
-          Reference site about Lorem Ipsum, giving information on its origins,
-          as well as a random Lipsum generator
-        </Text>
+        <Text style={styles.value}>{task.description || "No description available."}</Text>
       </View>
     </View>
   );
@@ -43,24 +49,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 16,
-    color: "#1E88E5", // Blue shade for the title
-  },
   section: {
     marginBottom: 16,
   },
+  rowSection: {
+    flexDirection: "row",  // Align child components in a row
+    justifyContent: "space-between",  // Spread them out evenly
+    marginBottom: 16,
+  },
+  timeSection: {
+    flex: 1,  // This makes both sections take equal space
+    marginRight: 8,  // Adds spacing between the time sections
+  },
   label: {
     fontSize: 14,
-    color: "#757575", // Gray shade for labels
+    fontWeight: "bold",  // Make the label text bold
+    color: "#757575",
     marginBottom: 4,
   },
   value: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#424242", // Darker text color for values
+    color: "#424242",
   },
 });
 
