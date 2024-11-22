@@ -16,6 +16,7 @@ import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
 import HomeMessenger from "../Screen/MessengerScreen/HomeMessenger";
 import { listenForNotifications } from "../services/thongBaoFirebase";
 import { database } from "../config/firebaseconfig";
+import { store } from "../redux/store";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,7 +27,11 @@ export default function TabNavigation({ route }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  // Lấy idCty từ store
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
 
+  
   useEffect(() => {
     const callback = (danhSachThongBao) => {
       const count = danhSachThongBao.filter(
@@ -43,30 +48,32 @@ export default function TabNavigation({ route }) {
 
   useEffect(() => {
     // Set up a listener for changes in the "chats" node
-    const chatsRef = ref(database, "chats");
+    const chatsRef = ref(database, `${idCty}/chats`);
+  
     const unsubscribe = onValue(chatsRef, (snapshot) => {
       if (snapshot.exists()) {
         let count = 0;
         snapshot.forEach((childSnapshot) => {
           const chatData = childSnapshot.val();
           const { lastSend, status, participants } = chatData;
-          if (participants.includes(userID)) {
+  
+          if (participants && participants.includes(userID)) {
+            // Increment unread count if the message is unread and not sent by the current user
             if (lastSend !== userID && status === "0") {
-              count += 1; // Increment unread count
+              count += 1;
             }
           }
         });
-        setUnreadCount(count);
+        setUnreadCount(count); // Update state with the new unread count
       } else {
-        setUnreadCount(0);
+        setUnreadCount(0); // No messages found
       }
     });
-
+  
+    // Cleanup listener on unmount
     return () => unsubscribe();
-  }, [userID]);
-
-  // Example unread counts
-  const unreadMessages = 3;
+  }, [userID, idCty]);
+  
 
   const IconWithBadge = ({ name, badgeCount, color, size, iconType }) => {
     const IconComponent =

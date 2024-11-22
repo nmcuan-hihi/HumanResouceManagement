@@ -5,6 +5,7 @@ import { getEmployeeById, readEmployeesFireStore } from '../../services/Employee
 import { ref, onValue, update } from 'firebase/database';
 import { database } from '../../config/firebaseconfig';
 import { readPhongBanFromRealtime } from '../../services/PhongBanDatabase';
+import { store } from '../../redux/store';
 
 export default function HomeMessenger({ navigation, route }) {
   const [visibleModal, setVisibleModal] = useState(false);
@@ -14,7 +15,9 @@ export default function HomeMessenger({ navigation, route }) {
   const [loading, setLoading] = useState(false);  // Loading state
   const { employee } = route.params;
   const [chatList, setChatList] = useState([]);
-
+    // Lấy idCty từ store
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
   const [phongbans, setPhongBan] = useState([]);
   const CheckStatusSend = (employeePatenerId, lastSendId, statusSend) => {
     if (employee.employeeId == lastSendId) {
@@ -48,7 +51,7 @@ export default function HomeMessenger({ navigation, route }) {
   };
 
   const listenToChatList = (employeeID) => {
-    const chatsRef = ref(database, 'chats');
+    const chatsRef = ref(database, `${idCty}/chats`);
     onValue(chatsRef, (snapshot) => {
       const chatList = [];
       snapshot.forEach((childSnapshot) => {
@@ -87,7 +90,7 @@ export default function HomeMessenger({ navigation, route }) {
     const employeeTo = await getEmployeeById(empToId);
 
     if (empToId == lastSend) {
-      const chatRef = ref(database, `chats/${id}`);
+      const chatRef = ref(database, `${idCty}/chats/${id}`);
       await update(chatRef, {
         status: '1', // 1 = Đã đọc
       });
@@ -96,14 +99,47 @@ export default function HomeMessenger({ navigation, route }) {
     navigation.navigate('MesengerDetails', { empFrom: employee, empTo: employeeTo });
   };
 
+   const handleCompanyChat = () => {
+     navigation.navigate('MesengerGroupDetails', { empFrom: route.params.employee, chatID: "GROUP_CHAT_"+idCty, KeyID: "COM" })
+
+   }
+   const handleGroupChat = () => {
+     navigation.navigate('MesengerGroupDetails', { empFrom: route.params.employee, chatID: "DEP_CHAT_"+employee.phongbanId, KeyID: "DEP"})
+
+   }
+
+   
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Messenger</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => setVisibleModal(true)}>
-          <FontAwesome5 name="facebook-messenger" size={24} color="blue" />
-        </TouchableOpacity>
-      </View>
+     <View style={styles.header}>
+  <Text style={styles.title}>Messenger</Text>
+  <View style={styles.buttonContainer}>
+   
+      {employee.chucvuId == "GD" ? null:(     
+        
+       <TouchableOpacity style={styles.addButton} onPress={handleGroupChat}>
+    <FontAwesome5 name="facebook-messenger" size={24} color="blue" />
+      <FontAwesome5 name="users" size={12} color="orange" style={styles.subIcon} />
+    </TouchableOpacity>)
+    }
+    
+
+    {/* Nút chat với công ty */}
+    <TouchableOpacity style={styles.addButton} onPress={handleCompanyChat}>
+    <FontAwesome5 name="facebook-messenger" size={24} color="blue" />
+      <FontAwesome5 name="building" size={12} color="green" style={styles.subIcon} />
+    </TouchableOpacity>
+
+     {/* Nút Messenger chính */}
+     <TouchableOpacity style={styles.addButton} onPress={() => setVisibleModal(true)}>
+      <FontAwesome5 name="facebook-messenger" size={24} color="blue" />
+      {/* <FontAwesome5 name="comment-dots" size={12} color="blue" style={styles.subIcon} /> */}
+    </TouchableOpacity>
+
+
+  </View>
+</View>
+
 
       {loading ? (
         <ActivityIndicator size="large" color="blue" style={styles.loadingIndicator} />
@@ -187,7 +223,7 @@ export default function HomeMessenger({ navigation, route }) {
                     }
                   }
                   else {
-                    if (item.phongbanId == employee.phongbanId && item.employeeId != employee.employeeId) {
+                    if ((item.phongbanId == employee.phongbanId && item.employeeId != employee.employeeId ) || item.chucvuId == "GD") {
                       return (
                         <TouchableOpacity style={styles.employeeItem} onPress={() => handleSelectEmployee(item)}>
                           <Text>{`${phongBanName ? phongBanName.tenPhongBan : 'Chưa có'} - ${item.name}`}</Text>
@@ -221,19 +257,30 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   title: {
-    fontSize: 20,
-    color: 'blue',
+    fontSize: 24,
     fontWeight: 'bold',
   },
-  addButton: {
-    padding: 8,
+  buttonContainer: {
+    flexDirection: 'row',
   },
+  addButton: {
+    marginHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  subIcon: {
+    position: 'absolute',
+    bottom: -8,  // Điều chỉnh khoảng cách so với nút chính
+    right: -8,   // Đưa icon phụ ra bên phải
+  },
+
   chatList: {
     flex: 1,
   },

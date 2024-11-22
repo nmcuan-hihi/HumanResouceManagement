@@ -14,8 +14,8 @@ import { saveIdCty } from "../../redux/slices/ctySlice";
 
 export default function LoginScreen({ navigation }) {
   const [companyId, setCompanyId] = useState("Nhabee");
-  const [employeeId, setEmployeeId] = useState("");
-  const [password, setPassword] = useState("");
+  const [employeeId, setEmployeeId] = useState("NV000");
+  const [password, setPassword] = useState("000");
   const dispatch = useDispatch();
 
   const handleLogin = async () => {

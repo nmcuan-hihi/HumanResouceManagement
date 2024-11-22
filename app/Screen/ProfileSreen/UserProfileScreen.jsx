@@ -9,10 +9,7 @@ export default function UserProfileScreen({ navigation ,route}) {
  
   const employeeId = employee?.employeeId;
   const handleLogOut = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
+    navigation.navigate('Login');
   };
   useEffect(() => {
     const fetchPhongBan = async () => {

@@ -60,6 +60,7 @@ import ChiTietThongBao from './app/Screen/NotificeScreen/ChiTietThongBao';
 
 import { Provider } from "react-redux";
 import { store } from "./app/redux/store";
+import MessengerGroupDetails from './app/Screen/MessengerScreen/MessengerGroupDetails';
 
 const Tab = createBottomTabNavigator();
 
@@ -81,6 +82,7 @@ export default function App() {
         <Stack.Screen name="DuyetNghiPhep" component={DuyetNghiPhep} options={{ headerShown: false }} />
         <Stack.Screen name="ChiTietNghiPhep" component={ChiTietNghiPhep} options={{ headerShown: false }} />
         <Stack.Screen name="MesengerDetails" component={MesengerDetails} options={{ headerShown: false }} />
+        <Stack.Screen name="MesengerGroupDetails" component={MessengerGroupDetails} options={{ headerShown: false }} />
         
         <Stack.Screen name="LoginCongTy" component={LoginCongTy} options={{ headerShown: false }} />
 		<Stack.Screen name="ThongTinChamCong" component={ThongTinChamCong} options={{ headerShown: false }} />
