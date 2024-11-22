@@ -25,7 +25,7 @@ export const addSkill = async (skill) => {
   const idCty = getIdCty(); // Lấy idCty từ Redux
   const skillId = skill.mask; // Sử dụng mask làm ID
   try {
-    await set(ref(database, `companies/${idCty}/skills/${skillId}`), skill); // Thêm kỹ năng vào Realtime Database
+    await set(ref(database, `${idCty}/skills/${skillId}`), skill); // Thêm kỹ năng vào Realtime Database
     console.log(`Skill ${skillId} added successfully!`);
   } catch (error) {
     console.error(`Error adding skill ${skillId}:`, error);
@@ -36,7 +36,7 @@ export const addSkill = async (skill) => {
 export const updateSkill = async (mask, updatedData) => {
   const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillRef = ref(database, `companies/${idCty}/skills/${mask}`);
+    const skillRef = ref(database, `${idCty}/skills/${mask}`);
     await update(skillRef, updatedData); // Cập nhật kỹ năng
     console.log(`Skill ${mask} updated successfully!`);
   } catch (error) {
@@ -49,7 +49,7 @@ export const updateSkill = async (mask, updatedData) => {
 export const deleteSkill = async (mask) => {
   const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillRef = ref(database, `companies/${idCty}/skills/${mask}`);
+    const skillRef = ref(database, `${idCty}/skills/${mask}`);
     await remove(skillRef); // Xóa kỹ năng
     console.log(`Skill ${mask} deleted successfully!`);
   } catch (error) {
@@ -62,7 +62,7 @@ export const deleteSkill = async (mask) => {
 export const readSkills = async () => {
   const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillsRef = ref(database, `companies/${idCty}/skills`);
+    const skillsRef = ref(database, `${idCty}/skills`);
     const snapshot = await get(skillsRef); // Lấy dữ liệu từ Realtime Database
 
     if (snapshot.exists()) {
@@ -85,7 +85,7 @@ export const readSkills = async () => {
 export const readSkill1 = async (mask) => {
   const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillRef = ref(database, `companies/${idCty}/skills/${mask}`);
+    const skillRef = ref(database, `${idCty}/skills/${mask}`);
     const snapshot = await get(skillRef); // Lấy dữ liệu từ Realtime Database
 
     if (snapshot.exists()) {
@@ -105,7 +105,7 @@ export const readSkill1 = async (mask) => {
 export const addSkillNV = async (Skill) => {
   const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillRef = ref(database, `companies/${idCty}/skillnhanvien/${Skill.employeeId}-${Skill.mask}`);
+    const skillRef = ref(database, `${idCty}/skillnhanvien/${Skill.employeeId}-${Skill.mask}`);
     await set(skillRef, Skill); // Thêm kỹ năng nhân viên
     console.log(`Employee ${Skill.employeeId} added successfully!`);
   } catch (error) {
@@ -117,7 +117,7 @@ export const addSkillNV = async (Skill) => {
 export const readSkillNhanVien = async () => {
   const idCty = getIdCty(); // Lấy idCty từ Redux
   try {
-    const skillNhanVienRef = ref(database, `companies/${idCty}/skillnhanvien`);
+    const skillNhanVienRef = ref(database, `${idCty}/skillnhanvien`);
     const snapshot = await get(skillNhanVienRef); // Lấy dữ liệu từ Realtime Database
 
     if (snapshot.exists()) {

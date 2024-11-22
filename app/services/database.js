@@ -271,7 +271,7 @@ export function writeBangCap(bangCap) {
   const idCty = state.congTy.idCty;
   
   const bangCapId = bangCap.bangcap_id;
-  set(ref(database, `/${idCty}/bangcap/${bangCapId}`), bangCap)
+  set(ref(database, `${idCty}/bangcap/${bangCapId}`), bangCap)
     .then(() => {
       console.log(`Bằng cấp ${bangCapId} cho công ty ${idCty} đã được ghi thành công!`);
     })
@@ -287,7 +287,7 @@ export async function readBangCap() {
     const state = store.getState();
     const idCty = state.congTy.idCty;
     
-    const snapshot = await get(ref(database, `/${idCty}/bangcap`));
+    const snapshot = await get(ref(database, `${idCty}/bangcap`));
     if (snapshot.exists()) {
       const bangCaps = Object.entries(snapshot.val()).map(([id, data]) => ({
         id,
@@ -310,7 +310,7 @@ export async function updateBangCap(bangcapId, tenBang) {
     const state = store.getState();
     const idCty = state.congTy.idCty;
     
-    await update(ref(database, `/${idCty}/bangcap/${bangcapId}`), { tenBang });
+    await update(ref(database, `${idCty}/bangcap/${bangcapId}`), { tenBang });
     console.log(`Bằng cấp ${bangcapId} cho công ty ${idCty} đã được cập nhật thành công!`);
   } catch (error) {
     console.error(`Lỗi khi cập nhật bằng cấp ${bangcapId} cho công ty ${idCty}:`, error);
@@ -324,7 +324,7 @@ export const deleteBangCap = async (bangCap_id) => {
     const state = store.getState();
     const idCty = state.congTy.idCty;
     
-    const bangCapRef = ref(database, `/${idCty}/bangcap/${bangCap_id}`);
+    const bangCapRef = ref(database, `${idCty}/bangcap/${bangCap_id}`);
     await remove(bangCapRef);
     console.log(`Bằng cấp ${bangCap_id} cho công ty ${idCty} đã được xóa thành công`);
   } catch (error) {
@@ -340,7 +340,7 @@ export async function readEmployeesByPhongBan(phongBanId) {
     const idCty = state.congTy.idCty;
     
     const employeeRef = query(
-      ref(database, `/${idCty}/employees`),
+      ref(database, `${idCty}/employees`),
       orderByChild("phongbanId"),
       equalTo(phongBanId)
     );
@@ -367,7 +367,7 @@ export async function addChamCong(chamCongData) {
     const state = store.getState();
     const idCty = state.congTy.idCty;
     
-    const newChamCongRef = push(ref(database, `/${idCty}/chamcong`));
+    const newChamCongRef = push(ref(database, `${idCty}/chamcong`));
     await set(newChamCongRef, chamCongData);
     console.log("Thông tin chấm công cho công ty đã được thêm thành công!");
   } catch (error) {
@@ -382,7 +382,7 @@ export async function readChamCong() {
     const state = store.getState();
     const idCty = state.congTy.idCty;
     
-    const snapshot = await get(ref(database, `/${idCty}/chamcong`));
+    const snapshot = await get(ref(database, `${idCty}/chamcong`));
     if (snapshot.exists()) {
       const chamCong = Object.entries(snapshot.val()).map(([id, data]) => ({
         id,

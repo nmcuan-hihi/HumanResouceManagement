@@ -99,17 +99,7 @@ export default function ChamCongNV({ navigation, route }) {
     fetchPhongBan();
   }, [selectedMonth, phongbanId]);
 
-  useEffect(() => {
-    if (phongbanId) {
-      handleFilterEmployeesByPhongBan(phongbanId, selectedMonth);
-    }
-  }, [phongbanId]);
 
-  useEffect(() => {
-    if (valueStatus) {
-      handleFilterEmployeesByStatus(valueStatus);
-    }
-  }, [valueStatus]);
 
   useEffect(() => {
     if (employees && employees.phongbanId !== phongbanId) {
