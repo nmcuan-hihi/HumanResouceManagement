@@ -6,6 +6,9 @@ import { database } from '../../config/firebaseconfig';
 import { ref, get, set, onValue } from 'firebase/database';
 import moment from 'moment';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { store } from '../../redux/store';
+
+
 
 export default function MesengerDetails({ navigation, route }) {
   const { empFrom, empTo } = route.params;
@@ -13,11 +16,14 @@ export default function MesengerDetails({ navigation, route }) {
   const [newMessage, setNewMessage] = useState('');
   const flatListRef = useRef(null);
   const chatID = generateChatID(empFrom.employeeId, empTo.employeeId);
-
+ // Lấy idCty từ store
+ const state = store.getState();
+ const idCty = state.congTy.idCty;
   const getMessenger = async (id1, id2) => {
+
     const chatID = generateChatID(id1, id2);
-    const chatRef = ref(database, `chats/${chatID}`);
-    const messagesRef = ref(database, `messages/${chatID}`);
+    const chatRef = ref(database, `${idCty}/chats/${chatID}`);
+    const messagesRef = ref(database, `${idCty}/messages/${chatID}`);
 
     try {
       const chatSnapshot = await get(chatRef);
@@ -47,10 +53,11 @@ export default function MesengerDetails({ navigation, route }) {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
+       
         const { messages } = await getMessenger(empFrom.employeeId, empTo.employeeId);
         setMessages(messages);
 
-        const messagesRef = ref(database, 'messages/' + chatID);
+        const messagesRef = ref(database, `${idCty}/messages/` + chatID);
         const unsubscribe = onValue(messagesRef, (snapshot) => {
           const data = snapshot.val();
           if (data) {

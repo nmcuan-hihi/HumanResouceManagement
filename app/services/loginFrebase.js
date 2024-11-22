@@ -78,9 +78,8 @@ export const addCompany = async (idCongTy, tenCongTy, tenGiamDoc, sdt) => {
     luongcoban: "",
     ngaysinh: "",
     ngaybatdau: "",
-    matKhau: "NV000",
+    matKhau: "NV000", 
     trangthai: "true",
-
     }
     await addEmployeeFireStore(emp)
     console.log("Thêm công ty thành công!");
