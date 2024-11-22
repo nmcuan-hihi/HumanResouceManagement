@@ -217,9 +217,11 @@ export default function DetailPB({ navigation, route }) {
                 <Text style={styles.nameBtn}>Lưu</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
-                <Text style={styles.nameBtn}>Xóa</Text>
-              </TouchableOpacity>
+              maPhongBan != "NS" && (
+                <TouchableOpacity style={styles.btnXoa} onPress={handleDelete}>
+                  <Text style={styles.nameBtn}>Xóa</Text>
+                </TouchableOpacity>
+              )
             )}
           </View>
         </ScrollView>
