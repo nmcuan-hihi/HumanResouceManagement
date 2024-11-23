@@ -16,9 +16,10 @@ const CalendarModal = ({ visible, selectedDate, onSelect, onClose }) => {
             onDayPress={(day) => onSelect(day.dateString)}
             markedDates={{ [selectedDate]: { selected: true } }}
           />
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>X</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+  <Text style={styles.closeButtonText}>X</Text>
+</TouchableOpacity>
+
         </View>
       </View>
     </Modal>

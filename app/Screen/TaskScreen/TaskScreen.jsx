@@ -6,7 +6,7 @@ import { readEmployees, readPhongBan } from "../../services/database"; // Import
 import BackNav from "../../Compoment/BackNav";
 import { database } from "../../config/firebaseconfig";
 
-const TaskScreen = ({ route,navigation }) => {
+const TaskScreen = ({ route, navigation }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [listEmployeeMyPB, setListEmployeeMyPB] = useState([]);
@@ -14,8 +14,15 @@ const TaskScreen = ({ route,navigation }) => {
   const [listPhongBan, setListPhongBan] = useState([]);
   const [employeeData, setEmployeeData] = useState(null); // Store employee data
 
+  // Add a check to ensure employee data exists
+  const { employee } = route.params || {};  // Default to empty object if route.params is undefined
+
   useEffect(() => {
-   
+    if (!employee) {
+      console.error("Employee data is missing in route params");
+      return;  // Exit early if employee data is missing
+    }
+
     const fetchTasks = async () => {
       try {
         const tasksData = await layTatCaNhiemVu();
@@ -33,28 +40,42 @@ const TaskScreen = ({ route,navigation }) => {
     };
 
     fetchTasks();
+  }, [employee]); // Ensure it depends on employee
+
+  useEffect(() => {
     getListNV();
     getListPB();
-  }, []); // Add route.params as a dependency to ensure it updates when params change
+  }, []); // Fetch data when component mounts
 
+  // Fetch list of employees from the database
   const getListNV = async () => {
     const data = await readEmployees();
     const dataArr = Object.values(data);
     setListEmployee(dataArr);
+  
+    // Kiểm tra xem employee đã được truyền vào chưa
+    console.log('Employee:', employee);
+  
+    // Lọc nhân viên theo phong ban của employee hiện tại
     const newData = dataArr.filter(
-      (nv) => nv.phongbanId == employee.phongbanId
+      (nv) => nv.phongbanId === employee?.phongbanId
     );
+    
+    console.log("Nhan vien trong phong ban:", newData); 
+    console.log("Tất cả nhân viên:", dataArr);
+    console.log("Phong ban của employee:", employee?.phongbanId);
+ // Kiểm tra danh sách nhân viên trong phòng ban
     setListEmployeeMyPB(newData);
-    console.log("Nhan vien:",newData);
   };
 
+  // Fetch departments (Phong Ban)
   const getListPB = async () => {
     const data = await readPhongBan();
     setListPhongBan(Object.values(data));
   };
 
   const handleAddTask = () => {
-    navigation.navigate("AddTask");
+    navigation.navigate("AddTask",{employee});
   };
 
   const handleTaskPress = (task) => {
