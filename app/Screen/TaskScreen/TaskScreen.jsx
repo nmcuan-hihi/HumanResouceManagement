@@ -1,34 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import { layTatCaNhiemVu } from "../../services/Task"; 
-import { getEmployeeById } from "../../services/EmployeeFireBase";
-import { readEmployees, readPhongBan } from "../../services/database"; // Import your function
+import { layTatCaNhiemVu, layNhiemVuById, listenForTask } from "../../services/Task"; 
 import BackNav from "../../Compoment/BackNav";
-import { database } from "../../config/firebaseconfig";
+import { readEmployees, readPhongBan } from "../../services/database";
 
 const TaskScreen = ({ route, navigation }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [listEmployeeMyPB, setListEmployeeMyPB] = useState([]);
-  const [listEmployee, setListEmployee] = useState([]);
-  const [listPhongBan, setListPhongBan] = useState([]);
-  const [employeeData, setEmployeeData] = useState(null); // Store employee data
 
-  // Add a check to ensure employee data exists
-  const { employee } = route.params || {};  // Default to empty object if route.params is undefined
+  const { employee } = route.params || {}; // Employee passed from route params
 
+  // Lấy danh sách nhiệm vụ ban đầu
   useEffect(() => {
     if (!employee) {
       console.error("Employee data is missing in route params");
-      return;  // Exit early if employee data is missing
+      return;
     }
 
     const fetchTasks = async () => {
       try {
         const tasksData = await layTatCaNhiemVu();
         if (tasksData) {
-          const taskArray = Object.values(tasksData);
-          setTasks(taskArray);
+          setTasks(Object.values(tasksData));
         } else {
           setTasks([]);
         }
@@ -40,46 +33,58 @@ const TaskScreen = ({ route, navigation }) => {
     };
 
     fetchTasks();
-  }, [employee]); // Ensure it depends on employee
+  }, [employee]);
 
+  // Lắng nghe thay đổi trong danh sách nhiệm vụ
   useEffect(() => {
-    getListNV();
-    getListPB();
-  }, []); // Fetch data when component mounts
+    if (!employee) return;
 
-  // Fetch list of employees from the database
-  const getListNV = async () => {
-    const data = await readEmployees();
-    const dataArr = Object.values(data);
-    setListEmployee(dataArr);
-  
-    // Kiểm tra xem employee đã được truyền vào chưa
-    console.log('Employee:', employee);
-  
-    // Lọc nhân viên theo phong ban của employee hiện tại
-    const newData = dataArr.filter(
-      (nv) => nv.phongbanId === employee?.phongbanId
-    );
-    
-    console.log("Nhan vien trong phong ban:", newData); 
-    console.log("Tất cả nhân viên:", dataArr);
-    console.log("Phong ban của employee:", employee?.phongbanId);
- // Kiểm tra danh sách nhân viên trong phòng ban
-    setListEmployeeMyPB(newData);
-  };
+    const handleTaskUpdate = (updatedTasks) => {
+      const updatedData = updatedTasks.map(async (task) => {
+        try {
+          const taskDetail = await layNhiemVuById(task.manhiemvu);
+          return {
+            employeeId: task.employeeId,
+            manhiemvu: task.manhiemvu,
+            taskName: taskDetail.taskName,
+            startDate: taskDetail.startDate,
+            endDate: taskDetail.endDate,
+            assignedEmployees: taskDetail.assignedEmployees,
+            trangThai: task.trangThai, // Trạng thái của nhiệm vụ
+          };
+        } catch (error) {
+          console.error("Error fetching task details:", error);
+        }
+      });
 
-  // Fetch departments (Phong Ban)
-  const getListPB = async () => {
-    const data = await readPhongBan();
-    setListPhongBan(Object.values(data));
+      Promise.all(updatedData).then((newTaskData) => {
+        setTasks(newTaskData.reverse()); // Đảo ngược thứ tự nếu cần hiển thị từ mới đến cũ
+      });
+    };
+
+    listenForTask(employee.employeeId, handleTaskUpdate);
+
+    return () => {
+      // Hủy listener khi component unmount
+      listenForTask(employee.employeeId, () => {});
+    };
+  }, [employee]);
+
+  const handleTaskPress = async (task) => {
+    try {
+      const taskDetails = await layNhiemVuById(task.manhiemvu);
+      if (taskDetails) {
+        navigation.navigate("TaskDetail", { task: taskDetails });
+      } else {
+        console.error("Task not found");
+      }
+    } catch (error) {
+      console.error("Error fetching task details:", error);
+    }
   };
 
   const handleAddTask = () => {
-    navigation.navigate("AddTask",{employee});
-  };
-
-  const handleTaskPress = (task) => {
-    navigation.navigate("TaskDetail", { task });
+    navigation.navigate("AddTask", { employee });
   };
 
   if (loading) {
@@ -90,14 +95,17 @@ const TaskScreen = ({ route, navigation }) => {
     );
   }
 
+  // Check if the employee is a department head
+  const isDepartmentHead = employee.chucvuId !== "NV"; // Assuming "GD" is the ID for trưởng phòng
+  console.log(isDepartmentHead)
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <BackNav
           navigation={navigation}
-          btn={"Thêm"}
+          btn={isDepartmentHead ? "Thêm" : ""}
           name={"Nhiệm Vụ"}
-          onEditPress={handleAddTask}
+          onEditPress={isDepartmentHead ? handleAddTask : null}
         />
       </View>
 
@@ -128,7 +136,7 @@ const TaskScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAFAFA",  // Lighter background color
+    backgroundColor: "#FAFAFA",
     paddingHorizontal: 20,
     paddingTop: 40,
   },
@@ -147,7 +155,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 8,  // Elevated shadow for Android
+    elevation: 8,
   },
   taskTitle: {
     fontSize: 20,
@@ -163,7 +171,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666666",
     marginBottom: 8,
-    flexWrap: 'wrap',  // Allow text to wrap
   },
   noTasksText: {
     textAlign: "center",

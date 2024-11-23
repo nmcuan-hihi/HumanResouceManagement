@@ -14,13 +14,14 @@ import { useRoute } from "@react-navigation/native";
 import DropDownPicker from "react-native-dropdown-picker";
 import BackNav from "../../Compoment/BackNav";
 import CalendarModal from "../../Compoment/CalendarModal";
+import { readPhongBanFromRealtime } from "../../services/PhongBanDatabase";
 import { readEmployeesFireStore } from "../../services/EmployeeFireBase";
 import { taoTaskDataBase, themTaskPhanCong } from "../../services/Task";
 
 const AddTask = ({ navigation }) => {
   const route = useRoute();
   const { employee } = route.params || {};
-
+  console.log(employee)
   const [taskName, setTaskName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -30,38 +31,70 @@ const AddTask = ({ navigation }) => {
   const [open, setOpen] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState([employee?.employeeId || ""]);
   const [employees, setEmployees] = useState([]);
+  const [phongBans, setPhongBans] = useState("");
+  const [searchPB, setSearchPB] = useState(
+    employee.phongbanId ? employee.phongbanId : ""
+  );
+  const [listNV, setListNV] = useState([]);
+
+  const [listNVPB, setListNVPB] = useState([]);
+
+
 
   useEffect(() => {
     const fetchEmployees = async () => {
-      if (employee && employee.phongbanId) {
-        try {
-          const employeesData = await readEmployeesFireStore();
-          console.log("Employees data fetched:", employeesData);
-
-          const filteredEmployees = employeesData.filter(emp => emp.phongbanId === employee.phongbanId && emp.chucvuId !== "GD");
-          console.log("Filtered employees:", filteredEmployees);
-
-          if (filteredEmployees.length > 0) {
-            setEmployees(filteredEmployees); // Set the filtered employees
-          } else {
-            Alert.alert("Thông báo", "Không có nhân viên nào trong phòng ban phù hợp.");
-          }
-        } catch (error) {
-          console.error("Lỗi khi lấy danh sách nhân viên:", error);
-          Alert.alert("Lỗi", "Không thể lấy danh sách nhân viên: " + error.message);
+      try {
+        const employeesData = await readEmployeesFireStore();
+    
+        // Kiểm tra thông tin người đăng nhập
+        console.log("Thông tin người đăng nhập:", employee);
+    
+        // Lọc Trưởng phòng cùng phòng ban với người đăng nhập
+        const truongPhong = employeesData.find(
+          (emp) =>
+            emp.chucvuId === "TP" && // Là Trưởng phòng
+            emp.maPhongBan === employee?.phongbanId // Cùng phòng ban với người đăng nhập
+        );
+    
+        if (!truongPhong) {
+          Alert.alert(
+            "Thông báo",
+            "Không tìm thấy Trưởng phòng trong phòng ban của bạn."
+          );
+          return;
         }
-      } else {
-        Alert.alert("Thông báo", "Nhân viên không có phòng ban.");
+    
+        console.log("Trưởng phòng của phòng ban hiện tại:", truongPhong);
+
+
+    
+        // Lọc danh sách nhân viên cùng phòng ban (trừ Trưởng phòng và Giám đốc)
+        const filteredEmployees = employeesData.filter(
+          (emp) =>
+            emp.phongbanId === truongPhong.phongbanId && // Cùng phòng ban với Trưởng phòng
+            emp.chucvuId !== "TP" && // Không phải Trưởng phòng
+            emp.chucvuId !== "GD" // Không phải Giám đốc
+        );
+    
+        console.log("Danh sách nhân viên cùng phòng ban:", filteredEmployees);
+    
+        // Cập nhật danh sách nhân viên
+        if (filteredEmployees.length > 0) {
+          setEmployees(filteredEmployees);
+        } else {
+          Alert.alert("Thông báo", "Không có nhân viên phù hợp trong phòng ban.");
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách nhân viên:", error);
+        Alert.alert("Lỗi", "Không thể lấy danh sách nhân viên: " + error.message);
       }
     };
-
-    if (employee) {
-      fetchEmployees(); // Fetch employees only if there's an employee
-    } else {
-      Alert.alert("Thông báo", "Không có thông tin nhân viên.");
-    }
+    
+   console.log("A:",employees.employeeId)
+    // Chỉ fetch nếu có thông tin về phòng ban của nhân viên
 
     fetchEmployees();
+    fetchPhongBan();
     // Initialize dates
     const today = new Date();
     setStartDate(formatDate(today));
@@ -71,6 +104,37 @@ const AddTask = ({ navigation }) => {
     setEndDate(formatDate(nextDay));
   }, [employee]);
 
+  const fetchPhongBan = async () => {
+    try {
+      const data = await readPhongBanFromRealtime();
+      if (data) {
+        const phongBanArray = Object.values(data).map((p) => ({
+          label: p.tenPhongBan,
+          value: p.maPhongBan,
+          
+        }));
+
+        setPhongBans(phongBanArray);
+        console.log(phongBans)
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy phòng ban:", error);
+    }
+  };
+
+  const locNhanVienPb = () => {
+    if (searchPB == "all" || !searchPB) {
+      setListNVPB(listNV);
+    } else {
+      const data = listNV.filter((nv) => {
+        return nv.phongbanId == searchPB;
+      });
+      setListNVPB(data);
+    }
+  };
+  useEffect(() => {
+    locNhanVienPb();
+  }, [searchPB, listNV]);
   const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -83,8 +147,8 @@ const AddTask = ({ navigation }) => {
       Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin.");
       return;
     }
-
-    const newTask = { taskName, description, startDate, endDate, assignedEmployees: selectedEmployees };
+    const idTruongPhong = [employee];
+    const newTask = { taskName, description, startDate, endDate,employee, assignedEmployees: selectedEmployees };
 
     try {
       const taskData = await taoTaskDataBase(newTask);

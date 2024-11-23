@@ -3,6 +3,7 @@ import {
   ref,
   set,
   get ,
+  onValue ,
   push
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
@@ -83,6 +84,30 @@ export async function layNhiemVuById(manhiemvu) {
     console.error("Lỗi khi lấy nhiệm vụ theo key:", error);
     throw error; // Ném lỗi nếu có lỗi xảy ra
   }
+}
+
+export function listenForTask(employeeId, callback) {
+  const idCty = getIdCty();
+  const thongBaonhanVienRef = ref(database, `${idCty}/nhiemvuphancong`); // Thêm idCty vào tham chiếu
+
+  // Đăng ký listener trên ref này
+  onValue(thongBaonhanVienRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const danhSachThongBao = [];
+      snapshot.forEach((childSnapshot) => {
+        const thongBao = childSnapshot.val();
+        // Kiểm tra nếu employeeId khớp
+        if (thongBao.employeeId === employeeId) {
+          danhSachThongBao.push(thongBao);
+        }
+      });
+      // Gọi callback với danh sách thông báo
+      callback(danhSachThongBao);
+    } else {
+      console.log("Không có dữ liệu nào.");
+      callback([]);
+    }
+  });
 }
 // Thêm thông báo cho nhân viên
 export async function themTaskPhanCong(employeeId, manhiemvu) {
