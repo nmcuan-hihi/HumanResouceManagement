@@ -1,9 +1,15 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
-export default function BackNav({ name, soLuong, btn, onEditPress }) {  
+export default function BackNav({ name, soLuong, btn, onEditPress }) {
   const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container}>
@@ -21,7 +27,6 @@ export default function BackNav({ name, soLuong, btn, onEditPress }) {
           {/* Hiển thị số lượng */}
           <Text style={[styles.saveButton, { marginEnd: 20 }]}>{soLuong}</Text>
 
-
           {/* Nút chỉnh sửa */}
           <TouchableOpacity onPress={onEditPress}>
             <Text style={styles.saveButton}>{btn}</Text>
@@ -35,30 +40,30 @@ export default function BackNav({ name, soLuong, btn, onEditPress }) {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-   
+
     flex: 1,
   },
   header: {
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   quantity: {
     marginRight: 8,
     fontSize: 16,
-    color: 'black',
+    color: "black",
   },
   saveButton: {
-    color: 'blue',
-    fontWeight: 'bold',
+    color: "blue",
+    fontWeight: "bold",
   },
 });
