@@ -1,34 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { layTatCaNhiemVu } from "../../services/Task"; 
-import { getEmployeeById } from "../../services/EmployeeFireBase"; // Import your function
+import { getEmployeeById } from "../../services/EmployeeFireBase";
+import { readEmployees, readPhongBan } from "../../services/database"; // Import your function
 import BackNav from "../../Compoment/BackNav";
 import { database } from "../../config/firebaseconfig";
 
 const TaskScreen = ({ route,navigation }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [listEmployeeMyPB, setListEmployeeMyPB] = useState([]);
+  const [listEmployee, setListEmployee] = useState([]);
+  const [listPhongBan, setListPhongBan] = useState([]);
   const [employeeData, setEmployeeData] = useState(null); // Store employee data
 
   useEffect(() => {
-    const employee = route.params?.employee; // Access employee from route.params
-    if (employee && employee.employeeId) {
-      // Fetch employee data using employeeId
-      const fetchEmployeeData = async () => {
-        try {
-          const data = await getEmployeeById(employee.employeeId);
-          setEmployeeData(data);
-          console.log("Employee Data:", data);
-        } catch (error) {
-          console.error("Error fetching employee data:", error);
-        }
-      };
-
-      fetchEmployeeData();
-    } else {
-      console.log("No employee ID found.");
-    }
-
+   
     const fetchTasks = async () => {
       try {
         const tasksData = await layTatCaNhiemVu();
@@ -46,7 +33,25 @@ const TaskScreen = ({ route,navigation }) => {
     };
 
     fetchTasks();
-  }, [route.params]); // Add route.params as a dependency to ensure it updates when params change
+    getListNV();
+    getListPB();
+  }, []); // Add route.params as a dependency to ensure it updates when params change
+
+  const getListNV = async () => {
+    const data = await readEmployees();
+    const dataArr = Object.values(data);
+    setListEmployee(dataArr);
+    const newData = dataArr.filter(
+      (nv) => nv.phongbanId == employee.phongbanId
+    );
+    setListEmployeeMyPB(newData);
+    console.log("Nhan vien:",newData);
+  };
+
+  const getListPB = async () => {
+    const data = await readPhongBan();
+    setListPhongBan(Object.values(data));
+  };
 
   const handleAddTask = () => {
     navigation.navigate("AddTask");
