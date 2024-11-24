@@ -203,147 +203,153 @@ const SuaThietBi = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <BackNav navigation={navigation} name={"Sửa thiết bị"} />
+      <View style={{ height: 40 }}>
+        <BackNav navigation={navigation} name={"Sửa thiết bị"} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Text style={styles.label}></Text>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.label}></Text>
+          {/* Hiển thị hình ảnh đã chọn */}
+          <View style={styles.avatarContainer}>
+            <TouchableOpacity style={styles.avatar1} onPress={selectImage}>
+              {imageUrl ? (
+                <Image source={{ uri: imageUrl }} style={styles.avatar} />
+              ) : (
+                <Image
+                  source={require("../../../assets/image/camera.png")}
+                  style={styles.avatar}
+                />
+              )}
 
-        {/* Hiển thị hình ảnh đã chọn */}
-        <View style={styles.avatarContainer}>
-          <TouchableOpacity style={styles.avatar1} onPress={selectImage}>
-            {imageUrl ? (
-              <Image source={{ uri: imageUrl }} style={styles.avatar} />
-            ) : (
-              <Image
-                source={require("../../../assets/image/camera.png")}
-                style={styles.avatar}
-              />
-            )}
+              <View style={styles.iconImage}>
+                <Image
+                  source={require("../../../assets/image/camera.png")}
+                  style={styles.iconImage1}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
 
-            <View style={styles.iconImage}>
-              <Image
-                source={require("../../../assets/image/camera.png")}
-                style={styles.iconImage1}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.label}>Tên:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Tên thiết bị"
-          value={ten}
-          onChangeText={setTen}
-        />
-
-        <Text style={styles.label}>Loại:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Loại thiết bị"
-          value={loai}
-          onChangeText={setLoai}
-        />
-
-        <Text style={styles.label}>Hãng:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Hãng sản xuất"
-          value={hang}
-          onChangeText={setHang}
-        />
-
-        <Text style={styles.label}>Ngày nhập:</Text>
-        <View>
+          <Text style={styles.label}>Tên:</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ngày nhập (YYYY-MM-DD)"
-            value={ngayNhap}
-            editable={false}
-            onChangeText={setNgayNhap}
+            placeholder="Tên thiết bị"
+            value={ten}
+            onChangeText={setTen}
           />
-          <TouchableOpacity style={styles.iconPicker} onPress={showDatepicker}>
-            <Icon name="calendar-month" size={24} color="#FFC107" />
-          </TouchableOpacity>
-        </View>
 
-        <Text style={styles.label}>Nhân viên được cấp:</Text>
-        {isEditing ? (
-          <>
-            <View style={styles.label}>
-              <SelectList
-                placeholder={nhanVien?.name}
-                setSelected={(val) => {
-                  setMaNV(val);
-                }}
-                data={dataSelect}
-                save="key"
-              />
-            </View>
-            {maNV && (
-              <>
-                <Text style={styles.label}>Ngày cấp:</Text>
-                <View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Ngày cấp (YYYY-MM-DD)"
-                    value={ngayCap}
-                    editable={false}
-                    onChangeText={setNgayCap}
-                  />
-                  <TouchableOpacity
-                    style={styles.iconPicker}
-                    onPress={showDatepickerCap}
-                  >
-                    <Icon name="calendar-month" size={24} color="#FFC107" />
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-          </>
-        ) : (
+          <Text style={styles.label}>Loại:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Loại thiết bị"
+            value={loai}
+            onChangeText={setLoai}
+          />
+
+          <Text style={styles.label}>Hãng:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Hãng sản xuất"
+            value={hang}
+            onChangeText={setHang}
+          />
+
+          <Text style={styles.label}>Ngày nhập:</Text>
           <View>
             <TextInput
               style={styles.input}
-              placeholder="Chưa cấp cho nhân viên"
-              value={nhanVien?.name}
+              placeholder="Ngày nhập (YYYY-MM-DD)"
+              value={ngayNhap}
               editable={false}
+              onChangeText={setNgayNhap}
             />
             <TouchableOpacity
               style={styles.iconPicker}
-              onPress={() => {
-                setIsEditing(!isEditing);
-              }}
+              onPress={showDatepicker}
             >
-              <Icon name="edit-square" size={24} color="#FFC107" />
+              <Icon name="calendar-month" size={24} color="#FFC107" />
             </TouchableOpacity>
           </View>
-        )}
 
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode={"date"}
-            is24Hour={true}
-            onChange={onChange}
-          />
-        )}
+          <Text style={styles.label}>Nhân viên được cấp:</Text>
+          {isEditing ? (
+            <>
+              <View style={styles.label}>
+                <SelectList
+                  placeholder={nhanVien?.name}
+                  setSelected={(val) => {
+                    setMaNV(val);
+                  }}
+                  data={dataSelect}
+                  save="key"
+                />
+              </View>
+              {maNV && (
+                <>
+                  <Text style={styles.label}>Ngày cấp:</Text>
+                  <View>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Ngày cấp (YYYY-MM-DD)"
+                      value={ngayCap}
+                      editable={false}
+                      onChangeText={setNgayCap}
+                    />
+                    <TouchableOpacity
+                      style={styles.iconPicker}
+                      onPress={showDatepickerCap}
+                    >
+                      <Icon name="calendar-month" size={24} color="#FFC107" />
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </>
+          ) : (
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder="Chưa cấp cho nhân viên"
+                value={nhanVien?.name}
+                editable={false}
+              />
+              <TouchableOpacity
+                style={styles.iconPicker}
+                onPress={() => {
+                  setIsEditing(!isEditing);
+                }}
+              >
+                <Icon name="edit-square" size={24} color="#FFC107" />
+              </TouchableOpacity>
+            </View>
+          )}
 
-        {showNC && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode={"date"}
-            is24Hour={true}
-            onChange={onChangeCap}
-          />
-        )}
+          {show && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode={"date"}
+              is24Hour={true}
+              onChange={onChange}
+            />
+          )}
 
-        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-          <Text style={styles.buttonText}>Cập nhật</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          {showNC && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode={"date"}
+              is24Hour={true}
+              onChange={onChangeCap}
+            />
+          )}
+
+          <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+            <Text style={styles.buttonText}>Cập nhật</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
     </View>
   );
 };
