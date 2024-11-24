@@ -2,32 +2,39 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import BackNav from "../../Compoment/BackNav";
-import { updateAssignedTaskStatus, getAssignedTask } from "../../services/Task"; // Import Firebase functions
+import { updateAssignedTaskStatus, getAssignedTask } from "../../services/Task";
 
 const TaskDetail = ({ navigation }) => {
   const route = useRoute();
   const { task } = route.params;
-  const { employee } = route.params || {}; // Pass `employeeId` from the parent component
+  const { employee } = route.params || {};
   const [isCompleted, setIsCompleted] = useState();
+  const isEmployee = employee?.chucvuId === 'NV';
 
   useEffect(() => {
-    const fetchAssignedTask = async () => {
-      try {
-        const assignedTask = await getAssignedTask(employee.employeeId, task.manhiemvu);
-        if (assignedTask) {
-          setIsCompleted(assignedTask.trangthai || false);
+    const fetchTaskStatus = async () => {
+      if (isEmployee) {
+        // Fetch status for employee
+        try {
+          const assignedTask = await getAssignedTask(employee.employeeId, task.manhiemvu);
+          if (assignedTask) {
+            setIsCompleted(assignedTask.trangthai || false);
+          }
+        } catch (error) {
+          Alert.alert("Error", "Failed to fetch assigned task");
         }
-      } catch (error) {
-        Alert.alert("Error", "Failed to fetch assigned task");
+      } else {
+        // For TP (Trưởng phòng), get status directly from task
+        setIsCompleted(task.trangthai || false);
       }
     };
   
     if (employee && task) {
-      fetchAssignedTask();
+      fetchTaskStatus();
     }
-  }, [task, employee]);
+  }, [task, employee, isEmployee]);
 
-  // Function to toggle completion status
+
   const handleToggleCompletion = async () => {
     try {
       const newStatus = !isCompleted;
@@ -45,19 +52,44 @@ const TaskDetail = ({ navigation }) => {
     }
   };
 
+  // Component to render status based on role
+  const renderStatusComponent = () => {
+    if (employee?.chucvuId === 'NV') { // Nhân viên
+      return (
+        <TouchableOpacity
+          style={[styles.button, isCompleted ? styles.completedButton : styles.notCompletedButton]}
+          onPress={handleToggleCompletion}
+        >
+          <Text style={styles.buttonText}>
+            {isCompleted ? "✅ Đã hoàn thành" : "❌ Chưa hoàn thành"}
+          </Text>
+        </TouchableOpacity>
+      );
+    } else { // Trưởng phòng
+      return (
+        <View style={styles.statusTextContainer}>
+          <Text style={[
+            styles.statusText,
+            isCompleted ? styles.completedText : styles.notCompletedText
+          ]}>
+            {isCompleted ? "Đã hoàn thành" : "Chưa hoàn thành"}
+          </Text>
+        </View>
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <BackNav name={"Chi tiết nhiệm vụ"} />
       </View>
 
-      {/* Task Details */}
       <View style={styles.section}>
         <Text style={styles.label}>Tên nhiệm vụ</Text>
         <Text style={styles.value}>{task?.taskName}</Text>
       </View>
 
-      {/* Time details in row */}
       <View style={styles.rowSection}>
         <View style={styles.timeSection}>
           <Text style={styles.label}>Thời gian bắt đầu</Text>
@@ -74,15 +106,7 @@ const TaskDetail = ({ navigation }) => {
         <Text style={styles.value}>{task?.description || "No description available."}</Text>
       </View>
 
-      {/* Task Completion Toggle */}
-      <TouchableOpacity
-        style={[styles.button, isCompleted ? styles.completedButton : styles.notCompletedButton]}
-        onPress={handleToggleCompletion}
-      >
-        <Text style={styles.buttonText}>
-          {isCompleted ? "✅ Đã hoàn thành" : "❌ Chưa hoàn thành"}
-        </Text>
-      </TouchableOpacity>
+      {renderStatusComponent()}
     </View>
   );
 };
@@ -140,6 +164,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
+  statusTextContainer: {
+    padding: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
+  },
+  statusText: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  completedText: {
+    color: "#4CAF50",
+  },
+  notCompletedText: {
+    color: "#F44336",
+  }
 });
 
 export default TaskDetail;

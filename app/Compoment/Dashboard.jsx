@@ -11,6 +11,7 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) =>
   const [tasks, setTasks] = useState([]);  // State to store tasks
   const phongbanId = employee?.phongbanId;
   const navigation = useNavigation();
+  const isEmployee = employee?.chucvuId === 'NV';
 
   useEffect(() => {
     const fetchPhongBan = async () => {
@@ -98,11 +99,16 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) =>
         <Text style={styles.buttonText}>Đăng ký nghỉ phép</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => {
-        navigation.navigate("TaskScreen", { employee: employee });
-      }}>
-        <Text style={styles.buttonText}>Nhiệm vụ của tôi</Text>
-      </TouchableOpacity>
+      {isEmployee && (
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={() => {
+            navigation.navigate("TaskScreen", { employee: employee });
+          }}
+        >
+          <Text style={styles.buttonText}>Nhiệm vụ của tôi</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

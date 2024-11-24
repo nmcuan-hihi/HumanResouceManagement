@@ -50,7 +50,7 @@ export async function taoTaskDataBase(nhiemvu) {
 export const getAssignedTask = async (employeeId, manhiemvu) => {
   try {
     if (!employeeId || !manhiemvu) {
-      console.error("Dữ liệu đầu vào không hợp lệ");
+      console.error("Dữ liệu đầu vào không hợp lệ?");
       return null;
     }
 
