@@ -238,8 +238,11 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                   </TouchableOpacity>
                 </View>
                 {bangCapNV && bangCapNV.length > 0 ? (
-                  bangCapNV.map((item, index) => (
-                    <TouchableOpacity key={index} onPress={() => bangcap(item)}>
+                  bangCapNV.map((item) => (
+                    <TouchableOpacity
+                      key={item.bangcap_id}
+                      onPress={() => bangcap(item)}
+                    >
                       <View style={styles.infoItem}>
                         <Text style={styles.infoValue}>
                           {item.tenBang || "N/A"}
@@ -275,9 +278,9 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 </View>
 
                 {skillNV && skillNV.length > 0 ? (
-                  skillNV.map((item, index) => (
-                    <TouchableOpacity>
-                      <View key={index} style={styles.infoItem}>
+                  skillNV.map((item) => (
+                    <TouchableOpacity key={item.mask}>
+                      <View style={styles.infoItem}>
                         <Text style={styles.infoValue}>
                           {item.tensk || "N/A"}
                         </Text>
@@ -307,15 +310,16 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 </View>
 
                 {thietBiNV && thietBiNV.length > 0 ? (
-                  thietBiNV.map((item, index) => (
+                  thietBiNV.map((item) => (
                     <TouchableOpacity
+                      key={item.id}
                       onPress={() => {
                         navigation.navigate("ChiTietCapThietBiNV", {
                           id: item.id,
                         });
                       }}
                     >
-                      <View key={index} style={styles.infoItem}>
+                      <View style={styles.infoItem}>
                         <Text style={styles.infoValue}>
                           {item.ten || "N/A"}
                         </Text>
