@@ -1,5 +1,5 @@
 import { database } from "../config/firebaseconfig";
-import { ref, push, set, get, update, onValue } from "firebase/database";
+import { ref, push, set, get, update, onValue,off } from "firebase/database";
 import { store } from "../redux/store"; // Import Redux store to access idCty
 
 // Lấy idCty từ Redux store
@@ -91,9 +91,10 @@ export async function layDanhSachThongBaoNhanVien(employeeId) {
 }
 
 // Lắng nghe thông báo cho nhân viên
+
 export function listenForNotifications(employeeId, callback) {
   const thongBaonhanVienRef = ref(database, `${idCty}/thongbaonhanvien`); // Thêm idCty vào tham chiếu
-
+  
   // Đăng ký listener trên ref này
   onValue(thongBaonhanVienRef, (snapshot) => {
     if (snapshot.exists()) {
@@ -112,8 +113,10 @@ export function listenForNotifications(employeeId, callback) {
       callback([]);
     }
   });
-}
 
+  // Trả về một hàm hủy đăng ký
+  return () => off(thongBaonhanVienRef);
+}4
 // Lấy thông báo theo ID
 export async function layThongBaoById(maThongBao) {
   try {

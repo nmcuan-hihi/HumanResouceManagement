@@ -1,6 +1,8 @@
 import { getDatabase, ref, get, set, update, serverTimestamp } from 'firebase/database';
 import { app } from '../config/firebaseconfig';  // Đảm bảo cấu hình đúng
 import { store, storeHRM } from "../redux/store";
+const database = getDatabase(app);
+const storage = getStorage(app); // Initialize Firebase Storage
 
 export const getEmployeesWithLeave = async (today) => {
   try {
@@ -50,7 +52,7 @@ export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) 
     const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
     const db = getDatabase(app);
     const employeesRef = ref(db, `${idCty}/employees`);
-    const leaveRef = ref(db, "nghiPhep");
+    const leaveRef = ref(db, `${idCty}/nghiPhep`);
 
     // Đọc danh sách nhân viên
     const snapshotEmployees = await get(employeesRef);
@@ -108,62 +110,6 @@ export async function getFilteredEmployeesByPhongBanAndLeave(phongbanId, today) 
     return [];
   }
 }
-
-
-
-export const getEmployeesWithLeave2 = async () => {
-  const db = getDatabase();
-  const state = store.getState();
-  const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
-  // Lấy danh sách nhân viên từ Firebase Realtime Database
-  const employeesRef = ref(db, `${idCty}/employees`);
-  const leavesRef = ref(db, `${idCty}/nghiPhep`);
-  
-  try {
-    // Lấy tất cả dữ liệu nhân viên
-    const employeeSnapshot = await get(employeesRef);
-    const employees = employeeSnapshot.val();
-    
-    // Lấy tất cả dữ liệu nghỉ phép
-    const leaveSnapshot = await get(leavesRef);
-    const leaves = leaveSnapshot.val();
-
-    // Lấy ngày hiện tại
-    const currentDate = new Date().toLocaleDateString('vi-VN');  // dd/MM/yyyy
-
-    
-    // Lọc danh sách nhân viên để loại bỏ những người đang nghỉ trong ngày hiện tại
-    const filteredEmployees = Object.keys(employees).filter(employeeId => {
-      const employee = employees[employeeId];
-      const leave = Object.values(leaves).find(leave => leave.employeeId === employeeId);
-      
-      // Kiểm tra xem nhân viên có ngày nghỉ trùng với ngày hiện tại không
-      if (leave) {
-        const leaveStartDate = leave.ngayBatDau;
-        const leaveEndDate = leave.ngayKetThuc;
-
-        // Nếu nhân viên đang nghỉ phép trong ngày hôm nay thì không thêm vào danh sách
-        if (currentDate >= leaveStartDate && currentDate <= leaveEndDate) {
-          return false;
-        }
-      }
-
-      // Nếu không có nghỉ phép hoặc không nghỉ trong ngày hiện tại, nhân viên sẽ có mặt trong danh sách
-      return true;
-    });
-
-    // Lấy thông tin của các nhân viên còn lại
-    const activeEmployees = filteredEmployees.map(employeeId => employees[employeeId]);
-
-    console.log(activeEmployees);
-    return activeEmployees;
-  } catch (error) {
-    console.error('Error fetching employees:', error);
-    return [];
-  }
-};
-// Lấy instance của Realtime Database
-const database = getDatabase(app);
 
 
 

@@ -10,7 +10,7 @@ export async function dangKyNghiPhep(nghiPhepData) {
     const idCty = state.congTy.idCty;
     
     // Tạo một reference đến nhánh "nghiPhep" trong database của công ty
-    const nghiPhepRef = ref(database, `/${idCty}/nghiPhep`);
+    const nghiPhepRef = ref(database, `${idCty}/nghiPhep`);
 
     // Tạo một ID mới cho yêu cầu nghỉ phép
     const newNghiPhepRef = push(nghiPhepRef);
@@ -47,7 +47,7 @@ export async function layDanhSachNghiPhep() {
     const idCty = state.congTy.idCty;
     
     // Tạo reference đến nhánh "nghiPhep" trong database của công ty
-    const nghiPhepRef = ref(database, `/${idCty}/nghiPhep`);
+    const nghiPhepRef = ref(database, `${idCty}/nghiPhep`);
 
     // Lấy dữ liệu từ Firebase
     const snapshot = await get(nghiPhepRef);
@@ -80,7 +80,7 @@ export async function duyetNghiPhep(id, status) {
     const idCty = state.congTy.idCty;
     
     // Tạo reference đến yêu cầu nghỉ phép cụ thể trong database của công ty
-    const nghiPhepRef = ref(database, `/${idCty}/nghiPhep/${id}`);
+    const nghiPhepRef = ref(database, `${idCty}/nghiPhep/${id}`);
 
     // Cập nhật trạng thái của yêu cầu nghỉ phép
     await update(nghiPhepRef, { trangThai: status });

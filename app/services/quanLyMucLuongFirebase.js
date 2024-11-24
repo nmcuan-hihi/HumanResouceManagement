@@ -16,8 +16,10 @@ const db = getDatabase(app);
 
 // Lấy công thức lương từ Realtime Database
 export async function getCongThucLuong() {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
   try {
-    const congThucLuongRef = ref(db, "congthucluong/ctl1");
+    const congThucLuongRef = ref(db, `${idCty}/congthucluong/ctl1`);
     const snapshot = await get(congThucLuongRef);
     if (snapshot.exists()) {
       return snapshot.val();
@@ -131,8 +133,10 @@ export async function getEmployeeSalaryAndAttendance(employeeId, month) {
 
 // Cập nhật công thức lương
 export async function updateCongThucLuong(newData) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
   try {
-    const congThucLuongRef = ref(db, "congthucluong/ctl1");
+    const congThucLuongRef = ref(db, `${idCty}/congthucluong/ctl1`);
     await update(congThucLuongRef, newData);
     console.log("Document successfully updated!");
   } catch (error) {
@@ -227,16 +231,15 @@ export async function getBangLuong() {
   }
 }
 
-
-
 //-------------------------------------Các hàm trong danh sách lương - By Thu pro-----------------------
 
 // lấy danh sách bảng công của tất cả nhân viên trong 1 tháng
 
-
 export async function getChamCongByMonth(nam, thang, callback) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
   const db = getDatabase();
-  const reference = ref(db, "chitietchamcong");
+  const reference = ref(db, `${idCty}/chitietchamcong`);
   const unsubscribe = onValue(reference, (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
@@ -250,6 +253,12 @@ export async function getChamCongByMonth(nam, thang, callback) {
           }
         }
       }
+
+      console.log(
+        results,
+        "---------dataresul----------------------------sadsadasdsadasdas"
+      );
+
       callback(results);
     } else {
       console.log("Không tìm thấy dữ liệu chấm công");
@@ -263,12 +272,14 @@ export async function getChamCongByMonth(nam, thang, callback) {
 
 // Lưu danh sách lương vào Realtime Database
 export async function luuDanhSachLuongFirebase(salaryList, nam, thang) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
   try {
     for (const salaryEntry of salaryList) {
       const documentKey = `${salaryEntry.employeeId}`;
       const salaryRef = ref(
         db,
-        `bangluongnhanvien/${documentKey}/${nam}/${thang}`
+        ` ${idCty}/bangluongnhanvien/${documentKey}/${nam}/${thang}`
       );
 
       await update(salaryRef, salaryEntry);
@@ -282,8 +293,10 @@ export async function luuDanhSachLuongFirebase(salaryList, nam, thang) {
 // Lấy danh sách bảng lương theo tháng
 
 export async function layDanhSachBangLuongTheoThang(nam, thang) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
   try {
-    const bangLuongRef = query(ref(db, "bangluongnhanvien"));
+    const bangLuongRef = query(ref(db, `${idCty}/bangluongnhanvien`));
     const snapshot = await get(bangLuongRef);
     const results = [];
 
