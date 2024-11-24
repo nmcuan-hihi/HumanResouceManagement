@@ -234,7 +234,7 @@ export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
     const monthString = `Tháng ${thang}`;
 
     // Construct the database reference path
-    const reference = ref(db, `${idCty}/chitietchamcong/${employeeId}/${nam}/${monthString}`);
+    const reference = ref(db, `${idCty}/chitietchamcong/${employeeId}/${nam}/${thang}`);
 
     // Attach a listener to fetch data
     onValue(reference, (snapshot) => {
