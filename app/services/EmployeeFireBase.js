@@ -108,51 +108,6 @@ export async function readEmployeesFireStore() {
     throw error;
   }
 }
-// hàm ;lấy nhân viên có chức vụ là trưởng phòng
-export async function getEmployeesInDepartment(employeeId) {
-  try {
-    const state = store.getState();
-    const { idCty, employees } = state.congTy.idCty;  // Destructure both
-
-    if (!idCty || !employees) {
-      console.warn("Missing company data or employees in Redux store", state.congTy);
-      return []; // Handle missing data by returning an empty array or showing a loading state
-    }
-
-    const currentUser = employees[employeeId];
-    if (!currentUser) {
-      throw new Error("Employee not found");
-    }
-
-    if (currentUser.chucvuId !== "TP") {
-      throw new Error("User is not a department head");
-    }
-
-    const employeeRef = ref(database, `${idCty}/employees`);
-    const snapshot = await get(employeeRef);
-
-    if (!snapshot.exists()) {
-      return [];
-    }
-
-    const departmentEmployees = [];
-    snapshot.forEach((childSnapshot) => {
-      const employee = childSnapshot.val();
-      if (employee.phongbanId === currentUser.phongbanId) {
-        departmentEmployees.push({
-          label: employee.name,
-          value: employee.employeeId,
-        });
-      }
-    });
-
-    return departmentEmployees;
-  } catch (error) {
-    console.error("Failed to get department employees:", error.message);
-    throw error;
-  }
-}
-
 
 
 

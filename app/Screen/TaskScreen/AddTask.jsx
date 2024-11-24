@@ -16,6 +16,7 @@ import BackNav from "../../Compoment/BackNav";
 import CalendarModal from "../../Compoment/CalendarModal";
 import { readPhongBanFromRealtime } from "../../services/PhongBanDatabase";
 import { readEmployeesFireStore } from "../../services/EmployeeFireBase";
+import { getEmployeeById } from "../../services/EmployeeFireBase";
 import { taoTaskDataBase, themTaskPhanCong } from "../../services/Task";
 
 const AddTask = ({ navigation }) => {
@@ -29,7 +30,7 @@ const AddTask = ({ navigation }) => {
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedDateType, setSelectedDateType] = useState("start");
   const [open, setOpen] = useState(false);
-  const [selectedEmployees, setSelectedEmployees] = useState([employee?.employeeId || ""]);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [phongBans, setPhongBans] = useState("");
   const [searchPB, setSearchPB] = useState(
@@ -47,31 +48,18 @@ const AddTask = ({ navigation }) => {
         const employeesData = await readEmployeesFireStore();
     
         // Kiểm tra thông tin người đăng nhập
-        console.log("Thông tin người đăng nhập:", employee);
-    
+       
+       
         // Lọc Trưởng phòng cùng phòng ban với người đăng nhập
-        const truongPhong = employeesData.find(
-          (emp) =>
-            emp.chucvuId === "TP" && // Là Trưởng phòng
-            emp.maPhongBan === employee?.phongbanId // Cùng phòng ban với người đăng nhập
-        );
     
-        if (!truongPhong) {
-          Alert.alert(
-            "Thông báo",
-            "Không tìm thấy Trưởng phòng trong phòng ban của bạn."
-          );
-          return;
-        }
-    
-        console.log("Trưởng phòng của phòng ban hiện tại:", truongPhong);
+       const getNV = await getEmployeeById(employee);
 
-
+  console.log("Thông tin người đăng nhập:", getNV);
     
         // Lọc danh sách nhân viên cùng phòng ban (trừ Trưởng phòng và Giám đốc)
         const filteredEmployees = employeesData.filter(
           (emp) =>
-            emp.phongbanId === truongPhong.phongbanId && // Cùng phòng ban với Trưởng phòng
+            emp.phongbanId === getNV.phongbanId && // Cùng phòng ban với Trưởng phòng
             emp.chucvuId !== "TP" && // Không phải Trưởng phòng
             emp.chucvuId !== "GD" // Không phải Giám đốc
         );
@@ -90,11 +78,11 @@ const AddTask = ({ navigation }) => {
       }
     };
     
-   console.log("A:",employees.employeeId)
+   
     // Chỉ fetch nếu có thông tin về phòng ban của nhân viên
 
     fetchEmployees();
-    fetchPhongBan();
+   
     // Initialize dates
     const today = new Date();
     setStartDate(formatDate(today));
@@ -104,37 +92,37 @@ const AddTask = ({ navigation }) => {
     setEndDate(formatDate(nextDay));
   }, [employee]);
 
-  const fetchPhongBan = async () => {
-    try {
-      const data = await readPhongBanFromRealtime();
-      if (data) {
-        const phongBanArray = Object.values(data).map((p) => ({
-          label: p.tenPhongBan,
-          value: p.maPhongBan,
+  // const fetchPhongBan = async () => {
+  //   try {
+  //     const data = await readPhongBanFromRealtime();
+  //     if (data) {
+  //       const phongBanArray = Object.values(data).map((p) => ({
+  //         label: p.tenPhongBan,
+  //         value: p.maPhongBan,
           
-        }));
+  //       }));
 
-        setPhongBans(phongBanArray);
-        console.log(phongBans)
-      }
-    } catch (error) {
-      console.error("Lỗi khi lấy phòng ban:", error);
-    }
-  };
+  //       setPhongBans(phongBanArray);
+  //       console.log(phongBans)
+  //     }
+  //   } catch (error) {
+  //     console.error("Lỗi khi lấy phòng ban:", error);
+  //   }
+  // };
 
-  const locNhanVienPb = () => {
-    if (searchPB == "all" || !searchPB) {
-      setListNVPB(listNV);
-    } else {
-      const data = listNV.filter((nv) => {
-        return nv.phongbanId == searchPB;
-      });
-      setListNVPB(data);
-    }
-  };
-  useEffect(() => {
-    locNhanVienPb();
-  }, [searchPB, listNV]);
+  // const locNhanVienPb = () => {
+  //   if (searchPB == "all" || !searchPB) {
+  //     setListNVPB(listNV);
+  //   } else {
+  //     const data = listNV.filter((nv) => {
+  //       return nv.phongbanId == searchPB;
+  //     });
+  //     setListNVPB(data);
+  //   }
+  // };
+  // useEffect(() => {
+  //   locNhanVienPb();
+  // }, [searchPB, listNV]);
   const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -147,8 +135,8 @@ const AddTask = ({ navigation }) => {
       Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin.");
       return;
     }
-    const idTruongPhong = [employee];
-    const newTask = { taskName, description, startDate, endDate,employee, assignedEmployees: selectedEmployees };
+   
+    const newTask = { taskName, description, startDate, endDate,employee};
 
     try {
       const taskData = await taoTaskDataBase(newTask);
