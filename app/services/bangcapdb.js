@@ -1,6 +1,20 @@
-import { getDatabase, ref, set, get, update, query, equalTo, orderByChild } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  set,
+  get,
+  update,
+  query,
+  equalTo,
+  orderByChild,
+} from "firebase/database";
 import { app } from "../config/firebaseconfig"; // Assumes your Firebase configuration is here
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 import { store } from "../redux/store"; // Import Redux store to access idCty
 
 const database = getDatabase(app);
@@ -8,7 +22,8 @@ const storage = getStorage(app); // Initialize Firebase Storage
 
 // Helper function to generate random string
 function random(length) {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * characters.length);
@@ -31,7 +46,13 @@ export async function addBangCapNV(bangCap, image) {
     const imageUrl = await getDownloadURL(imageRef);
 
     const data = { ...bangCap, imageUrl };
-    await set(ref(database, `${idCty}/bangcapnhanvien/${bangCap.employeeId}-${bangCap.bangcap_id}`), data);
+    await set(
+      ref(
+        database,
+        `${idCty}/bangcapnhanvien/${bangCap.employeeId}-${bangCap.bangcap_id}`
+      ),
+      data
+    );
     console.log(`Employee ${bangCap.employeeId} added successfully!`);
   } catch (error) {
     console.error("Error adding employee qualification:", error);
@@ -44,23 +65,25 @@ export async function readBangCapNhanVien1(bangcap_id, employeeId) {
     const state = store.getState();
     const idCty = state.congTy.idCty; // Get idCty from Redux store
 
-    const bangCapRef = query(ref(database, `${idCty}/bangcapnhanvien`), orderByChild("bangcap_id"), equalTo(bangcap_id));
+    const bangCapRef = query(
+      ref(database, `${idCty}/bangcapnhanvien/${employeeId}-${bangcap_id}`)
+    );
     const snapshot = await get(bangCapRef);
 
     if (snapshot.exists()) {
-      let bangCapDetail = null;
-      snapshot.forEach((doc) => {
-        if (doc.val().employeeId === employeeId) {
-          bangCapDetail = doc.val();
-        }
-      });
+      let bangCapDetail = snapshot.val();
       return bangCapDetail || {};
     } else {
-      console.log("No document found with the provided bangcap_id and employeeId");
+      console.log(
+        "No document found with the provided bangcap_id and employeeId"
+      );
       return {};
     }
   } catch (error) {
-    console.error("Error reading qualification by bangcap_id and employeeId:", error);
+    console.error(
+      "Error reading qualification by bangcap_id and employeeId:",
+      error
+    );
     return {};
   }
 }
@@ -95,7 +118,10 @@ export async function toggleXacthuc(employeeId, bangcapId) {
     const state = store.getState();
     const idCty = state.congTy.idCty; // Get idCty from Redux store
 
-    const docRef = ref(database, `${idCty}/bangcapnhanvien/${employeeId}-${bangcapId}`);
+    const docRef = ref(
+      database,
+      `${idCty}/bangcapnhanvien/${employeeId}-${bangcapId}`
+    );
     const snapshot = await get(docRef);
 
     if (snapshot.exists()) {
@@ -103,7 +129,10 @@ export async function toggleXacthuc(employeeId, bangcapId) {
       const newXacthuc = currentXacthuc === "0" ? "1" : "0";
       await update(docRef, { xacthuc: newXacthuc });
 
-      console.log(`Cập nhật xacthuc thành công cho ${employeeId} - ${bangcapId}:`, newXacthuc);
+      console.log(
+        `Cập nhật xacthuc thành công cho ${employeeId} - ${bangcapId}:`,
+        newXacthuc
+      );
       return newXacthuc;
     } else {
       console.log("Không tìm thấy tài liệu để cập nhật!");

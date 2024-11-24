@@ -61,18 +61,22 @@ export function getAllThietBi(callback) {
   const thietBiRef = ref(database, `${idCty}/thietbicty`);
 
   // Sử dụng onValue để lắng nghe thay đổi
-  onValue(thietBiRef, (snapshot) => {
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      const thietBiList = Object.keys(data).map((key) => data[key]);
-      callback(thietBiList); // Gọi callback với dữ liệu mới
-    } else {
-      console.log("Không có dữ liệu thiết bị.");
-      callback([]); // Gọi callback với mảng rỗng
+  onValue(
+    thietBiRef,
+    (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const thietBiList = Object.keys(data).map((key) => data[key]);
+        callback(thietBiList); // Gọi callback với dữ liệu mới
+      } else {
+        console.log("Không có dữ liệu thiết bị.");
+        callback([]); // Gọi callback với mảng rỗng
+      }
+    },
+    (error) => {
+      console.error("Lỗi khi lắng nghe thay đổi:", error);
     }
-  }, (error) => {
-    console.error("Lỗi khi lắng nghe thay đổi:", error);
-  });
+  );
 }
 
 // Hàm lấy thiết bị theo ID
@@ -131,5 +135,50 @@ export async function updateThietBi(id, updatedData) {
     console.log(`Cập nhật thiết bị với ID ${id} thành công.`);
   } catch (error) {
     console.error("Lỗi khi cập nhật thiết bị:", error);
+  }
+}
+export function getAllThietBiByEmployeeId(employeeId) {
+  return new Promise((resolve, reject) => {
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
+
+    const thietBiRef = ref(database, `${idCty}/thietbicty`);
+
+    // Sử dụng onValue để lắng nghe thay đổi
+    onValue(
+      thietBiRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const thietBiList = Object.values(data);
+          const newData = thietBiList.filter(
+            (tb) => tb.employeeId === employeeId
+          );
+          resolve(newData); // Trả về dữ liệu mới
+        } else {
+          console.log("Không có dữ liệu thiết bị.");
+          resolve([]); // Trả về mảng rỗng
+        }
+      },
+      (error) => {
+        console.error("Lỗi khi lắng nghe thay đổi:", error);
+        reject(error); // Trả về lỗi
+      }
+    );
+  });
+}
+
+// Hàm trả thiết bị
+export async function traThietBi(id, updatedData) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+  try {
+    const thietBiRef = ref(database, `${idCty}/thietbicty/${id}`);
+    await update(thietBiRef, updatedData);
+
+    // Cập nhật thông tin thiết bị
+    console.log(`Trả thiết bị với ID ${id} thành công.`);
+  } catch (error) {
+    console.error("Lỗi khi Trả thiết bị:", error);
   }
 }

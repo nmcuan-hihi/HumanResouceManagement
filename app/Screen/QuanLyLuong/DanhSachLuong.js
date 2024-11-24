@@ -157,9 +157,7 @@ const DanhSachLuong = ({ navigation }) => {
     return diffInHours;
   }
 
-  const timeIn = "9:00 AM";
-  const timeOut = "5:00 PM";
-  const hoursWorked = calculateHours(timeIn, timeOut);
+
 
   const luongTamTinh = (duLieuChamCong) => {
     const temporarySalaryData = [];
@@ -255,6 +253,7 @@ const DanhSachLuong = ({ navigation }) => {
 
         // Cập nhật danh sách chấm công
         setDSChamCong(dataChamcong);
+        console.log(dataChamcong,'----------------------------')
 
         // Kiểm tra và cập nhật lại danh sách lương
         const today = formatDateToYYYYMM(new Date());

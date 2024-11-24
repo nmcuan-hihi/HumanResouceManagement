@@ -58,6 +58,8 @@ import ChiTietThongBao from "./app/Screen/NotificeScreen/ChiTietThongBao";
 import ListThietBi from "./app/Screen/ThietBiScreen/ListThietBi";
 import ChiTietThietBi from "./app/Screen/ThietBiScreen/ChiTietThietBi";
 import SuaThietBi from "./app/Screen/ThietBiScreen/SuaThietBi";
+import ThemThietBiNhanVien from "./app/Screen/ThietBiScreen/ThemThietBiNhanVien";
+import ChiTietCapThietBiNV from "./app/Screen/ThietBiScreen/ChiTietCapThietBiNV";
 
 import { Provider } from "react-redux";
 import { store } from "./app/redux/store";
@@ -291,6 +293,18 @@ export default function App() {
             <Stack.Screen
               name="SuaThietBi"
               component={SuaThietBi}
+              options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+              name="ThemThietBiNhanVien"
+              component={ThemThietBiNhanVien}
+              options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+              name="ChiTietCapThietBiNV"
+              component={ChiTietCapThietBiNV}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>
