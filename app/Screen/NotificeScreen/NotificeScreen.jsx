@@ -36,14 +36,13 @@ export default function NotificeScreen({ navigation, route }) {
             };
           })
         );
-
+  
         setListThongBaoNV(newData.reverse());
       }
     );
-
-    return () => unsubscribe();
+  
+    return () => unsubscribe(); // Gọi hàm hủy để dừng lắng nghe
   }, []);
-
   const capNhatTrangThai = async (employeeId, maThongBao) => {
     try {
       await capNhatTrangThaiThongBao(employeeId, maThongBao);

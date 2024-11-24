@@ -128,6 +128,22 @@ export default function HomeScreenGD({ navigation, route }) {
             <Icon name="book" size={24} color="#FF9966" />
             <Text style={styles.statValue}>Kỹ năng</Text>
           </TouchableOpacity>
+
+
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate("ListThietBi")}
+          >
+            <Icon name="laptop" size={24} color="#9C27B0" />
+            <Text style={styles.statValue}>Thiết bị</Text>
+          </TouchableOpacity>
+
+
+
+
+
+
+
           <TouchableOpacity
             style={styles.statItem}
             onPress={() => navigation.navigate("DanhSachLuong")}
