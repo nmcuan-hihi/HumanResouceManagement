@@ -7,11 +7,11 @@ import {
   orderByChild,
   equalTo,
   push,
-  onValue 
+  onValue,
 } from "firebase/database";
 import { app } from "../config/firebaseconfig"; // Đảm bảo bạn đã cấu hình đúng
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
-import { store } from "../redux/store"; 
+import { store } from "../redux/store";
 const db = getDatabase(app);
 
 // Lấy công thức lương từ Realtime Database
@@ -27,7 +27,7 @@ export async function getCongThucLuong() {
       console.log("Không tìm thấy dữ liệu công thức lương!");
     }
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu:", error);
+    console.log("Lỗi khi lấy dữ liệu:", error);
   }
 }
 export async function getEmployeeSalaryAndAttendance(employeeId, month) {
@@ -126,7 +126,7 @@ export async function getEmployeeSalaryAndAttendance(employeeId, month) {
       summary: summary,
     };
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu:", error);
+    console.log("Lỗi khi lấy dữ liệu:", error);
     throw error;
   }
 }
@@ -140,7 +140,7 @@ export async function updateCongThucLuong(newData) {
     await update(congThucLuongRef, newData);
     console.log("Document successfully updated!");
   } catch (error) {
-    console.error("Error updating document:", error);
+    console.log("Error updating document:", error);
   }
 }
 
@@ -172,7 +172,7 @@ export async function getChamCongDetailsByEmployeeId(employeeId) {
 
     return data;
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu chấm công:", error);
+    console.log("Lỗi khi lấy dữ liệu chấm công:", error);
     throw error;
   }
 }
@@ -204,7 +204,7 @@ export async function getChamCongDetailsByMonth(employeeId, thang) {
 
     return data;
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ Realtime Database:", error);
+    console.log("Lỗi khi lấy dữ liệu từ Realtime Database:", error);
     throw new Error("Không thể lấy dữ liệu chấm công.");
   }
 }
@@ -226,13 +226,12 @@ export async function getBangLuong() {
 
     return data;
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ collection:", error);
+    console.log("Lỗi khi lấy dữ liệu từ collection:", error);
     throw error;
   }
 }
 
 // Retrieve attendance details for a specific month
-
 
 export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
   try {
@@ -244,7 +243,10 @@ export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
     const monthString = `Tháng ${thang}`;
 
     // Construct the database reference path
-    const reference = ref(db, `${idCty}/chitietchamcong/${employeeId}/${nam}/${thang}`);
+    const reference = ref(
+      db,
+      `${idCty}/chitietchamcong/${employeeId}/${nam}/${thang}`
+    );
 
     // Attach a listener to fetch data
     onValue(reference, (snapshot) => {
@@ -256,7 +258,10 @@ export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
         const attendanceDetails = Object.keys(data)
           .map((key) => {
             const day = key; // Day from the database
-            const fullDateString = `${nam}-${String(thang).padStart(2, "0")}-${day.padStart(2, "0")}`;
+            const fullDateString = `${nam}-${String(thang).padStart(
+              2,
+              "0"
+            )}-${day.padStart(2, "0")}`;
             return {
               ...data[key],
               date: fullDateString, // Format as YYYY-MM-DD
@@ -270,29 +275,18 @@ export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
         console.log("Filtered attendance details: ", attendanceDetails);
         callback(attendanceDetails);
       } else {
-        console.warn("No data found for the specified month.");
         callback([]); // Return an empty array if no data
       }
     });
   } catch (error) {
-    console.error("Error fetching attendance details: ", error);
+    console.log("Error fetching attendance details: ", error);
     callback([]); // Handle errors gracefully
   }
 }
 
-
-
-
-
-
-
-
-
-
 //-------------------------------------Các hàm trong danh sách lương - By Thu pro-----------------------
 
 // lấy danh sách bảng công của tất cả nhân viên trong 1 tháng
-
 
 export async function getChamCongByMonth(nam, thang, callback) {
   const db = getDatabase();
@@ -321,6 +315,36 @@ export async function getChamCongByMonth(nam, thang, callback) {
   return unsubscribe;
 }
 
+export function getChamCongByMonth123(nam, thang, callback) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+  const db = getDatabase();
+
+  const thietBiRef = ref(db, `${idCty}/chitietchamcong`);
+
+  // Sử dụng onValue để lắng nghe thay đổi
+  onValue(thietBiRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const results = [];
+
+      for (const employeeId in data) {
+        if (data[employeeId][nam] && data[employeeId][nam][thang]) {
+          const records = data[employeeId][nam][thang];
+          for (const day in records) {
+            results.push(records[day]);
+          }
+        }
+      }
+      callback(results);
+    } else {
+      console.log("Không tìm thấy dữ liệu chấm công");
+
+      callback([]);
+    }
+  });
+}
+
 // Lưu danh sách lương vào Realtime Database
 export async function luuDanhSachLuongFirebase(salaryList, nam, thang) {
   const state = store.getState();
@@ -330,14 +354,14 @@ export async function luuDanhSachLuongFirebase(salaryList, nam, thang) {
       const documentKey = `${salaryEntry.employeeId}`;
       const salaryRef = ref(
         db,
-        ` ${idCty}/bangluongnhanvien/${documentKey}/${nam}/${thang}`
+        `${idCty}/bangluongnhanvien/${documentKey}/${nam}/${thang}`
       );
 
       await update(salaryRef, salaryEntry);
       console.log("Document successfully written for key:", documentKey);
     }
   } catch (error) {
-    console.error("Error writing document:", error);
+    console.log("Error writing document:", error);
   }
 }
 
@@ -362,7 +386,7 @@ export async function layDanhSachBangLuongTheoThang(nam, thang) {
     }
     return results;
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu từ collection:", error);
+    console.log("Lỗi khi lấy dữ liệu từ collection:", error);
     throw error;
   }
 }

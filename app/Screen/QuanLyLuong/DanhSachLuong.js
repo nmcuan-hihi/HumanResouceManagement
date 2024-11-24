@@ -23,6 +23,7 @@ import {
   getAllChamCongDetails,
   luuDanhSachLuongFirebase,
   layDanhSachBangLuongTheoThang,
+  getChamCongByMonth123,
 } from "../../services/quanLyMucLuongFirebase";
 import LoadingModal from "../../Compoment/modalLodading";
 import dayjs from "dayjs";
@@ -144,20 +145,17 @@ const DanhSachLuong = ({ navigation }) => {
       // Trả về đối tượng Date (Ngày, tháng, năm có thể được ghi rõ nếu cần)
       const date = new Date();
       date.setHours(hours, minutes);
+
       return date;
     };
 
-    const startTime = formatTime(timeIn);
-    const endTime = formatTime(timeOut);
-
+    const startTime = formatTime(timeIn + "");
+    const endTime = formatTime(timeOut + "");
     // Tính số giờ giữa thời gian vào và ra
     const diffInMilliseconds = endTime - startTime; // Số mili giây giữa hai thời gian
     const diffInHours = diffInMilliseconds / 1000 / 60 / 60; // Chuyển đổi mili giây sang giờ
-
     return diffInHours;
   }
-
-
 
   const luongTamTinh = (duLieuChamCong) => {
     const temporarySalaryData = [];
@@ -172,11 +170,18 @@ const DanhSachLuong = ({ navigation }) => {
           totalOvertime: 0,
         };
       }
-      const gioLam = calculateHours(chamcong.timeIn, chamcong.timeOut);
 
-      acc[employeeId].ngayCong += gioLam / 8;
-      acc[employeeId].ngayCong = Math.round(acc[employeeId].ngayCong * 10) / 10;
-      acc[employeeId].totalOvertime += chamcong?.tangCa ? chamcong?.tangCa : 0;
+      const gioLam = calculateHours(chamcong.timeIn, chamcong.timeOut) || 0;
+      console.log(chamcong.tangCa);
+      let temp = 0;
+      if (gioLam / 8 > 1) {
+        temp = 1;
+      } else {
+        temp = Math.round((gioLam / 8) * 10) / 10;
+      }
+
+      acc[employeeId].ngayCong += temp;
+      acc[employeeId].totalOvertime += chamcong?.tangCa || 0;
 
       return acc;
     }, {});
@@ -213,8 +218,9 @@ const DanhSachLuong = ({ navigation }) => {
       );
 
       const luongThamNien = parseInt(luong * hs_thamnien * namThamNien);
-      const thucNhan =
-       parseInt( luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa + luongThamNien);
+      const thucNhan = parseInt(
+        luong1Ngay * ngayCong + chuyenCan + phuCap + tangCa + luongThamNien
+      );
 
       const salaryEntry = {
         employeeId,
@@ -232,6 +238,8 @@ const DanhSachLuong = ({ navigation }) => {
     }
     return temporarySalaryData;
   };
+
+  //Lấy chi tiết chấm công
   const getChiTietCC = async () => {
     setVisibleLoad(true);
 
@@ -241,46 +249,35 @@ const DanhSachLuong = ({ navigation }) => {
       currentDate.getMonth() + 1
     );
 
-    // Khởi động một biến để lưu chi tiết chấm công
-    let dataChamcong = [];
+    // Kiểm tra và cập nhật lại danh sách lương
+    const today = formatDateToYYYYMM(new Date());
+    let luongs = [];
 
-    // Lắng nghe dữ liệu chấm công
-    const unsubscribeChamCong = getChamCongByMonth(
+    if (today !== formatDateToYYYYMM(currentDate)) {
+      luongs = dataluong.length > 0 ? dataluong : luongTamTinh(dsChamCong);
+    } else {
+      luongs = luongTamTinh(dsChamCong);
+    }
+
+    setListLuong(luongs);
+    setVisibleLoad(checkLoad);
+  };
+
+  useEffect(() => {
+    getChamCongByMonth123(
       currentDate.getFullYear(),
       currentDate.getMonth() + 1,
       (data) => {
-        dataChamcong = Array.isArray(data) ? data : [];
-
-        // Cập nhật danh sách chấm công
-        setDSChamCong(dataChamcong);
-        console.log(dataChamcong,'----------------------------')
-
-        // Kiểm tra và cập nhật lại danh sách lương
-        const today = formatDateToYYYYMM(new Date());
-        let luongs = [];
-
-        if (today !== formatDateToYYYYMM(currentDate)) {
-          luongs =
-            dataluong.length > 0 ? dataluong : luongTamTinh(dataChamcong);
-        } else {
-          luongs = luongTamTinh(dataChamcong);
-        }
-
-        setListLuong(luongs);
-        setVisibleLoad(checkLoad);
+        setDSChamCong(data);
       }
     );
-
-    return () => {
-      unsubscribeChamCong();
-    };
-  };
+  }, [currentDate]);
 
   useEffect(() => {
     if (!checkLoad) {
       getChiTietCC();
     }
-  }, [currentDate, checkLoad]);
+  }, [currentDate, checkLoad, dsChamCong]);
 
   const filterNVByPb = () => {
     const listNVByPB = listNV.filter((nv) => {
@@ -533,6 +530,14 @@ const DanhSachLuong = ({ navigation }) => {
           value={searchInput}
         />
       </View>
+      {listSearch.length == 0 && (
+        <View
+          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+        >
+          <Text>Không có dữ liệu!!!</Text>
+        </View>
+      )}
+
       <FlatList
         data={listSearch}
         renderItem={renderSalaryItem}
