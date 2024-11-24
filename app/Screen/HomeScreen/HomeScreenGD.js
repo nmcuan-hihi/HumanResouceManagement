@@ -78,6 +78,7 @@ export default function HomeScreenGD({ navigation, route }) {
             <Icon name="person" size={24} color="#2196F3" />
             <Text style={styles.statValue}>Nhân viên</Text>
           </TouchableOpacity>
+        
           <TouchableOpacity
             style={styles.statItem}
             onPress={() => {

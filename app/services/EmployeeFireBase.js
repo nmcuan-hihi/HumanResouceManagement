@@ -109,6 +109,9 @@ export async function readEmployeesFireStore() {
   }
 }
 
+
+
+
 // Function to get an employee by ID from Realtime Database
 export async function getEmployeeById(employeeId) {
   try {

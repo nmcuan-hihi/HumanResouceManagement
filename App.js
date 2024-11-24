@@ -61,6 +61,10 @@ import SuaThietBi from "./app/Screen/ThietBiScreen/SuaThietBi";
 import ThemThietBiNhanVien from "./app/Screen/ThietBiScreen/ThemThietBiNhanVien";
 import ChiTietCapThietBiNV from "./app/Screen/ThietBiScreen/ChiTietCapThietBiNV";
 
+import TaskScreen from './app/Screen/TaskScreen/TaskScreen';
+import AddTask from './app/Screen/TaskScreen/AddTask';
+import TaskDetail from './app/Screen/TaskScreen/TaskDetail';
+
 import { Provider } from "react-redux";
 import { store } from "./app/redux/store";
 import MessengerGroupDetails from './app/Screen/MessengerScreen/MessengerGroupDetails';

@@ -21,8 +21,8 @@ const EmployeeScreen = ({ navigation, route }) => {
   const [pendingLeaveCount, setPendingLeaveCount] = useState(0); // Thêm state cho nghỉ phép chưa xác nhận
   const date = new Date();
 
-  const navigateTo = (screen) => {
-    navigation.navigate(screen);
+  const navigateTo = (screen, params = {}) => {
+    navigation.navigate(screen, params);  // Navigate with params
   };
 
   // Lấy danh sách nhân viên
@@ -34,7 +34,7 @@ const EmployeeScreen = ({ navigation, route }) => {
       (nv) => nv.phongbanId == employee.phongbanId
     );
     setListEmployeeMyPB(newData);
-    console.log(newData);
+    console.log("DATA:",newData);
   };
 
   // Lấy danh sách phòng ban
@@ -117,25 +117,27 @@ const EmployeeScreen = ({ navigation, route }) => {
               label="Nghỉ phép"
               onPress={() => navigateTo("DuyetNghiPhep")}
             />
-            <StatItem icon="money" color="#FFC107"  label="Lương" />
+            <StatItem icon="money" color="#FFC107" label="Lương" />
             <StatItem
               icon="fingerprint"
               component={MaterialIcons}
               color="#9C27B0"
-              
               label="Chấm công nhân viên"
               onPress={() => navigation.navigate("ChamCongNV", {phongbanId: employee.phongbanId})}
             />
-           
             <StatItem
               icon="fingerprint"
               component={MaterialIcons}
               color="#9C27B0"
-              
               label="Thông tin chấm công"
               onPress={() => navigateTo("ThongTinChamCong")}
             />
-            <StatItem icon="tasks" color="#FF9800" value="0" label="Nhiệm Vụ" />
+            <StatItem 
+              icon="tasks" 
+              color="#FF9800" 
+              value="" 
+              label="Nhiệm Vụ" 
+              onPress={() => navigateTo("TaskScreen",  { employee:employee.employeeId })} /> 
           </View>
         </View>
       </ScrollView>

@@ -7,11 +7,11 @@ import {
   orderByChild,
   equalTo,
   push,
-  onValue,
+  onValue 
 } from "firebase/database";
 import { app } from "../config/firebaseconfig"; // Đảm bảo bạn đã cấu hình đúng
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
-import { store } from "../redux/store"; // Import Redux store to access idCty
+import { store } from "../redux/store"; 
 const db = getDatabase(app);
 
 // Lấy công thức lương từ Realtime Database
@@ -231,15 +231,72 @@ export async function getBangLuong() {
   }
 }
 
+// Retrieve attendance details for a specific month
+
+
+export async function getChamCongByMonth1(nam, thang, employeeId, callback) {
+  try {
+    const db = getDatabase();
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
+
+    // Convert month number to "Tháng X" format
+    const monthString = `Tháng ${thang}`;
+
+    // Construct the database reference path
+    const reference = ref(db, `${idCty}/chitietchamcong/${employeeId}/${nam}/${thang}`);
+
+    // Attach a listener to fetch data
+    onValue(reference, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const today = new Date(); // Current date
+
+        // Process and filter attendance data
+        const attendanceDetails = Object.keys(data)
+          .map((key) => {
+            const day = key; // Day from the database
+            const fullDateString = `${nam}-${String(thang).padStart(2, "0")}-${day.padStart(2, "0")}`;
+            return {
+              ...data[key],
+              date: fullDateString, // Format as YYYY-MM-DD
+            };
+          })
+          .filter((item) => {
+            const itemDate = new Date(item.date);
+            return itemDate <= today; // Exclude future dates
+          });
+
+        console.log("Filtered attendance details: ", attendanceDetails);
+        callback(attendanceDetails);
+      } else {
+        console.warn("No data found for the specified month.");
+        callback([]); // Return an empty array if no data
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching attendance details: ", error);
+    callback([]); // Handle errors gracefully
+  }
+}
+
+
+
+
+
+
+
+
+
+
 //-------------------------------------Các hàm trong danh sách lương - By Thu pro-----------------------
 
 // lấy danh sách bảng công của tất cả nhân viên trong 1 tháng
 
+
 export async function getChamCongByMonth(nam, thang, callback) {
-  const state = store.getState();
-  const idCty = state.congTy.idCty;
   const db = getDatabase();
-  const reference = ref(db, `${idCty}/chitietchamcong`);
+  const reference = ref(db, "chitietchamcong");
   const unsubscribe = onValue(reference, (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
@@ -253,12 +310,6 @@ export async function getChamCongByMonth(nam, thang, callback) {
           }
         }
       }
-
-      console.log(
-        results,
-        "---------dataresul----------------------------sadsadasdsadasdas"
-      );
-
       callback(results);
     } else {
       console.log("Không tìm thấy dữ liệu chấm công");
