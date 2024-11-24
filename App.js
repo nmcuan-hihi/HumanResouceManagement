@@ -85,11 +85,11 @@ export default function App() {
       <View style={styles.container}>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Login">
-          <Stack.Screen name="DangKyNghi" component={DangKyNghiScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="DuyetNghiPhep" component={DuyetNghiPhep} options={{ headerShown: false }} />
-        <Stack.Screen name="ChiTietNghiPhep" component={ChiTietNghiPhep} options={{ headerShown: false }} />
-        <Stack.Screen name="MesengerDetails" component={MesengerDetails} options={{ headerShown: false }} />
-        <Stack.Screen name="MesengerGroupDetails" component={MessengerGroupDetails} options={{ headerShown: false }} />
+            <Stack.Screen name="DangKyNghi" component={DangKyNghiScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="DuyetNghiPhep" component={DuyetNghiPhep} options={{ headerShown: false }} />
+            <Stack.Screen name="ChiTietNghiPhep" component={ChiTietNghiPhep} options={{ headerShown: false }} />
+            <Stack.Screen name="MesengerDetails" component={MesengerDetails} options={{ headerShown: false }} />
+            <Stack.Screen name="MesengerGroupDetails" component={MessengerGroupDetails} options={{ headerShown: false }} />
 
             <Stack.Screen
               name="LoginCongTy"
@@ -106,6 +106,9 @@ export default function App() {
               component={LoginScreen}
               options={{ headerShown: false }}
             />
+            <Stack.Screen name="TaskScreen" component={TaskScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="AddTask" component={AddTask} options={{ headerShown: false }} />
+            <Stack.Screen name="TaskDetail" component={TaskDetail} options={{ headerShown: false }} />
             <Stack.Screen
               name="Home"
               component={HomeScreen}
