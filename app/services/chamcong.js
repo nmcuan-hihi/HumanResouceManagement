@@ -1,6 +1,7 @@
 import { getDatabase, ref, get, set, update, serverTimestamp } from 'firebase/database';
 import { app } from '../config/firebaseconfig';  // Đảm bảo cấu hình đúng
 import { store, storeHRM } from "../redux/store";
+const database = getDatabase(app); // Khởi tạo Realtime Database
 
 export const getEmployeesWithLeave = async (today) => {
   try {
