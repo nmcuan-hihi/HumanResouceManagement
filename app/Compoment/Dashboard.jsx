@@ -6,7 +6,7 @@ import { getPhongBanById } from "../services/InfoDataLogin";
 import { getTasksForEmployee } from "../services/Task"; // Assuming you have a service to fetch tasks
 import { useNavigation } from "@react-navigation/native";
 
-const Dashboard = ({ listEmployee, employee, onPressChamCong }) => {
+const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) => {
   const [phongBan, setPhongBan] = useState(null);
   const [tasks, setTasks] = useState([]);  // State to store tasks
   const phongbanId = employee?.phongbanId;
@@ -92,7 +92,7 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong }) => {
         <Text style={styles.buttonText}>Chấm công của bạn</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => {
+      <TouchableOpacity style={styles.button} onPress={onPressNhemVU => {
         navigation.navigate("DangKyNghi", { employee: employee });
       }}>
         <Text style={styles.buttonText}>Đăng ký nghỉ phép</Text>

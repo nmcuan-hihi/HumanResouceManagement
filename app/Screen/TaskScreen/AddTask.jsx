@@ -32,15 +32,6 @@ const AddTask = ({ navigation }) => {
   const [open, setOpen] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [employees, setEmployees] = useState([]);
-  const [phongBans, setPhongBans] = useState("");
-  const [searchPB, setSearchPB] = useState(
-    employee.phongbanId ? employee.phongbanId : ""
-  );
-  const [listNV, setListNV] = useState([]);
-
-  const [listNVPB, setListNVPB] = useState([]);
-
-
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -92,37 +83,7 @@ const AddTask = ({ navigation }) => {
     setEndDate(formatDate(nextDay));
   }, [employee]);
 
-  // const fetchPhongBan = async () => {
-  //   try {
-  //     const data = await readPhongBanFromRealtime();
-  //     if (data) {
-  //       const phongBanArray = Object.values(data).map((p) => ({
-  //         label: p.tenPhongBan,
-  //         value: p.maPhongBan,
-          
-  //       }));
 
-  //       setPhongBans(phongBanArray);
-  //       console.log(phongBans)
-  //     }
-  //   } catch (error) {
-  //     console.error("Lỗi khi lấy phòng ban:", error);
-  //   }
-  // };
-
-  // const locNhanVienPb = () => {
-  //   if (searchPB == "all" || !searchPB) {
-  //     setListNVPB(listNV);
-  //   } else {
-  //     const data = listNV.filter((nv) => {
-  //       return nv.phongbanId == searchPB;
-  //     });
-  //     setListNVPB(data);
-  //   }
-  // };
-  // useEffect(() => {
-  //   locNhanVienPb();
-  // }, [searchPB, listNV]);
   const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -136,7 +97,7 @@ const AddTask = ({ navigation }) => {
       return;
     }
    
-    const newTask = { taskName, description, startDate, endDate,employee};
+    const newTask = { taskName, description, startDate, endDate,employee, };
 
     try {
       const taskData = await taoTaskDataBase(newTask);

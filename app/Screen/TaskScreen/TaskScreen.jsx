@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { getEmployeeById } from "../../services/EmployeeFireBase";
 import { layTatCaNhiemVu, layNhiemVuById, listenForTask } from "../../services/Task"; 
+
 import BackNav from "../../Compoment/BackNav";
-import { readEmployees, readPhongBan } from "../../services/database";
+
 
 const TaskScreen = ({ route, navigation }) => {
   const [tasks, setTasks] = useState([]);
@@ -12,16 +14,41 @@ const TaskScreen = ({ route, navigation }) => {
 
   // Lấy danh sách nhiệm vụ ban đầu
   useEffect(() => {
-    if (!employee) {
-      console.error("Employee data is missing in route params");
-      return;
-    }
 
     const fetchTasks = async () => {
+     
+      setLoading(true);
+  
       try {
+        // Fetch the employee details using the provided employee ID
+        const emp = await getEmployeeById(employee);
+         // `employee` is the ID here
+        if (!emp) {
+          console.error("Employee not found");
+          setTasks([]);
+          return;
+        }
+  
+        const employeeId = emp.employeeId;
+        const phongbanId = emp.phongbanId; // Department ID for department heads
+        const chucvuId = emp.chucvuId; // Role ID (e.g., "TP" for department head)
+  
+        // Check if the user is a department head
+        if (chucvuId !== "TP") {
+          console.log("Only department heads can access this functionality");
+          setTasks([]); // Clear tasks if the user is not authorized
+          return;
+        }
+  
+        // Fetch all tasks
         const tasksData = await layTatCaNhiemVu();
         if (tasksData) {
-          setTasks(Object.values(tasksData));
+          // Filter tasks for the employee or their department
+          const filteredTasks = Object.values(tasksData).filter((task) => {
+            return task.employee === employeeId || task.phongbanId === phongbanId;
+          });
+  
+          setTasks(filteredTasks);
         } else {
           setTasks([]);
         }
@@ -31,9 +58,12 @@ const TaskScreen = ({ route, navigation }) => {
         setLoading(false);
       }
     };
-
+  
     fetchTasks();
   }, [employee]);
+  
+  
+  
 
   // Lắng nghe thay đổi trong danh sách nhiệm vụ
   useEffect(() => {
@@ -74,7 +104,7 @@ const TaskScreen = ({ route, navigation }) => {
     try {
       const taskDetails = await layNhiemVuById(task.manhiemvu);
       if (taskDetails) {
-        navigation.navigate("TaskDetail", { task: taskDetails });
+        navigation.navigate("TaskDetail", { task: taskDetails, employee });
       } else {
         console.error("Task not found");
       }
