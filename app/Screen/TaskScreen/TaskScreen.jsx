@@ -161,7 +161,7 @@ const TaskScreen = ({ route, navigation }) => {
                 >
                   <Text style={styles.taskTitle}>{task.taskName}</Text>
                   <View style={styles.taskDetails}>
-                    <Text style={styles.detailText}>Start: {task.startDate} {relatedTaskNVsTrangThai.length}</Text>
+                    <Text style={styles.detailText}>Start: {task.startDate}</Text>
                     <Text style={styles.detailText}>End: {task.endDate}</Text>
                     <Text style={styles.detailText}>Assigned to: {task.assignedEmployees}</Text>
                     
