@@ -38,7 +38,7 @@ export default function AddMember({ navigation, route }) {
     getListBangCap();
   }, []);
 
-  const pickImage = async () => {
+  const pickImage1 = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Quyền bị từ chối!", "Vui lòng cấp quyền để chọn ảnh.");
@@ -56,6 +56,80 @@ export default function AddMember({ navigation, route }) {
       setImageBC(result.assets[0].uri);
     }
   };
+
+  
+  const pickImage = async () => {
+    const actionSheetOptions = ["Chọn ảnh", "Chụp ảnh", "Hủy"];
+
+    Alert.alert(
+      "Chọn hình ảnh",
+      "",
+      [
+        {
+          text: actionSheetOptions[0],
+          onPress: () => launchImageLibrary(),
+        },
+        {
+          text: actionSheetOptions[1],
+          onPress: () => launchCamera(),
+        },
+        {
+          text: actionSheetOptions[2],
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const launchImageLibrary = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("Bạn cần cấp quyền truy cập thư viện ảnh!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets?.length > 0) {
+
+      setImageBC(result.assets[0].uri);
+    }
+  };
+
+  const launchCamera = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("Bạn cần cấp quyền truy cập camera!");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets?.length > 0) {
+
+      setImageBC(result.assets[0].uri);
+    }
+  };
+
+
+
+
+
+
+
+
+
 
   const handleAddBangCap_NV = async () => {
     const data = {

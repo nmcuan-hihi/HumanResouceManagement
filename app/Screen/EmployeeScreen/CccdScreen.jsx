@@ -30,7 +30,7 @@ export default function CccdScreen({ navigation, route }) {
     };
 
     useEffect(() => {
-        requestPermission(); // Yêu cầu quyền truy cập
+       // requestPermission(); // Yêu cầu quyền truy cập
         const fetchData = async () => {
             try {
                 const data = await readInfoCCCD(cccdNumber);
@@ -46,7 +46,7 @@ export default function CccdScreen({ navigation, route }) {
         fetchData();
     }, [cccdNumber]);
 
-    const pickImage = async (setImage, setImageUrl) => {
+    const pickImage1 = async (setImage, setImageUrl) => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
@@ -59,6 +59,80 @@ export default function CccdScreen({ navigation, route }) {
             setImageUrl(uri);
         }
     };
+
+
+
+    const pickImage = async (setImage, setImageUrl) => {
+        const actionSheetOptions = ["Chọn ảnh", "Chụp ảnh", "Hủy"];
+      
+        Alert.alert(
+          "Chọn hình ảnh",
+          "",
+          [
+            {
+              text: actionSheetOptions[0],
+              onPress: () => launchImageLibrary(setImage, setImageUrl),
+            },
+            {
+              text: actionSheetOptions[1],
+              onPress: () => launchCamera(setImage, setImageUrl),
+            },
+            {
+              text: actionSheetOptions[2],
+              style: "cancel",
+            },
+          ],
+          { cancelable: true }
+        );
+      };
+      
+      const launchImageLibrary = async (setImage, setImageUrl) => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+        if (permissionResult.granted === false) {
+          alert("Bạn cần cấp quyền truy cập thư viện ảnh!");
+          return;
+        }
+      
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 1,
+        });
+      
+        if (!result.canceled && result.assets?.length > 0) {
+          const uri = result.assets[0].uri;
+          setImage(uri);
+          setImageUrl(uri);
+        }
+      };
+      
+      const launchCamera = async (setImage, setImageUrl) => {
+        const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      
+        if (permissionResult.granted === false) {
+          alert("Bạn cần cấp quyền truy cập camera!");
+          return;
+        }
+      
+        const result = await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 1,
+        });
+      
+        if (!result.canceled && result.assets?.length > 0) {
+          const uri = result.assets[0].uri;
+          setImage(uri);
+          setImageUrl(uri);
+        }
+      };
+
+
+
+
+
 
     const handleAddCccdImg = async () => {
         if (!frontImage || !backImage) {

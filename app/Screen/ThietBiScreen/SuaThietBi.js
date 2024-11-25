@@ -151,13 +151,24 @@ const SuaThietBi = ({ navigation, route }) => {
     Alert.alert(
       "Chọn hình ảnh",
       "",
-      actionSheetOptions.slice(0, 2).map((option, index) => ({
-        text: option,
-        onPress: index === 0 ? launchImageLibrary : launchCamera,
-      })),
+      [
+        {
+          text: actionSheetOptions[0],
+          onPress: () => launchImageLibrary(),
+        },
+        {
+          text: actionSheetOptions[1],
+          onPress: () => launchCamera(),
+        },
+        {
+          text: actionSheetOptions[2],
+          style: "cancel",
+        },
+      ],
       { cancelable: true }
     );
   };
+
 
   const launchImageLibrary = async () => {
     const permissionResult =
@@ -171,11 +182,10 @@ const SuaThietBi = ({ navigation, route }) => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
     });
 
-    if (!result.cancelled) {
+    if (!result.canceled && result.assets?.length > 0) {
       setImageUrl(result.assets[0].uri);
       setCheckImg(true);
     }
@@ -191,11 +201,10 @@ const SuaThietBi = ({ navigation, route }) => {
 
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
     });
 
-    if (!result.cancelled) {
+    if (!result.canceled && result.assets?.length > 0) {
       setImageUrl(result.assets[0].uri);
       setCheckImg(true);
     }

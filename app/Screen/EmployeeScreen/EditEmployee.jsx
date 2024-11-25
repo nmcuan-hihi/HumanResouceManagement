@@ -108,7 +108,52 @@ export default function EditMember({ route, navigation }) {
   };
 
   // Hàm chọn ảnh từ thư viện
+  // const pickImage = async () => {
+  //   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //   if (status !== "granted") {
+  //     Alert.alert("Quyền bị từ chối!", "Vui lòng cấp quyền để chọn ảnh.");
+  //     return;
+  //   }
+
+  //   const result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: true,
+  //     aspect: [1, 1],
+  //     quality: 1,
+  //   });
+
+  //   if (!result.canceled && result.assets?.length > 0) {
+  //     setProfileImage(result.assets[0].uri);
+  //   }
+  // };
+
+
+
   const pickImage = async () => {
+    const actionSheetOptions = ["Chọn ảnh", "Chụp ảnh", "Hủy"];
+
+    Alert.alert(
+      "Chọn hình ảnh",
+      "",
+      [
+        {
+          text: actionSheetOptions[0],
+          onPress: () => launchImageLibrary(),
+        },
+        {
+          text: actionSheetOptions[1],
+          onPress: () => launchCamera(),
+        },
+        {
+          text: actionSheetOptions[2],
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const launchImageLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Quyền bị từ chối!", "Vui lòng cấp quyền để chọn ảnh.");
@@ -126,6 +171,31 @@ export default function EditMember({ route, navigation }) {
       setProfileImage(result.assets[0].uri);
     }
   };
+  const launchCamera = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("Bạn cần cấp quyền truy cập camera!");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets?.length > 0) {
+      setProfileImage(result.assets[0].uri);
+
+    }
+  };
+
+
+
+
+
+  
 
   // Cập nhật trường dữ liệu
   const updateField = (field, value) => {
