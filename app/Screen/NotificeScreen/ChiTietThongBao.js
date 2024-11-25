@@ -57,14 +57,14 @@ export default function AddThongBao({ route, navigation }) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={{ width: 200, marginVertical: 20 }}></View>
+        <View style={{ width: 200, margin: 10, }}></View>
 
         <Text style={styles.tieuDe}>{thongBao.tieuDe}</Text>
-
-        <Text style={styles.textArea}>{thongBao.noiDung}</Text>
         <View style={styles.viewTG}>
           <Text style={styles.textTG}>{formatDate(thongBao.thoiGian)}</Text>
         </View>
+        <Text style={styles.textArea}>{thongBao.noiDung}</Text>
+        
       </ScrollView>
     </View>
   );

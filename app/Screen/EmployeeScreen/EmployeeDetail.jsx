@@ -205,7 +205,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 />
                 <InfoItem
                   label="CCCD"
-                  value={employeeData.cccd || "N/A"}
+                  value={`✎ ${employeeData.cccd}` || "N/A"}
                   onPress={() => {
                     navigation.navigate("cccd", {
                       cccdNumber: employeeData.employeeId, employeeId: employeeData.cccd
