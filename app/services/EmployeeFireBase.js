@@ -92,11 +92,16 @@ export async function readEmployeesFireStore() {
     const employeeRef = ref(database, `${idCty}/employees`);
     const snapshot = await get(employeeRef);
 
-    if (snapshot.exists()) {
-      const employees = [];
-      snapshot.forEach((childSnapshot) => {
-        employees.push({ id: childSnapshot.key, ...childSnapshot.val() });
-      });
+   
+      if (snapshot.exists()) {
+        const employees = [];
+        snapshot.forEach((childSnapshot) => {
+          const employee = { id: childSnapshot.key, ...childSnapshot.val() };
+          // Loại bỏ các nhân viên có chucvu_id = "GD"
+          if (employee.chucvuId !== "GD") {
+            employees.push(employee);
+          }
+        });
 
       return employees;
     } else {
@@ -108,6 +113,7 @@ export async function readEmployeesFireStore() {
     throw error;
   }
 }
+
 
 
 
