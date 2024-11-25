@@ -81,6 +81,14 @@ export default function HomScreenTPKT({ navigation, route }) {
         </Text>
 
         <View style={styles.statsContainer}>
+        <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate("ListEmployee",{phongbanId: employee.phongbanId, chucvu_id: employee.chucvuId})}
+          >
+            <Icon name="person" size={24} color="#2196F3" />
+            <Text style={styles.statValue}></Text>
+            <Text style={styles.statLabel}>Nhân viên</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('AddThongBao',{ employee })} style={styles.statItem}>
             <Icon name="alarm-add" size={24} color="#4CAF50" />
             <Text style={styles.statValue}></Text>

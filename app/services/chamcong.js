@@ -52,6 +52,40 @@ export const getEmployeesWithLeave = async (today) => {
     return [];
   }
 };
+export async function locTheoPhongBan(phongbanId, chucvuId) {
+  try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
+    const db = getDatabase(app);
+    const employeesRef = ref(db, `${idCty}/employees`);
+
+    // Đọc danh sách nhân viên
+    const snapshotEmployees = await get(employeesRef);
+    if (!snapshotEmployees.exists()) {
+      return [];
+    }
+    const employees = snapshotEmployees.val();
+
+    // Lọc nhân viên theo chucvu_id và phongbanId
+    const filteredEmployees = Object.values(employees).filter((employee) => {
+      // Nếu chucvu_id là "GD", hiển thị tất cả nhân viên
+      // Nếu phongbanId là "NS" và chucvu_id là "TP", hiển thị tất cả nhân viên
+      // Nếu chucvu_id là "TP" và phongbanId trùng với phòng ban của TP, chỉ hiển thị nhân viên thuộc phòng ban đó
+      return (
+        chucvuId === "GD" || 
+        (phongbanId === "NS" && chucvuId === "TP") || 
+        (chucvuId === "TP" && employee.phongbanId === phongbanId)
+      );
+    });
+
+    return filteredEmployees;
+  } catch (error) {
+    console.error("Lỗi khi lọc nhân viên theo phòng ban và chức vụ:", error);
+    return [];
+  }
+}
+
+
 
 export async function getFilteredEmployeesByPhongBanAndLeave(
   phongbanId,
