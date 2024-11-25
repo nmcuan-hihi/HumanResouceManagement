@@ -104,7 +104,7 @@ const AddTask = ({ navigation }) => {
       return;
     }
 
-    const newTask = { taskName, description, startDate, endDate, employee };
+    const newTask = { taskName, description, startDate, endDate, employee ,assignedEmployees: selectedEmployees};
 
     try {
       const taskData = await taoTaskDataBase(newTask);
