@@ -11,7 +11,7 @@ import UserProfileScreen from "../Screen/ProfileSreen/UserProfileScreen";
 import NotificeScreen from "../Screen/NotificeScreen/NotificeScreen";
 import HomeScreenGD from "../Screen/HomeScreen/HomeScreenGD";
 import QuanLyMucLuong from "../Screen/QuanLyLuong/QuanLyMucLuong";
-import ChammCong from "../Screen/MarkAttendaceScreen/MarkAttendace";
+import HomScreenTPKT from "../Screen/MarkAttendaceScreen/HomeScreenTP";
 import EmployeeScreen from "../Screen/HomeScreen/MangageEmployeeScreen";
 import HomeMessenger from "../Screen/MessengerScreen/HomeMessenger";
 import { listenForNotifications } from "../services/thongBaoFirebase";
@@ -159,7 +159,7 @@ export default function TabNavigation({ route }) {
       return (
         <Tab.Screen
           name="SalaryManagement"
-          component={ChammCong}
+          component={HomScreenTPKT}
           initialParams={{ employee }}
           options={{
             tabBarLabel: "Salary",

@@ -11,7 +11,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import Dashboard from "../../Compoment/Dashboard";
 import { readEmployees, readPhongBan } from "../../services/database";
 
-export default function ChammCong({ navigation, route }) {
+export default function HomScreenTPKT({ navigation, route }) {
   const { employee } = route.params;
   const [listEmployeeMyPB, setListEmployeeMyPB] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
@@ -20,7 +20,7 @@ export default function ChammCong({ navigation, route }) {
 
   const date = new Date();
   const handlePress = () => {
-    navigation.navigate("ChamCongNV"); // Điều hướng đến màn hình chấm công
+    navigation.navigate("ChamCongNV", {phongbanId: employee.phongbanId}); // Điều hướng đến màn hình chấm công
   };
 
   //lấy ds nhân viên
@@ -54,11 +54,11 @@ export default function ChammCong({ navigation, route }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <Dashboard listEmployee={listEmployeeMyPB} employee={employee}  onPressChamCong={() => {
-            navigation.navigate("ChiTietBangLuong", {
-              employeeId: employee.employeeId,
-            });
-          }} />
+        <Dashboard listEmployee={listEmployeeMyPB} employee={employee} onPressChamCong={() => {
+          navigation.navigate("ChiTietBangLuong", {
+            employeeId: employee.employeeId,
+          });
+        }} />
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
@@ -81,38 +81,31 @@ export default function ChammCong({ navigation, route }) {
         </Text>
 
         <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
+          <TouchableOpacity onPress={() => navigation.navigate('AddThongBao',{ employee })} style={styles.statItem}>
             <Icon name="alarm-add" size={24} color="#4CAF50" />
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Tăng ca, làm thêm</Text>
-          </View>
-          <View style={styles.statItem}>
+            <Text style={styles.statValue}></Text>
+            <Text style={styles.statLabel}>Thông báo</Text>
+          </TouchableOpacity>
+
+          
+          <TouchableOpacity onPress={() => navigation.navigate("TaskScreen",  { employee:employee })} style={styles.statItem}>
             <Icon name="access-time" size={24} color="#F44336" />
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Đi trễ</Text>
-          </View>
-          <View style={styles.statItem}>
+            <Text style={styles.statValue}></Text>
+            <Text style={styles.statLabel}>Giao nhiệm vụ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('DuyetNghiPhep')} style={styles.statItem}>
             <Icon name="event-busy" size={24} color="#2196F3" />
             <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Nghỉ phép</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Icon name="attach-money" size={24} color="#FFC107" />
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Lương</Text>
-          </View>
+            <Text style={styles.statLabel}>Duyệt nghỉ phép</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity onPress={handlePress} style={styles.statItem}>
             <Icon name="fingerprint" size={24} color="#9C27B0" />
-            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statValue}></Text>
             <Text style={styles.statLabel}>Chấm công nhân viên</Text>
           </TouchableOpacity>
 
-          <View style={styles.statItem}>
-            <Icon name="star" size={24} color="#FF9800" />
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Thưởng, phụ cấp</Text>
-          </View>
+
         </View>
       </ScrollView>
     </SafeAreaView>

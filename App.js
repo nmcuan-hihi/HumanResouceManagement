@@ -7,7 +7,7 @@ import HomeScreen from "./app/Screen/HomeScreen/HomeScreen";
 
 import LoginCongTy from "./app/Screen/LoginSreen/LoginCongTy";
 
-import ChamCong from "./app/Screen/MarkAttendaceScreen/MarkAttendace";
+import ChamCong from "./app/Screen/MarkAttendaceScreen/HomeScreenTP";
 import ChamCongNV from "./app/Screen/MarkAttendaceScreen/MarkAttendaceNV";
 import EmployeeScreen from "./app/Screen/HomeScreen/MangageEmployeeScreen";
 import ListEmployee from "./app/Screen/EmployeeScreen/ListEmployee";
