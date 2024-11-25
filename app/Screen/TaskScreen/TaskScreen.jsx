@@ -7,45 +7,36 @@ import BackNav from "../../Compoment/BackNav";
 
 
 const TaskScreen = ({ route, navigation }) => {
+  const { employee } = route.params || {}; 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { employee } = route.params || {}; // Employee passed from route params
+  // Employee passed from route params
+
 
   // Lấy danh sách nhiệm vụ ban đầu
   useEffect(() => {
-
     const fetchTasks = async () => {
-     
       setLoading(true);
-  
       try {
-        // Fetch the employee details using the provided employee ID
-        const emp = await getEmployeeById(employee);
-         // `employee` is the ID here
-        if (!emp) {
-          console.error("Employee not found");
-          setTasks([]);
-          return;
-        }
-  
-        const employeeId = emp.employeeId;
-        const phongbanId = emp.phongbanId; // Department ID for department heads
-        const chucvuId = emp.chucvuId; // Role ID (e.g., "TP" for department head)
+        const employeeId = employee.employeeId;
+        const phongbanId = employee.phongbanId; // Department ID for department heads
+        const chucvuId = employee.chucvuId; // Role ID (e.g., "TP" for department head)
   
         // Check if the user is a department head
-        if (chucvuId !== "TP") {
-          console.log("Only department heads can access this functionality");
-          setTasks([]); // Clear tasks if the user is not authorized
-          return;
-        }
+        // if (chucvuId !== "TP") {
+        //   console.log("Only department heads can access this functionality");
+        //   setTasks([]); // Clear tasks if the user is not authorized
+        //   return;
+        // }
   
         // Fetch all tasks
-        const tasksData = await layTatCaNhiemVu();
+        const tasksData = await layTatCaNhiemVu(employeeId);
+        console.log("NV",tasksData)
         if (tasksData) {
           // Filter tasks for the employee or their department
           const filteredTasks = Object.values(tasksData).filter((task) => {
-            return task.employee === employeeId || task.phongbanId === phongbanId;
+            return task.employee === employeeId 
           });
   
           setTasks(filteredTasks);

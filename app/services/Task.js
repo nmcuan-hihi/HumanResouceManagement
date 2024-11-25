@@ -47,37 +47,37 @@ export async function taoTaskDataBase(nhiemvu) {
     throw error;
   }
 }
-export const getAssignedTask = async (employeeId, manhiemvu) => {
-  try {
-    if (!employeeId || !manhiemvu) {
-      console.error("Dữ liệu đầu vào không hợp lệ?");
-      return null;
+  export const getAssignedTask = async (employeeId, manhiemvu) => {
+    try {
+      if (!employeeId || !manhiemvu) {
+        console.error("Dữ liệu đầu vào không hợp lệ?");
+        return null;
+      }
+
+      const idCty = getIdCty();
+      const taskRef = ref(database,`${idCty}/nhiemvuphancong`);
+
+      const snapshot = await get(taskRef);
+      if (!snapshot.exists()) {
+        return null;
+      }
+
+      const tasks = snapshot.val();
+      const taskKey = Object.keys(tasks).find(
+        key => tasks[key].employeeId === employeeId && tasks[key].manhiemvu === manhiemvu
+      );
+
+      if (!taskKey) {
+        return null;
+      }
+
+      return tasks[taskKey];
+
+    } catch (error) {
+      console.error("Lỗi khi lấy thông tin nhiệm vụ:", error);
+      throw error;
     }
-
-    const idCty = getIdCty();
-    const taskRef = ref(database, `${idCty}/nhiemvuphancong`);
-
-    const snapshot = await get(taskRef);
-    if (!snapshot.exists()) {
-      return null;
-    }
-
-    const tasks = snapshot.val();
-    const taskKey = Object.keys(tasks).find(
-      key => tasks[key].employeeId === employeeId && tasks[key].manhiemvu === manhiemvu
-    );
-
-    if (!taskKey) {
-      return null;
-    }
-
-    return tasks[taskKey];
-
-  } catch (error) {
-    console.error("Lỗi khi lấy thông tin nhiệm vụ:", error);
-    throw error;
-  }
-};
+  };
 export const updateAssignedTaskStatus = async (employeeId, manhiemvu, trangthai) => {
   try {
     // Validate đầu vào
@@ -124,7 +124,7 @@ export const updateAssignedTaskStatus = async (employeeId, manhiemvu, trangthai)
     throw error;
   }
 };
-export async function layTatCaNhiemVu(employeeId, phongbanId) {
+export async function layTatCaNhiemVu(employeeId) {
   const idCty = getIdCty(); // ID công ty từ Redux
   try {
     const tasksRef = ref(database, `${idCty}/nhiemvu`);
@@ -135,7 +135,7 @@ export async function layTatCaNhiemVu(employeeId, phongbanId) {
 
       // Lọc nhiệm vụ theo employeeId hoặc phongbanId
       const filteredTasks = Object.values(allTasks).filter(
-        (task) => task.employee === employeeId || task.phongbanId === phongbanId
+        (task) => task.employee === employeeId
       );
 
       return filteredTasks;

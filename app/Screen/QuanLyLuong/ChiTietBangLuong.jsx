@@ -106,7 +106,7 @@ setNoSalaryData(true); // No salary data found
     const formattedDate = `${itemDate.getDate().toString().padStart(2, '0')}/${(itemDate.getMonth() + 1).toString().padStart(2, '0')}/${itemDate.getFullYear()}`;
     
     return (
-      <View style={styles.attendanceItem} key={item.id}>
+      <View style={styles.attendanceItem} key={item.createdAt}>
         <Text style={styles.attendanceDate}>{formattedDate}</Text>
         <Text style={styles.attendanceTime}>{item.timeIn}</Text>
         <Text style={styles.attendanceTime}>{item.timeOut}</Text>
@@ -162,7 +162,7 @@ setNoSalaryData(true); // No salary data found
               {[ 
                 { label: 'Lương cơ bản:', value: salaryData?.luong },
                 { label: 'Phụ cấp:', value: salaryData?.phucap },
-{ label: 'Ngày công:', value: salaryData?.ngaycong || 0 },
+                { label: 'Ngày công:', value: salaryData?.ngaycong || 0 },
                 { label: 'Chuyên cần:', value: salaryData?.chuyencan },
                 { label: 'Tăng ca:', value: salaryData?.tangca },
                 { label: 'Thực nhận:', value: salaryData?.thucnhan, highlight: true }

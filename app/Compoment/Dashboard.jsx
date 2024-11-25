@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Import icon
 
 import { getPhongBanById } from "../services/InfoDataLogin";
-import { getTasksForEmployee } from "../services/Task"; // Assuming you have a service to fetch tasks
+// import { getTasksForEmployee } from "../services/Task"; // Assuming you have a service to fetch tasks
 import { useNavigation } from "@react-navigation/native";
 
 const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) => {
@@ -25,17 +25,17 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) =>
     fetchPhongBan();
   }, [phongbanId]);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (employee?.employeeId) {
-        const tasksData = await getTasksForEmployee(employee?.employeeId); // Fetch tasks for the employee
-        if (Array.isArray(tasksData)) {
-          setTasks(tasksData); // Set tasks to state
-        }
-      }
-    };
-    fetchTasks();
-  }, [employee]);
+  // useEffect(() => {
+  //   const fetchTasks = async () => {
+  //     if (employee?.employeeId) {
+  //       const tasksData = await getTasksForEmployee(employee?.employeeId); // Fetch tasks for the employee
+  //       if (Array.isArray(tasksData)) {
+  //         setTasks(tasksData); // Set tasks to state
+  //       }
+  //     }
+  //   };
+  //   fetchTasks();
+  // }, [employee]);
 
   return (
     <View style={styles.container}>
