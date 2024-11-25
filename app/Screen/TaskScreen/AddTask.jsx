@@ -22,7 +22,7 @@ import { taoTaskDataBase, themTaskPhanCong } from "../../services/Task";
 const AddTask = ({ navigation }) => {
   const route = useRoute();
   const { employee } = route.params || {};
-  console.log(employee)
+  console.log(employee);
   const [taskName, setTaskName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -37,16 +37,15 @@ const AddTask = ({ navigation }) => {
     const fetchEmployees = async () => {
       try {
         const employeesData = await readEmployeesFireStore();
-    
-        // Kiểm tra thông tin người đăng nhập
-       
-       
-        // Lọc Trưởng phòng cùng phòng ban với người đăng nhập
-    
-       const getNV = await getEmployeeById(employee);
 
-  console.log("Thông tin người đăng nhập:", getNV);
-    
+        // Kiểm tra thông tin người đăng nhập
+
+        // Lọc Trưởng phòng cùng phòng ban với người đăng nhập
+
+        const getNV = await getEmployeeById(employee.employeeId);
+
+        console.log("Thông tin người đăng nhập:", getNV);
+
         // Lọc danh sách nhân viên cùng phòng ban (trừ Trưởng phòng và Giám đốc)
         const filteredEmployees = employeesData.filter(
           (emp) =>
@@ -54,26 +53,31 @@ const AddTask = ({ navigation }) => {
             emp.chucvuId !== "TP" && // Không phải Trưởng phòng
             emp.chucvuId !== "GD" // Không phải Giám đốc
         );
-    
+
         console.log("Danh sách nhân viên cùng phòng ban:", filteredEmployees);
-    
+
         // Cập nhật danh sách nhân viên
         if (filteredEmployees.length > 0) {
           setEmployees(filteredEmployees);
         } else {
-          Alert.alert("Thông báo", "Không có nhân viên phù hợp trong phòng ban.");
+          Alert.alert(
+            "Thông báo",
+            "Không có nhân viên phù hợp trong phòng ban."
+          );
         }
       } catch (error) {
         console.error("Lỗi khi lấy danh sách nhân viên:", error);
-        Alert.alert("Lỗi", "Không thể lấy danh sách nhân viên: " + error.message);
+        Alert.alert(
+          "Lỗi",
+          "Không thể lấy danh sách nhân viên: " + error.message
+        );
       }
     };
-    
-   
+
     // Chỉ fetch nếu có thông tin về phòng ban của nhân viên
 
     fetchEmployees();
-   
+
     // Initialize dates
     const today = new Date();
     setStartDate(formatDate(today));
@@ -83,7 +87,6 @@ const AddTask = ({ navigation }) => {
     setEndDate(formatDate(nextDay));
   }, [employee]);
 
-
   const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -92,12 +95,16 @@ const AddTask = ({ navigation }) => {
   };
 
   const handleAddTask = async () => {
-    if (!taskName.trim() || !description.trim() || selectedEmployees.length === 0) {
+    if (
+      !taskName.trim() ||
+      !description.trim() ||
+      selectedEmployees.length === 0
+    ) {
       Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin.");
       return;
     }
-   
-    const newTask = { taskName, description, startDate, endDate,employee, };
+
+    const newTask = { taskName, description, startDate, endDate, employee };
 
     try {
       const taskData = await taoTaskDataBase(newTask);
@@ -146,13 +153,19 @@ const AddTask = ({ navigation }) => {
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>Ngày bắt đầu</Text>
-          <TouchableOpacity onPress={() => handleOpenCalendar("start")} style={styles.datePicker}>
+          <TouchableOpacity
+            onPress={() => handleOpenCalendar("start")}
+            style={styles.datePicker}
+          >
             <Text>{startDate}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>Ngày kết thúc</Text>
-          <TouchableOpacity onPress={() => handleOpenCalendar("end")} style={styles.datePicker}>
+          <TouchableOpacity
+            onPress={() => handleOpenCalendar("end")}
+            style={styles.datePicker}
+          >
             <Text>{endDate}</Text>
           </TouchableOpacity>
         </View>
@@ -170,7 +183,10 @@ const AddTask = ({ navigation }) => {
           <DropDownPicker
             open={open}
             setOpen={setOpen}
-            items={employees.map((emp) => ({ label: emp.name, value: emp.employeeId }))}
+            items={employees.map((emp) => ({
+              label: emp.name,
+              value: emp.employeeId,
+            }))}
             value={selectedEmployees}
             setValue={setSelectedEmployees}
             multiple={true}
@@ -195,7 +211,7 @@ const AddTask = ({ navigation }) => {
 };
 const styles = StyleSheet.create({
   container: {
-    flex:0,
+    flex: 0,
     backgroundColor: "#FFF",
     paddingHorizontal: 16,
     paddingTop: 40,
