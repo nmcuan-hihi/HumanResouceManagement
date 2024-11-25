@@ -54,7 +54,7 @@ export const addEmployeeFireStore = async (employee, profileImage = null) => {
 
     employee.employeeId = await getNewEmployeeId();
     employee.matKhau = employee.employeeId;
-    const imageUrl = "";
+    let imageUrl = "";
     if(profileImage != null){
         // Reference for the image in storage
     const imageRef = storageRef(storage, `${idCty}/employee/${employee.employeeId}.jpg`);
