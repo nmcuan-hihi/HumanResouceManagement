@@ -124,29 +124,25 @@ export const updateAssignedTaskStatus = async (employeeId, manhiemvu, trangthai)
     throw error;
   }
 };
-export async function layTatCaNhiemVu(employeeId) {
-  const idCty = getIdCty(); // ID công ty từ Redux
+export async function layTatCaNhiemVu() {
+  const idCty = getIdCty(); // ID công ty từ Redux hoặc nguồn khác  
   try {
     const tasksRef = ref(database, `${idCty}/nhiemvu`);
     const snapshot = await get(tasksRef);
 
     if (snapshot.exists()) {
+      // Trả về tất cả nhiệm vụ
       const allTasks = snapshot.val();
-
-      // Lọc nhiệm vụ theo employeeId hoặc phongbanId
-      const filteredTasks = Object.values(allTasks).filter(
-        (task) => task.employee === employeeId
-      );
-
-      return filteredTasks;
+      return Object.values(allTasks); // Chuyển đối tượng sang mảng
     } else {
-      return [];
+      return []; // Không có nhiệm vụ nào
     }
   } catch (error) {
-    console.error("Error fetching tasks:", error);
+    console.error("Error fetching all tasks:", error);
     throw error;
   }
 }
+
 
 export async function layNhiemVuById(manhiemvu) {
   const idCty = getIdCty(); // Lấy idCty từ Redux
@@ -240,4 +236,56 @@ export const getTaskStatistics = async (employeeId) => {
     console.error("Lỗi khi lấy thống kê nhiệm vụ:", error);
     throw error;
   }
+  
 };
+
+
+export async function layTatCaNhiemVuPhanCongByMaNV(manhiemvu) {
+  const idCty = getIdCty(); // ID công ty từ Redux hoặc nguồn khác
+  try {
+    const tasksRef = ref(database, `${idCty}/nhiemvuphancong`); // Tham chiếu đến nhánh "nhiemvuphancong"
+    const snapshot = await get(tasksRef);
+
+    if (snapshot.exists()) {
+      const allTasks = snapshot.val();
+      // Lọc nhiệm vụ phân công theo manhiemvu
+      const filteredTasks = Object.values(allTasks).filter(
+        (task) => task.manhiemvu === manhiemvu
+      );
+      return filteredTasks;
+    } else {
+      return []; // Không có nhiệm vụ phân công nào
+    }
+  } catch (error) {
+    console.error("Error fetching assigned tasks:", error);
+    throw error;
+  }
+}
+export async function layTatCaNhiemVuPhanCong() {
+  const idCty = getIdCty(); // ID công ty từ Redux hoặc nguồn khác
+  try {
+    const tasksRef = ref(database, `${idCty}/nhiemvuphancong`); // Tham chiếu đến nhánh "nhiemvuphancong"
+    const snapshot = await get(tasksRef);
+
+    if (snapshot.exists()) {
+      // Trả về tất cả nhiệm vụ phân công
+      const allTasks = snapshot.val();
+      return Object.values(allTasks); // Chuyển đối tượng sang mảng
+    } else {
+      return []; // Không có nhiệm vụ phân công nào
+    }
+  } catch (error) {
+    console.error("Error fetching all assigned tasks:", error);
+    throw error;
+  }
+}
+
+
+
+
+
+
+
+
+
+

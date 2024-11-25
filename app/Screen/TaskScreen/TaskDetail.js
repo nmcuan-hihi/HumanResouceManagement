@@ -6,7 +6,7 @@ import { updateAssignedTaskStatus, getAssignedTask } from "../../services/Task";
 
 const TaskDetail = ({ navigation }) => {
   const route = useRoute();
-  const { task } = route.params;
+  const { task, tyle } = route.params;
   const { employee } = route.params || {};
   const [isCompleted, setIsCompleted] = useState();
   const isEmployee = employee?.chucvuId === 'NV';
@@ -28,7 +28,7 @@ const TaskDetail = ({ navigation }) => {
         setIsCompleted(task.trangthai || false);
       }
     };
-  
+
     if (employee && task) {
       fetchTaskStatus();
     }
@@ -40,8 +40,8 @@ const TaskDetail = ({ navigation }) => {
       const newStatus = !isCompleted;
       setIsCompleted(newStatus);
       const result = await updateAssignedTaskStatus(
-        employee.employeeId, 
-        task.manhiemvu, 
+        employee.employeeId,
+        task.manhiemvu,
         newStatus
       );
       if (result) {
@@ -67,14 +67,33 @@ const TaskDetail = ({ navigation }) => {
       );
     } else { // Trưởng phòng
       return (
-        <View style={styles.statusTextContainer}>
-          <Text style={[
-            styles.statusText,
-            isCompleted ? styles.completedText : styles.notCompletedText
-          ]}>
-            {isCompleted ? "Đã hoàn thành" : "Chưa hoàn thành"}
-          </Text>
-        </View>
+        <>
+          {tyle === 100 && (
+            <View style={styles.statusTextContainer}>
+              <Text
+                style={[
+                  styles.statusText,
+                  isCompleted ? styles.completedText : styles.notCompletedTextfull,
+                ]}
+              >
+                Đã hoàn thành
+              </Text>
+            </View>
+          )}
+
+          {tyle !== 100 && (
+            <View style={styles.statusTextContainer}>
+              <Text
+                style={[
+                  styles.statusText,
+                  isCompleted ? styles.completedText : styles.notCompletedText,
+                ]}
+              >
+                Đã hoàn thành {tyle} %
+              </Text>
+            </View>
+          )}
+        </>
       );
     }
   };
@@ -179,6 +198,10 @@ const styles = StyleSheet.create({
   },
   notCompletedText: {
     color: "#F44336",
+  }
+  ,
+  notCompletedTextfull: {
+    color: "#00FF00",
   }
 });
 

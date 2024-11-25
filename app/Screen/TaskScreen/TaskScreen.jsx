@@ -1,44 +1,68 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
-import { layTatCaNhiemVu, layNhiemVuById, listenForTask } from "../../services/Task"; 
+import { layTatCaNhiemVu, layNhiemVuById, listenForTask, layTatCaNhiemVuPhanCong, layTatCaNhiemVuPhanCongByMaNV } from "../../services/Task";
 
 import BackNav from "../../Compoment/BackNav";
 
 
 const TaskScreen = ({ route, navigation }) => {
-  const { employee } = route.params || {}; 
+  const { employee } = route.params || {};
   const [tasks, setTasks] = useState([]);
+  const [fullTasks, setFullTasks] = useState([]);
+  const [tasksNV, setTasksNV] = useState([]);
+  const [fullTasksNV, setFullTasksNV] = useState([]);
+
+
+  const [fullAllTasksNV, setFullAlTasksNV] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Employee passed from route params
 
 
-  // Lấy danh sách nhiệm vụ ban đầu
+  useEffect(() => {
+    async function fetchTasks() {
+      try {
+        const tasks = await layTatCaNhiemVuPhanCongByMaNV("MN001"); // Thay "MN001" bằng manhiemvu cụ thể
+        console.log("Nhiệm vụ phân công:", tasks);
+      } catch (error) {
+        console.error("Lỗi khi lấy nhiệm vụ phân công:", error);
+      }
+    }
+
+    fetchTasks();
+  }, []);
+
+  useEffect(() => {
+    async function fetchAllAssignedTasks() {
+      try {
+        const allTasks = await layTatCaNhiemVuPhanCong();
+        console.log("Danh sách nhiệm vụ phân công:", allTasks);
+        setFullAlTasksNV(allTasks)
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách nhiệm vụ phân công:", error);
+      }
+    }
+
+    fetchAllAssignedTasks();
+  }, []);
+
+
+
   useEffect(() => {
     const fetchTasks = async () => {
       setLoading(true);
       try {
         const employeeId = employee.employeeId;
-        const phongbanId = employee.phongbanId; // Department ID for department heads
-        const chucvuId = employee.chucvuId; // Role ID (e.g., "TP" for department head)
-  
-        // Check if the user is a department head
-        // if (chucvuId !== "TP") {
-        //   console.log("Only department heads can access this functionality");
-        //   setTasks([]); // Clear tasks if the user is not authorized
-        //   return;
-        // }
-  
-        // Fetch all tasks
-        const tasksData = await layTatCaNhiemVu(employeeId);
-        console.log("NV",tasksData)
+        const tasksData = await layTatCaNhiemVu();
+        setFullTasks(tasksData)
         if (tasksData) {
+
           // Filter tasks for the employee or their department
-          const filteredTasks = Object.values(tasksData).filter((task) => {
-            return task.employee === employeeId 
+          const filteredTasks = tasksData.filter((task) => {
+            return task.employee == employeeId
           });
-  
+
+
           setTasks(filteredTasks);
         } else {
           setTasks([]);
@@ -49,53 +73,43 @@ const TaskScreen = ({ route, navigation }) => {
         setLoading(false);
       }
     };
-  
+
     fetchTasks();
   }, [employee]);
-  
-  
-  
 
-  // Lắng nghe thay đổi trong danh sách nhiệm vụ
   useEffect(() => {
-    if (!employee) return;
+    const unsubscribe = listenForTask(employee.employeeId, (newTasks) => {
+      setTasksNV(newTasks);
 
-    const handleTaskUpdate = (updatedTasks) => {
-      const updatedData = updatedTasks.map(async (task) => {
-        try {
-          const taskDetail = await layNhiemVuById(task.manhiemvu);
-          return {
-            employeeId: task.employeeId,
-            manhiemvu: task.manhiemvu,
-            taskName: taskDetail.taskName,
-            startDate: taskDetail.startDate,
-            endDate: taskDetail.endDate,
-            assignedEmployees: taskDetail.assignedEmployees,
-            trangThai: task.trangThai, // Trạng thái của nhiệm vụ
-          };
-        } catch (error) {
-          console.error("Error fetching task details:", error);
-        }
-      });
+      // Lọc danh sách thông báo từ fullTasks dựa trên manhiemvu trong newTasks
+      const filteredTasks = fullTasks.filter((task) =>
+        newTasks.some((newTask) => newTask.manhiemvu === task.manhiemvu)
+      );
+      setFullTasksNV(filteredTasks)
+      console.log(filteredTasks, '-adasd21321312 dsd       dsd    312312312sda----')
 
-      Promise.all(updatedData).then((newTaskData) => {
-        setTasks(newTaskData.reverse()); // Đảo ngược thứ tự nếu cần hiển thị từ mới đến cũ
-      });
-    };
-
-    listenForTask(employee.employeeId, handleTaskUpdate);
+      // Xử lý dữ liệu được lọc (ví dụ: cập nhật state khác nếu cần)
+    });
 
     return () => {
-      // Hủy listener khi component unmount
-      listenForTask(employee.employeeId, () => {});
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
-  }, [employee]);
+  }, [employee, fullTasks]);
 
-  const handleTaskPress = async (task) => {
+
+
+
+
+
+
+
+  const handleTaskPress = async (task,tyle) => {
     try {
       const taskDetails = await layNhiemVuById(task.manhiemvu);
       if (taskDetails) {
-        navigation.navigate("TaskDetail", { task: taskDetails, employee });
+        navigation.navigate("TaskDetail", { task: taskDetails, employee ,tyle});
       } else {
         console.error("Task not found");
       }
@@ -108,17 +122,12 @@ const TaskScreen = ({ route, navigation }) => {
     navigation.navigate("AddTask", { employee });
   };
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.loadingText}>Loading tasks...</Text>
-      </View>
-    );
-  }
 
   // Check if the employee is a department head
   const isDepartmentHead = employee.chucvuId !== "NV"; // Assuming "GD" is the ID for trưởng phòng
-  console.log(isDepartmentHead)
+
+  console.log("adsadsadsaddddd Tasks:", employee.chucvuId);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -131,24 +140,82 @@ const TaskScreen = ({ route, navigation }) => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {tasks.length > 0 ? (
-          tasks.map((task) => (
-            <TouchableOpacity
-              key={task.manhiemvu}
-              style={styles.taskCard}
-              onPress={() => handleTaskPress(task)}
-            >
-              <Text style={styles.taskTitle}>{task.taskName}</Text>
-              <View style={styles.taskDetails}>
-                <Text style={styles.detailText}>Start: {task.startDate}</Text>
-                <Text style={styles.detailText}>End: {task.endDate}</Text>
-                <Text style={styles.detailText}>Assigned to: {task.assignedEmployees}</Text>
-              </View>
-            </TouchableOpacity>
-          ))
+        {isDepartmentHead ? (
+          tasks.length > 0 ? (
+            tasks.map((task) => {
+              // Lấy các nhiệm vụ phân công liên quan
+              const relatedTaskNVs = fullAllTasksNV.filter(
+                (nvTask) => nvTask.manhiemvu === task.manhiemvu
+              );
+              const relatedTaskNVsTrangThai = relatedTaskNVs.filter((nv) => {
+               return nv.trangthai == true
+              })
+
+              const completionPercentage = (relatedTaskNVsTrangThai.length / relatedTaskNVs.length) * 100;
+
+              return (
+                <TouchableOpacity
+                  key={task.manhiemvu}
+                  style={styles.taskCard}
+                  onPress={() => handleTaskPress(task,completionPercentage)}
+                >
+                  <Text style={styles.taskTitle}>{task.taskName}</Text>
+                  <View style={styles.taskDetails}>
+                    <Text style={styles.detailText}>Start: {task.startDate} {relatedTaskNVsTrangThai.length}</Text>
+                    <Text style={styles.detailText}>End: {task.endDate}</Text>
+                    <Text style={styles.detailText}>Assigned to: {task.assignedEmployees}</Text>
+                    
+                    {/* Thanh độ dài hoàn thành */}
+                    <View style={styles.progressContainer}>
+                      <View
+                        style={[
+                          styles.progressBar,
+                          { width: `${completionPercentage}%` },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          ) : (
+            <Text style={styles.noTasksText}>Không có nhiệm vụ nào!</Text>
+          )
+        ) : fullTasksNV.length > 0 ? (
+          fullTasksNV.map((task) => {
+            // Kiểm tra xem task có trong tasksNV không
+            const matchedTask = tasksNV.find(
+              (nvTask) => nvTask.manhiemvu === task.manhiemvu && nvTask.employeeId === employee.employeeId
+            );
+
+            // Đặt màu nền dựa trên trạng thái
+            const backgroundColor = matchedTask
+              ? matchedTask.trangthai === true
+                ? "#00FF00"
+                : "yellow"
+              : "white";
+
+            return (
+              <TouchableOpacity
+                key={task.manhiemvu}
+                style={[styles.taskCard, { backgroundColor }]}
+                onPress={() => handleTaskPress(task,0)}
+              >
+                <Text style={styles.taskTitle}>{task.taskName}</Text>
+                <View style={styles.taskDetails}>
+                  <Text style={styles.detailText}>Start: {task.startDate}</Text>
+                  <Text style={styles.detailText}>End: {task.endDate}</Text>
+                  <Text style={styles.detailText}>Assigned to: {task.assignedEmployees}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })
         ) : (
           <Text style={styles.noTasksText}>Không có nhiệm vụ nào!</Text>
         )}
+
+
+
       </ScrollView>
     </View>
   );
@@ -206,6 +273,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     color: "#B0B0B0",
+  },
+  progressContainer: {
+    height: 10, 
+    backgroundColor: '#e0e0e0', 
+    borderRadius: 5, 
+    overflow: 'hidden', 
+  },
+  progressBar: {
+    height: '100%', 
+    backgroundColor: '#4caf50', 
   },
 });
 

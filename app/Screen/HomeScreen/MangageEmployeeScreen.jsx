@@ -137,7 +137,7 @@ const EmployeeScreen = ({ navigation, route }) => {
               color="#FF9800" 
               value="" 
               label="Nhiệm Vụ" 
-              onPress={() => navigateTo("TaskScreen",  { employee:employee.employeeId })} /> 
+              onPress={() => navigateTo("TaskScreen",  { employee:employee })} /> 
           </View>
         </View>
       </ScrollView>
