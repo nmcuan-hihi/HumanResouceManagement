@@ -12,6 +12,7 @@ import Dashboard from "../../Compoment/Dashboard";
 import { readEmployees, readPhongBan } from "../../services/database";
 import { ref, onValue } from "firebase/database";
 import { database } from "../../config/firebaseconfig"; // Đảm bảo bạn có cấu hình Firebase ở đây
+import { store } from "../../redux/store";
 
 const EmployeeScreen = ({ navigation, route }) => {
   const { employee } = route.params;
@@ -22,9 +23,11 @@ const EmployeeScreen = ({ navigation, route }) => {
   const date = new Date();
 
   const navigateTo = (screen, params = {}) => {
-    navigation.navigate(screen, params);  // Navigate with params
+    navigation.navigate(screen, params);  
   };
-
+    // Lấy idCty từ store
+    const state = store.getState();
+    const idCty = state.congTy.idCty;
   // Lấy danh sách nhân viên
   const getListNV = async () => {
     const data = await readEmployees();
@@ -45,12 +48,12 @@ const EmployeeScreen = ({ navigation, route }) => {
 
   // Lấy số lượng nghỉ phép chưa xác nhận
   const getPendingLeaveCount = () => {
-    const nghiPhepRef = ref(database, "nghiPhep");
+    const nghiPhepRef = ref(database, `${idCty}/nghiPhep`);
     onValue(nghiPhepRef, (snapshot) => {
       let count = 0;
       snapshot.forEach((childSnapshot) => {
         const leaveData = childSnapshot.val();
-        if (leaveData.trangThai === "0") {
+        if (leaveData.trangThai === "0" && leaveData.department == employee.phongbanId) {
           count++;
         }
       });
@@ -99,7 +102,13 @@ const EmployeeScreen = ({ navigation, route }) => {
               label="Phòng ban"
               onPress={() => navigateTo("PhongBanScreen")}
             />
-
+            <StatItem
+              icon="calendar-times-o"
+              color="#2196F3"
+              value={pendingLeaveCount} // Hiển thị số lượng nghỉ phép chưa duyệt
+              label="Nghỉ phép"
+              onPress={() => navigateTo("DuyetNghiPhep", {employee: employee})}
+            />
             <StatItem
               icon="notifications"
               component={MaterialIcons}
@@ -110,14 +119,8 @@ const EmployeeScreen = ({ navigation, route }) => {
                 navigation.navigate("AddThongBao", { employee });
               }}
             />
-            <StatItem
-              icon="calendar-times-o"
-              color="#2196F3"
-              value={pendingLeaveCount} // Hiển thị số lượng nghỉ phép chưa duyệt
-              label="Nghỉ phép"
-              onPress={() => navigateTo("DuyetNghiPhep")}
-            />
-            <StatItem icon="money" color="#FFC107" label="Lương" />
+           
+            {/* <StatItem icon="money" color="#FFC107" label="Lương" /> */}
             <StatItem
               icon="fingerprint"
               component={MaterialIcons}
@@ -178,8 +181,9 @@ const styles = StyleSheet.create({
   },
   dateText: {
     textAlign: "center",
-    marginVertical: 16,
-    fontSize: 16,
+
+    color: "blue",
+    fontSize: 14,
     fontWeight: "bold",
   },
   statsContainer: {

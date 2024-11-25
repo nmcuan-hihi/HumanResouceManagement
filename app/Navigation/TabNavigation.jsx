@@ -155,21 +155,7 @@ export default function TabNavigation({ route }) {
 
   // Tab riêng theo vai trò
   const RoleSpecificTabs = () => {
-    if (role === "TP" && employee?.phongbanId === "KT") {
-      return (
-        <Tab.Screen
-          name="SalaryManagement"
-          component={EmployeeScreen}
-          initialParams={{ employee }}
-          options={{
-            tabBarLabel: "Salary",
-            tabBarIcon: ({ color }) => (
-              <FontAwesome name="money" size={24} color={color} />
-            ),
-          }}
-        />
-      );
-    } else if (role === "TP" && employee?.phongbanId === "NS") {
+     if (role === "TP" && employee?.phongbanId === "NS") {
       return (
         <Tab.Screen
           name="SalaryManagement"

@@ -73,7 +73,7 @@ export async function layDanhSachNghiPhep() {
 }
 
 // Hàm để duyệt hoặc hủy yêu cầu nghỉ phép
-export async function duyetNghiPhep(id, status) {
+export async function duyetNghiPhep(id, status, rejectReason = null) {
   try {
     // Lấy idCty từ store
     const state = store.getState();
@@ -82,8 +82,16 @@ export async function duyetNghiPhep(id, status) {
     // Tạo reference đến yêu cầu nghỉ phép cụ thể trong database của công ty
     const nghiPhepRef = ref(database, `${idCty}/nghiPhep/${id}`);
 
-    // Cập nhật trạng thái của yêu cầu nghỉ phép
-    await update(nghiPhepRef, { trangThai: status });
+    // Tạo object cập nhật trạng thái
+    const updateData = { trangThai: status };
+
+    // Nếu có rejectReason, thêm lý do từ chối vào object cập nhật
+    if (rejectReason) {
+      updateData.lyDoTuChoi = rejectReason;
+    }
+
+    // Cập nhật trạng thái và lý do từ chối (nếu có)
+    await update(nghiPhepRef, updateData);
 
     return { success: true, message: 'Cập nhật trạng thái thành công!' };
   } catch (error) {
@@ -91,3 +99,4 @@ export async function duyetNghiPhep(id, status) {
     return { success: false, message: 'Cập nhật trạng thái thất bại.', error };
   }
 }
+

@@ -14,8 +14,8 @@ import { saveIdCty } from "../../redux/slices/ctySlice";
 
 export default function LoginScreen({ navigation }) {
   const [companyId, setCompanyId] = useState("Nhabee");
-  const [employeeId, setEmployeeId] = useState("NV000");
-  const [password, setPassword] = useState("000");
+  const [employeeId, setEmployeeId] = useState("NV003");
+  const [password, setPassword] = useState("1");
   const dispatch = useDispatch();
 
   const handleLogin = async () => {
@@ -165,8 +165,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   createCompanyText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "blue",
-    textDecorationLine: "underline",
+    position: "absolute",
+  bottom: -10, 
+  right: -180,  
   },
 });

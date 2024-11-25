@@ -88,7 +88,7 @@ export default function ListThietBi({ navigation }) {
           onChangeText={handleSearch}
         />
         <FlatList
-          style={{ marginTop: 10 }}
+          style={{ marginHorizontal: 5 }}
           data={filteredTB}
           renderItem={({ item }) => (
             <Item
@@ -110,7 +110,7 @@ export default function ListThietBi({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#ffff",
     paddingTop: 20,
   },
   headerSection: {
@@ -127,19 +127,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   containerItem: {
+    padding: 5,
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 5,
     width: "45%",
     margin: 10,
     alignItems: "center",
     borderColor: "#C0C0C0",
-    backgroundColor: "#FFFFEE",
+    backgroundColor: "#fff",
   },
   itemImage: {
-    width: "80%",
+    width: "90%",
     height: 100,
     resizeMode: "stretch",
-    marginTop: 5,
+    marginVertical: 5,
   },
   textLicensePlate: {
     color: "#000000",
@@ -153,13 +154,13 @@ const styles = StyleSheet.create({
   },
   textItem: {
     color: "#000000",
-    fontSize: 16,
+    fontSize: 13,
   },
   searchInput: {
     height: 40,
     borderColor: "#C0C0C0",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 5,
     marginHorizontal: 15,
     marginVertical: 10,
     paddingLeft: 10,

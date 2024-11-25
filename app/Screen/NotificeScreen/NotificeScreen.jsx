@@ -91,7 +91,7 @@ export default function NotificeScreen({ navigation, route }) {
         style={[
           styles.notificationCard,
           {
-            backgroundColor: item.trangThai ? "#FFFFFF" : "#7FFFD4",
+            backgroundColor: item.trangThai ? "#eef0f1" : "#7FFFD4",
           },
         ]}
       >
@@ -145,10 +145,10 @@ export default function NotificeScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#ffff",
   },
   header: {
-    backgroundColor: "#F5F5F5", // Màu xanh
+    backgroundColor: "#ffff", // Màu xanh
     paddingVertical: 20,
     alignItems: "center",
   },
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginVertical: 10,
     marginHorizontal: 15,
-    borderRadius: 10,
+    borderRadius: 5,
     elevation: 3, // Để tạo hiệu ứng đổ bóng
   },
   notificationTitle: {

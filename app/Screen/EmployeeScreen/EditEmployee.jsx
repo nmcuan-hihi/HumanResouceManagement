@@ -450,7 +450,8 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 16, marginRight: 10 },
   statusDot: { width: 10, height: 10, borderRadius: 5 },
   container: {
-    flex: 15,
+    backgroundColor: "#FFF",
+    flex: 20,
     padding: 20,
   },
   avatarContainer: {

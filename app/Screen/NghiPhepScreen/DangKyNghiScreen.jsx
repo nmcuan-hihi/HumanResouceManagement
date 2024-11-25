@@ -18,18 +18,9 @@ export default function DangKyNghiScreen({ route, navigation }) {
   const [phongBan, setPhongBan] = useState('');
 
   useEffect(() => {
-    const fetchPhongBan = async () => {
-      try {
-        const tenPhongBan = await getPhongBanById(employee.phongbanId);
-        setPhongBan(tenPhongBan.tenPhongBan);
-      } catch (error) {
-        console.error("Lỗi khi lấy phòng ban:", error);
-      }
-    };
+    
   
-    if (employee && employee.phongbanId) {
-      fetchPhongBan();
-    }
+    
   }, [employee]);
 
   const handleDatePickerVisibility = (type) => {
@@ -92,7 +83,7 @@ export default function DangKyNghiScreen({ route, navigation }) {
     const nghiPhepData = {
       employeeId: employee.employeeId,
       employeeName: employee.name,
-      department: phongBan,
+      department: employee.phongbanId,
       startDate: selectedStartDate.toLocaleDateString(),
       endDate: selectedEndDate.toLocaleDateString(),
       title: title,
