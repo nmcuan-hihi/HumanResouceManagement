@@ -159,7 +159,7 @@ export default function TabNavigation({ route }) {
       return (
         <Tab.Screen
           name="SalaryManagement"
-          component={EmployeeScreen}
+          component={ChammCong}
           initialParams={{ employee }}
           options={{
             tabBarLabel: "Salary",
