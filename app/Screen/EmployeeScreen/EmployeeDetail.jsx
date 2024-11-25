@@ -208,7 +208,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                   value={employeeData.cccd || "N/A"}
                   onPress={() => {
                     navigation.navigate("cccd", {
-                      cccdNumber: employeeData.cccd,
+                      cccdNumber: employeeData.employeeId, employeeId: employeeData.cccd
                     });
                   }}
                 />

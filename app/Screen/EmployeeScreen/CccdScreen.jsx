@@ -19,7 +19,8 @@ export default function CccdScreen({ navigation, route }) {
     const [backImage, setBackImage] = useState(null);
     const [frontImageUrl, setFrontImageUrl] = useState(null);
     const [backImageUrl, setBackImageUrl] = useState(null);
-    const { cccdNumber } = route.params;
+    const { cccdNumber, employeeId } = route.params;
+console.log(employeeId+"hjhjhj"+cccdNumber);
 
     // Hàm yêu cầu quyền truy cập thư viện ảnh
     const requestPermission = async () => {
@@ -166,7 +167,7 @@ export default function CccdScreen({ navigation, route }) {
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Text style={styles.label}>Số CCCD</Text>
-                <Text style={styles.input}>{cccdNumber}</Text>
+                <Text style={styles.input}>{employeeId}</Text>
 
                 <Text style={{ marginBottom: 10 }}>Nhấp vào để chọn ảnh</Text>
                 <TouchableOpacity
