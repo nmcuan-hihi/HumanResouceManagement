@@ -21,6 +21,8 @@ export default function ListChucVu({ navigation }) {
 
     try {
       const data = await readChucVu(0);
+      console.log("chucvu"+data);
+      
       if (data) {
         const chucVuArray = Object.keys(data).map(key => ({
           ...data[key],

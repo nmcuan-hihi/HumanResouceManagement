@@ -6,6 +6,7 @@ import {
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
 import { addEmployeeFireStore } from "./EmployeeFireBase";
+import { writePhongBan ,createChucVu} from "./database";
 
 const database = getDatabase(app); // Khởi tạo Realtime Database
 
@@ -51,22 +52,39 @@ export const checkCompanyExists = async (idCongTy) => {
   }
 };
 
-// Hàm thêm công ty vào cơ sở dữ liệu (giữ nguyên ref của bạn)
 export const addCompany = async (idCongTy, tenCongTy, tenGiamDoc, sdt) => {
   try {
+    // Tạo đường dẫn lưu thông tin công ty
     const companyRef = ref(database, `${idCongTy}/data`);
-
-    // Dữ liệu công ty cần lưu
     const companyData = {
       tenCongTy,
       tenGiamDoc,
       sdt,
     };
 
-    // Thêm dữ liệu vào Firebase
+    // Thêm thông tin công ty
     await set(companyRef, companyData);
 
-    const emp = {
+    // Thêm giám đốc mặc định
+    await addDefaultDirector();
+
+    // Thêm phòng ban Nhân Sự
+    await addDefaultPhongBan();
+
+    // Thêm các chức vụ mặc định
+    await addDefaultChucVu();
+
+    console.log("Thêm công ty, phòng ban, và chức vụ thành công!");
+    return true; // Thêm thành công
+  } catch (error) {
+    console.error("Lỗi khi thêm công ty:", error);
+    return false; // Thêm thất bại
+  }
+};
+
+// Thêm giám đốc mặc định
+const addDefaultDirector = async () => {
+  const emp = {
     cccd: "",
     employeeId: "NV000",
     name: "",
@@ -78,14 +96,41 @@ export const addCompany = async (idCongTy, tenCongTy, tenGiamDoc, sdt) => {
     luongcoban: "",
     ngaysinh: "",
     ngaybatdau: "",
-    matKhau: "NV000", 
+    matKhau: "NV000",
     trangthai: "true",
-    }
-    await addEmployeeFireStore(emp)
-    console.log("Thêm công ty thành công!");
-    return true; // Thêm thành công
-  } catch (error) {
-    console.error("Lỗi khi thêm công ty:", error);
-    return false; // Thêm thất bại
-  }
+  };
+  await addEmployeeFireStore(emp);
 };
+
+// Thêm phòng ban Nhân Sự
+const addDefaultPhongBan = async () => {
+  const phongBan = {
+    maPhongBan: "NS",
+    tenPhongBan: "Nhân Sự",
+    maQuanLy: "", // Chưa có quản lý
+  };
+  await writePhongBan(phongBan);
+};
+
+// Thêm các chức vụ mặc định
+const addDefaultChucVu = async () => {
+  const chucVuTP = {
+    chucvu_id: "TP",
+    hschucvu: "5",
+    loaichucvu: "Trưởng Phòng",
+  };
+  const chucVuGD = {
+    chucvu_id: "GD",
+    hschucvu: "5",
+    loaichucvu: "Giám Đốc",
+  };
+  const chucVuNV = {
+    chucvu_id: "NV",
+    hschucvu: "5",
+    loaichucvu: "Nhân Viên",
+  };
+  await createChucVu("TP", chucVuTP);
+  await createChucVu("NV", chucVuNV);
+  await createChucVu("GD", chucVuGD);
+};
+
