@@ -17,7 +17,7 @@ const DashboardGD = ({ listEmployee, listPhongBan }) => {
         </View>
 
         <View style={styles.statsContainer}>
-        <View style={[styles.statBox, styles.statBoxYellow, { marginBottom: 20 }]}>
+          <View style={[styles.statBox, styles.statBoxYellow, { marginBottom: 20 }]}>
             <Icon
               name="meeting-room"
               size={30}
@@ -34,7 +34,7 @@ const DashboardGD = ({ listEmployee, listPhongBan }) => {
             <Text style={styles.statLabel}>Nhân viên</Text>
           </View>
 
-          <View style={[styles.statBox, styles.statBoxRed]}>
+          {/* <View style={[styles.statBox, styles.statBoxRed]}>
             <Icon name="attach-money" size={24} color="#000" style={styles.icon} />
             <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Lương nhân viên</Text>
@@ -44,7 +44,7 @@ const DashboardGD = ({ listEmployee, listPhongBan }) => {
             <Icon name="star" size={30} color="orange" style={styles.icon} />
             <Text style={styles.statNumber}>Chưa có</Text>
             <Text style={styles.statLabel}>Khen thưởng</Text>
-          </View>
+          </View> */}
         </View>
       </View>
     </View>
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   overviewTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom:10,
+   
   },
   date: {
     fontSize: 14,
@@ -91,7 +91,6 @@ const styles = StyleSheet.create({
     width: "48%",
     borderRadius: 10,
     padding: 20,
-
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOpacity: 0.2,
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
   statBoxCyan: {
     backgroundColor: "#00BCD4",
   },
-  statBoxRed: { 
+  statBoxRed: {
     backgroundColor: "#E1F9FD",
   },
 });
