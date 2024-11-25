@@ -88,6 +88,7 @@ const EmployeeScreen = ({ navigation, route }) => {
           </Text>
 
           <View style={styles.statsContainer}>
+            
             <StatItem
               icon="user"
               color="#4CAF50"

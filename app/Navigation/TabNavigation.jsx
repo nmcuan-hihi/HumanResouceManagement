@@ -155,7 +155,7 @@ export default function TabNavigation({ route }) {
 
   // Tab riêng theo vai trò
   const RoleSpecificTabs = () => {
-    if (role === "TP" && employee?.phongbanId === "KT") {
+    if (role === "TP" && employee?.phongbanId != "NS") {
       return (
         <Tab.Screen
           name="SalaryManagement"
