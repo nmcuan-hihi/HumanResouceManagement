@@ -116,7 +116,7 @@ export function listenForNotifications(employeeId, callback) {
 
   // Trả về một hàm hủy đăng ký
   return () => off(thongBaonhanVienRef);
-}4
+}
 // Lấy thông báo theo ID
 export async function layThongBaoById(maThongBao) {
   try {

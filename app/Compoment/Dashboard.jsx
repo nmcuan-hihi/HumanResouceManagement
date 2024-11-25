@@ -3,14 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Import icon
 
 import { getPhongBanById } from "../services/InfoDataLogin";
-import { getTasksForEmployee } from "../services/Task"; // Assuming you have a service to fetch tasks
+// import { getTasksForEmployee } from "../services/Task"; // Assuming you have a service to fetch tasks
 import { useNavigation } from "@react-navigation/native";
 
-const Dashboard = ({ listEmployee, employee, onPressChamCong }) => {
+const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) => {
   const [phongBan, setPhongBan] = useState(null);
   const [tasks, setTasks] = useState([]);  // State to store tasks
   const phongbanId = employee?.phongbanId;
   const navigation = useNavigation();
+  const isEmployee = employee?.chucvuId === 'NV';
 
   useEffect(() => {
     const fetchPhongBan = async () => {
@@ -24,17 +25,17 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong }) => {
     fetchPhongBan();
   }, [phongbanId]);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (employee?.employeeId) {
-        const tasksData = await getTasksForEmployee(employee?.employeeId); // Fetch tasks for the employee
-        if (Array.isArray(tasksData)) {
-          setTasks(tasksData); // Set tasks to state
-        }
-      }
-    };
-    fetchTasks();
-  }, [employee]);
+  // useEffect(() => {
+  //   const fetchTasks = async () => {
+  //     if (employee?.employeeId) {
+  //       const tasksData = await getTasksForEmployee(employee?.employeeId); // Fetch tasks for the employee
+  //       if (Array.isArray(tasksData)) {
+  //         setTasks(tasksData); // Set tasks to state
+  //       }
+  //     }
+  //   };
+  //   fetchTasks();
+  // }, [employee]);
 
   return (
     <View style={styles.container}>
@@ -92,17 +93,22 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong }) => {
         <Text style={styles.buttonText}>Chấm công của bạn</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => {
+      <TouchableOpacity style={styles.button} onPress={onPressNhemVU => {
         navigation.navigate("DangKyNghi", { employee: employee });
       }}>
         <Text style={styles.buttonText}>Đăng ký nghỉ phép</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => {
-        navigation.navigate("TaskScreen", { employee: employee });
-      }}>
-        <Text style={styles.buttonText}>Nhiệm vụ của tôi</Text>
-      </TouchableOpacity>
+      {isEmployee && (
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={() => {
+            navigation.navigate("TaskScreen", { employee: employee });
+          }}
+        >
+          <Text style={styles.buttonText}>Nhiệm vụ của tôi</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
