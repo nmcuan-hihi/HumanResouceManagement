@@ -68,13 +68,13 @@ export async function locTheoPhongBan(phongbanId, chucvuId) {
 
     // Lọc nhân viên theo chucvu_id và phongbanId
     const filteredEmployees = Object.values(employees).filter((employee) => {
-      // Nếu chucvu_id là "GD", hiển thị tất cả nhân viên
-      // Nếu phongbanId là "NS" và chucvu_id là "TP", hiển thị tất cả nhân viên
-      // Nếu chucvu_id là "TP" và phongbanId trùng với phòng ban của TP, chỉ hiển thị nhân viên thuộc phòng ban đó
+      // Điều kiện lọc:
       return (
-        chucvuId === "GD" || 
+        // Nếu chucvu_id là "GD", loại khỏi danh sách
+        employee.chucvuId !== "GD" && 
+        (chucvuId === "GD" || 
         (phongbanId === "NS" && chucvuId === "TP") || 
-        (chucvuId === "TP" && employee.phongbanId === phongbanId)
+        (chucvuId === "TP" && employee.phongbanId === phongbanId))
       );
     });
 
