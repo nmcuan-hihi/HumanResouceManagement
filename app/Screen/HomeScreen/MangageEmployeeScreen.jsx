@@ -106,7 +106,7 @@ const EmployeeScreen = ({ navigation, route }) => {
             <StatItem
               icon="calendar-times-o"
               color="#2196F3"
-              value={pendingLeaveCount} // Hiển thị số lượng nghỉ phép chưa duyệt
+              value={pendingLeaveCount} 
               label="Nghỉ phép"
               onPress={() => navigateTo("DuyetNghiPhep", {employee: employee})}
             />

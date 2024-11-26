@@ -32,7 +32,7 @@ const Dashboard = ({
   const [dsBangCong, setDSBangCong] = useState([]);
   const [cong, setCong] = useState({ gioLam: 0, ngayLam: 0 });
 
-  console.log(employee, "=======================");
+
   useEffect(() => {
     const fetchPhongBan = async () => {
       if (phongbanId) {
