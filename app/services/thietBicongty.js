@@ -182,3 +182,100 @@ export async function traThietBi(id, updatedData) {
     console.error("Lỗi khi Trả thiết bị:", error);
   }
 }
+
+//hàm thêm thietbinhanvien
+export async function addThietBiNhanVien(employeeId, thietbiId, data) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+
+  try {
+    const refPath = ref(
+      database,
+      `${idCty}/thietbinhanvien/${employeeId}/${thietbiId}`
+    );
+
+    // Kiểm tra thiết bị đã tồn tại chưa
+    const snapshot = await get(refPath);
+
+    if (snapshot.exists()) {
+      // Nếu đã tồn tại, lấy giá trị hiện tại và tăng số lượng
+      const currentData = snapshot.val();
+      const updatedSoLuong = (currentData.soLuong || 0) + data.soLuong;
+
+      await set(refPath, {
+        ...currentData,
+        soLuong: updatedSoLuong, // Cập nhật số lượng
+      });
+    } else {
+      // Nếu chưa tồn tại, thêm mới với số lượng = 1
+      await set(refPath, {
+        ...data,
+        soLuong: data.soLuong, // Đặt số lượng ban đầu là 1
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi thêm hoặc cập nhật thiết bị:", error);
+  }
+}
+
+// lấy ds thiết bị nv
+
+export async function getThietBiNhanVien(employeeId) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+
+  try {
+    // Lấy dữ liệu từ Firebase
+    const snapshot = await get(
+      ref(database, `${idCty}/thietbinhanvien/${employeeId}`)
+    );
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const thietBiList = Object.values(data);
+      return thietBiList;
+    } else {
+      console.log("Không tìm thấy thiết bị cho nhân viên này.");
+      return []; // Không có dữ liệu
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách thiết bị:", error);
+    return [];
+  }
+}
+
+// Hàm cập nhật thiết bị nhân viên
+export async function updateThietBiNhanVien(
+  employeeId,
+  thietbiId,
+  updatedData
+) {
+  const state = store.getState();
+  const idCty = state.congTy.idCty;
+
+  try {
+    const refPath = ref(
+      database,
+      `${idCty}/thietbinhanvien/${employeeId}/${thietbiId}`
+    );
+
+    // Kiểm tra thiết bị đã tồn tại chưa
+    const snapshot = await get(refPath);
+
+    if (snapshot.exists()) {
+      // Nếu đã tồn tại, lấy giá trị hiện tại
+      const currentData = snapshot.val();
+
+      // Cập nhật dữ liệu thiết bị
+      const updatedDevice = {
+        ...currentData,
+        ...updatedData,
+      };
+
+      await set(refPath, updatedDevice);
+    } else {
+      console.warn("Thiết bị không tồn tại để cập nhật.");
+    }
+  } catch (error) {
+    console.error("Lỗi khi cập nhật thiết bị:", error);
+  }
+}

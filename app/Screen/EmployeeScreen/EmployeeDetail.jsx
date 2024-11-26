@@ -21,7 +21,11 @@ import { readSkillNhanVien } from "../../services/skill";
 import { getEmployeeById } from "../../services/EmployeeFireBase";
 import { toggleXacthuc } from "../../services/bangcapdb";
 import { useFocusEffect } from "@react-navigation/native";
-import { getAllThietBiByEmployeeId } from "../../services/thietBicongty";
+import {
+  getAllThietBi,
+  getAllThietBiByEmployeeId,
+  getThietBiNhanVien,
+} from "../../services/thietBicongty";
 
 const database = getDatabase();
 
@@ -107,15 +111,39 @@ export default function EmployeeDetailScreen({ route, navigation }) {
     }
   };
 
-  //Hàm lấy danh sách thiết bị cho nhân viên
-
+  // Hàm lấy danh sách thiết bị cho nhân viên
   const getDataThietBiNV = async () => {
     try {
-      const datatbnv = await getAllThietBiByEmployeeId(manv);
-      setThietBiNV(datatbnv);
-      console.log(datatbnv, "------ds tb-------------");
+      getAllThietBi((allDevices) => {
+        getThietBiNhanVien(manv)
+          .then((arrTB) => {
+            const filteredDevices = allDevices
+              .filter((device) =>
+                arrTB.some((item) => item.thietbiId === device.id)
+              )
+              .map((device) => {
+                // Tìm kiếm trong arrTB để lấy soLuongMay
+                const matchedItem = arrTB.find(
+                  (item) => item.thietbiId === device.id
+                );
+
+                return {
+                  ...device,
+                  soLuongMay: matchedItem ? matchedItem.soLuong : 0,
+                  ngayCap: matchedItem.ngayCap,
+                  employeeId: matchedItem.employeeId,
+
+                };
+              });
+
+            setThietBiNV(filteredDevices);
+          })
+          .catch((error) => {
+            console.log("Lỗi khi lấy dữ liệu thiết bị của nhân viên:", error);
+          });
+      });
     } catch (error) {
-      console.log("Lỗi lấy data sk:", error);
+      console.log("Lỗi khi lấy dữ liệu:", error);
     }
   };
 
@@ -208,7 +236,8 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                   value={`✎ ${employeeData.cccd}` || "N/A"}
                   onPress={() => {
                     navigation.navigate("cccd", {
-                      cccdNumber: employeeData.employeeId, employeeId: employeeData.cccd
+                      cccdNumber: employeeData.employeeId,
+                      employeeId: employeeData.cccd,
                     });
                   }}
                 />
@@ -310,22 +339,28 @@ export default function EmployeeDetailScreen({ route, navigation }) {
                 </View>
 
                 {thietBiNV && thietBiNV.length > 0 ? (
-                  thietBiNV.map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      onPress={() => {
-                        navigation.navigate("ChiTietCapThietBiNV", {
-                          id: item.id,
-                        });
-                      }}
-                    >
-                      <View style={styles.infoItem}>
-                        <Text style={styles.infoValue}>
-                          {item.ten || "N/A"}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))
+                  thietBiNV.map(
+                    (item) =>
+                      item.soLuongMay !== 0 && ( // Kiểm tra soLuongMay và điều kiện hiển thị
+                        <TouchableOpacity
+                          key={item.id}
+                          onPress={() => {
+                            navigation.navigate("ChiTietCapThietBiNV", {
+                              thietBi: item,
+                            });
+                          }}
+                        >
+                          <View style={styles.infoItem}>
+                            <Text style={styles.infoValue}>
+                              {item.ten || "N/A"}
+                            </Text>
+                            <Text style={styles.infoValue}>
+                              {item.soLuongMay || "N/A"}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      )
+                  )
                 ) : (
                   <Text>Không có thiết bị</Text>
                 )}

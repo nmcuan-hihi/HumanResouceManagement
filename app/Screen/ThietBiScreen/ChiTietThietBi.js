@@ -108,22 +108,17 @@ export default function ChiTietBangCap({ navigation, route }) {
             </View>
 
             <View style={styles.cardRow}>
+              <Text style={styles.label}>Số lượng:</Text>
+              <Text style={styles.textDetail}>{thietBi?.soLuong}</Text>
+            </View>
+            <View style={styles.cardRow}>
+              <Text style={styles.label}>Đã cấp:</Text>
+              <Text style={styles.textDetail}>{thietBi?.daCap}</Text>
+            </View>
+            <View style={styles.cardRow}>
               <Text style={styles.label}>Ngày nhập kho:</Text>
               <Text style={styles.textDetail}>{thietBi?.ngayNhap}</Text>
             </View>
-
-            {thietBi?.employeeId && (
-              <>
-                <View style={styles.cardRow}>
-                  <Text style={styles.label}>Cấp nhân viên:</Text>
-                  <Text style={styles.textDetail}>{nhanVien?.name}</Text>
-                </View>
-                <View style={styles.cardRow}>
-                  <Text style={styles.label}>Ngày cấp:</Text>
-                  <Text style={styles.textDetail}>{thietBi?.ngayCap}</Text>
-                </View>
-              </>
-            )}
           </View>
 
           <TouchableOpacity style={styles.button} onPress={xoaThietBi}>
