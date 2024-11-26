@@ -253,7 +253,7 @@ export default function AddMember({ navigation }) {
       onEditPress={handleAddEmployee}
     />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        
         style={styles.container}
       >
         <SafeAreaView>
