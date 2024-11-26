@@ -86,9 +86,9 @@ export async function duyetNghiPhep(id, status, rejectReason = null) {
     const updateData = { trangThai: status };
 
     // Nếu có rejectReason, thêm lý do từ chối vào object cập nhật
-    if (rejectReason) {
+    
       updateData.lyDoTuChoi = rejectReason;
-    }
+   
 
     // Cập nhật trạng thái và lý do từ chối (nếu có)
     await update(nghiPhepRef, updateData);

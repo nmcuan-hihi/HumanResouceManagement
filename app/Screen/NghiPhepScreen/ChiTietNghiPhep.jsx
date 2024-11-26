@@ -93,6 +93,12 @@ export default function ChiTietNghiPhep({ route, navigation }) {
               )}
             </Text>
           </View>
+          {nghiPhepData.lyDoTuChoi == null ? (null):(<View style={styles.reasonContainer}>
+            <Text style={styles.detail}>Lý do không được duyệt:</Text>
+            <Text style={styles.reason}>             
+             <Text style={styles.seeMore1}>{nghiPhepData.lyDoTuChoi}</Text>         
+            </Text>
+          </View>)}
         </View>
 
         <View style={styles.bottomSection}>
@@ -195,6 +201,10 @@ const styles = StyleSheet.create({
   seeMore: {
     fontSize: 16,
     color: 'blue',
+  },
+  seeMore1: {
+    fontSize: 16,
+    color: 'red',
   },
   bottomSection: {
     paddingBottom: 20,

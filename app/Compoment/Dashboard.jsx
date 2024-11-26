@@ -114,7 +114,7 @@ const Dashboard = ({
     setCong(data);
   }, [dsBangCong]);
 
-  console.log(dsBangCong, "--------------------------------");
+ 
   useEffect(() => {
     const unsubscribe = listenForTask(employee.employeeId, (newTasks) => {
       setTasksNV(newTasks);
@@ -124,10 +124,7 @@ const Dashboard = ({
         newTasks.some((newTask) => newTask.manhiemvu === task.manhiemvu)
       );
       setFullTasksNV(filteredTasks);
-      console.log(
-        filteredTasks,
-        "-adasd21321312 dsd       dsd    312312312sda----"
-      );
+     
 
       // Xử lý dữ liệu được lọc (ví dụ: cập nhật state khác nếu cần)
     });
