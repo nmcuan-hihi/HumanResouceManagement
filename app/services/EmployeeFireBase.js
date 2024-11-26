@@ -1,5 +1,11 @@
 import {
-  getDatabase, ref, set, get, child, update, remove
+  getDatabase,
+  ref,
+  set,
+  get,
+  child,
+  update,
+  remove,
 } from "firebase/database";
 import { app } from "../config/firebaseconfig";
 import {
@@ -14,7 +20,10 @@ const database = getDatabase(app);
 const storage = getStorage(app);
 
 // Function to edit employee in Realtime Database
-export const editEmployeeFireStore = async (updatedData, newProfileImage = null) => {
+export const editEmployeeFireStore = async (
+  updatedData,
+  newProfileImage = null
+) => {
   const employeeId = updatedData.employeeId;
 
   try {
@@ -25,7 +34,10 @@ export const editEmployeeFireStore = async (updatedData, newProfileImage = null)
     // Check if a new image is provided
     let imageUrl = updatedData.imageUrl;
     if (newProfileImage) {
-      const imageRef = storageRef(storage, `${idCty}/employee/${employeeId}.jpg`);
+      const imageRef = storageRef(
+        storage,
+        `${idCty}/employee/${employeeId}.jpg`
+      );
       const response = await fetch(newProfileImage);
       if (!response.ok) throw new Error("Failed to fetch new image");
 
@@ -35,7 +47,7 @@ export const editEmployeeFireStore = async (updatedData, newProfileImage = null)
     }
 
     const updatedEmployee = { ...updatedData, imageUrl };
-    
+
     // Update the employee data in Realtime Database
     await update(employeeRef, updatedEmployee);
 
@@ -55,21 +67,21 @@ export const addEmployeeFireStore = async (employee, profileImage = null) => {
     employee.employeeId = await getNewEmployeeId();
     employee.matKhau = employee.employeeId;
     let imageUrl = "";
-    if(profileImage != null){
-        // Reference for the image in storage
-    const imageRef = storageRef(storage, `${idCty}/employee/${employee.employeeId}.jpg`);
+    if (profileImage != null) {
+      // Reference for the image in storage
+      const imageRef = storageRef(
+        storage,
+        `${idCty}/employee/${employee.employeeId}.jpg`
+      );
 
-    // Upload image
-    const response = await fetch(profileImage);
-    const blob = await response.blob();
-    await uploadBytes(imageRef, blob);
+      // Upload image
+      const response = await fetch(profileImage);
+      const blob = await response.blob();
+      await uploadBytes(imageRef, blob);
 
-    // Get image URL
-    imageUrl = await getDownloadURL(imageRef);
+      // Get image URL
+      imageUrl = await getDownloadURL(imageRef);
     }
-
-
-   
 
     // Update employee data with image URL
     const emp = { ...employee, imageUrl };
@@ -92,16 +104,14 @@ export async function readEmployeesFireStore() {
     const employeeRef = ref(database, `${idCty}/employees`);
     const snapshot = await get(employeeRef);
 
-   
-      if (snapshot.exists()) {
-        const employees = [];
-        snapshot.forEach((childSnapshot) => {
-          const employee = { id: childSnapshot.key, ...childSnapshot.val() };
-          // Loại bỏ các nhân viên có chucvu_id = "GD"
-          if (employee.chucvuId !== "GD") {
-            employees.push(employee);
-          }
-        });
+    if (snapshot.exists()) {
+      const employees = [];
+      snapshot.forEach((childSnapshot) => {
+        const employee = { id: childSnapshot.key, ...childSnapshot.val() };
+        // Loại bỏ các nhân viên có chucvu_id = "GD"
+
+        employees.push(employee);
+      });
 
       return employees;
     } else {
@@ -114,10 +124,6 @@ export async function readEmployeesFireStore() {
   }
 }
 
-
-
-
-
 // Function to get an employee by ID from Realtime Database
 export async function getEmployeeById(employeeId) {
   try {
@@ -127,7 +133,7 @@ export async function getEmployeeById(employeeId) {
 
     console.log("Fetching employee with ID:", employeeId); // Debug log
     const employeeRef = ref(database, `${idCty}/employees/${employeeId}`);
- 
+
     const snapshot = await get(employeeRef);
 
     if (snapshot.exists()) {
@@ -159,8 +165,9 @@ export async function getNewEmployeeId() {
         employees.push(childSnapshot.key);
       });
 
-      const latestId = Math.max(...employees.map(id => parseInt(id.slice(2)))) || 0;
-      newId = `NV${(latestId + 1).toString().padStart(3, '0')}`;
+      const latestId =
+        Math.max(...employees.map((id) => parseInt(id.slice(2)))) || 0;
+      newId = `NV${(latestId + 1).toString().padStart(3, "0")}`;
     } else {
       newId = "NV000";
     }
