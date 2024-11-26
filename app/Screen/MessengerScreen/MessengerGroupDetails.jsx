@@ -129,7 +129,7 @@ export default function MessengerGroupDetails({ navigation, route }) {
                 item.sender === empFrom.employeeId ? styles.messageFrom : styles.messageTo,
               ]}
             >
-              <Text style={styles.nameText}>{employee.name}</Text>
+              <Text style={styles.nameText}>{employee?.name}</Text>
               <Text style={styles.messageText}>{item.text}</Text>
               <Text style={styles.timestamp}>{moment(item.timestamp).format('HH:mm DD/MM')}</Text>
             </View>

@@ -9,20 +9,39 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Dashboard from "../../Compoment/Dashboard";
+import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { ref, onValue } from "firebase/database";
 import { readEmployees, readPhongBan } from "../../services/database";
-
+import { database } from "../../config/firebaseconfig"; 
+import { store } from "../../redux/store";
 export default function HomScreenTPKT({ navigation, route }) {
   const { employee } = route.params;
   const [listEmployeeMyPB, setListEmployeeMyPB] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
-
+  const [pendingLeaveCount, setPendingLeaveCount] = useState(0); 
   const [listPhongBan, setListPhongBan] = useState([]);
-
+ // Lấy idCty từ store
+ const state = store.getState();
+ const idCty = state.congTy.idCty;
   const date = new Date();
+  
   const handlePress = () => {
     navigation.navigate("ChamCongNV", {phongbanId: employee.phongbanId}); // Điều hướng đến màn hình chấm công
   };
-
+ // Lấy số lượng nghỉ phép chưa xác nhận
+ const getPendingLeaveCount = () => {
+  const nghiPhepRef = ref(database, `${idCty}/nghiPhep`);
+  onValue(nghiPhepRef, (snapshot) => {
+    let count = 0;
+    snapshot.forEach((childSnapshot) => {
+      const leaveData = childSnapshot.val();
+      if (leaveData.trangThai === "0" && leaveData.department == employee.phongbanId) {
+        count++;
+      }
+    });
+    setPendingLeaveCount(count);
+  });
+};
   //lấy ds nhân viên
 
   const getListNV = async () => {
@@ -49,6 +68,7 @@ export default function HomScreenTPKT({ navigation, route }) {
   useEffect(() => {
     getListNV();
     getListPB();
+    getPendingLeaveCount();
   }, []);
 
   return (
@@ -60,22 +80,8 @@ export default function HomScreenTPKT({ navigation, route }) {
           });
         }} />
 
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryRow}>
-            <Text>Tổng nhân viên</Text>
-            <Text style={styles.summaryValue}>{listEmployee.length}</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text>Tổng lương</Text>
-            <Text style={styles.summaryValue}>Chưa có </Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text>Tổng giờ làm</Text>
-            <Text style={styles.summaryValue}>Chưa có</Text>
-          </View>
-          <View style={styles.chartPlaceholder} />
-        </View>
-
+        
+<Text style={styles.contentText}>Chức năng</Text>
         <Text style={styles.dateText}>
           Hôm nay, {date.toLocaleDateString("vi-VN")}
         </Text>
@@ -101,11 +107,13 @@ export default function HomScreenTPKT({ navigation, route }) {
             <Text style={styles.statValue}></Text>
             <Text style={styles.statLabel}>Giao nhiệm vụ</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('DuyetNghiPhep')} style={styles.statItem}>
-            <Icon name="event-busy" size={24} color="#2196F3" />
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Duyệt nghỉ phép</Text>
-          </TouchableOpacity>
+          <StatItem
+              icon="calendar-times-o"
+              color="#2196F3"
+              value={pendingLeaveCount} // Hiển thị số lượng nghỉ phép chưa duyệt
+              label="Nghỉ phép"
+              onPress={() => navigateTo("DuyetNghiPhep", {employee: employee})}
+            />
 
           <TouchableOpacity onPress={handlePress} style={styles.statItem}>
             <Icon name="fingerprint" size={24} color="#9C27B0" />
@@ -119,12 +127,32 @@ export default function HomScreenTPKT({ navigation, route }) {
     </SafeAreaView>
   );
 }
+const StatItem = ({
+  icon,
+  component: IconComponent = FontAwesome,
+  color,
+  value,
+  label,
+  onPress,
+}) => (
+  <TouchableOpacity style={styles.statItem} onPress={onPress}>
+    <IconComponent name={icon} size={28} color={color} />
+    <Text style={styles.statValue}>{value}</Text>
+    <Text style={styles.statLabel}>{label}</Text>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-    margin: 10,
+    backgroundColor: "#fff",
+   
+  },
+  contentText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
   },
   summaryCard: {
     backgroundColor: "#FFF9C4",
@@ -148,7 +176,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     textAlign: "center",
-    marginVertical: 16,
+
   },
   statsContainer: {
     flexDirection: "row",
