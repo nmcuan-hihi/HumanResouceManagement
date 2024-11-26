@@ -19,7 +19,7 @@ export default function EmployeeList({ navigation , route}) {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [phongBanList, setPhongBanList] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-console.log("....."+phongbanId+chucvu_id);
+
 
   // Move fetchData outside useFocusEffect
   const fetchData = async () => {
@@ -125,22 +125,26 @@ console.log("....."+phongbanId+chucvu_id);
             <Text style={styles.buttonText}>Tìm kiếm</Text>
           </TouchableOpacity>
         </View>
-
+  
         {/* Filter Section */}
         <View style={styles.filterWrapper}>
-          <View style={styles.filterSection}>
-            <RNPickerSelect
-              onValueChange={(itemValue) => setSelectedPhongBan(itemValue)}
-              items={phongBanList.map((phongBan) => ({
-                label: phongBan.tenPhongBan,
-                value: phongBan.maPhongBan,
-              }))}
-              value={selectedPhongBan}
-              placeholder={{ label: 'Phòng ban', value: '' }}
-              style={pickerSelectStyles}
-            />
-          </View>
-
+          {/* Spinner Phòng Ban - Hiển thị chỉ khi chucvu_id là GD */}
+          {chucvu_id === 'GD' && (
+            <View style={styles.filterSection}>
+              <RNPickerSelect
+                onValueChange={(itemValue) => setSelectedPhongBan(itemValue)}
+                items={phongBanList.map((phongBan) => ({
+                  label: phongBan.tenPhongBan,
+                  value: phongBan.maPhongBan,
+                }))}
+                value={selectedPhongBan}
+                placeholder={{ label: 'Phòng ban', value: '' }}
+                style={pickerSelectStyles}
+              />
+            </View>
+          )}
+  
+          {/* Spinner Giới tính */}
           <View style={styles.filterSection}>
             <RNPickerSelect
               onValueChange={(itemValue) => setSelectedGender(itemValue)}
@@ -153,7 +157,8 @@ console.log("....."+phongbanId+chucvu_id);
               style={pickerSelectStyles}
             />
           </View>
-
+  
+          {/* Spinner Trạng thái */}
           <View style={styles.filterSection}>
             <RNPickerSelect
               onValueChange={(itemValue) => setSelectedStatus(itemValue)}
@@ -167,7 +172,7 @@ console.log("....."+phongbanId+chucvu_id);
             />
           </View>
         </View>
-
+  
         {/* Employee List */}
         <FlatList
           style={styles.employeeList}
@@ -185,34 +190,44 @@ console.log("....."+phongbanId+chucvu_id);
       </View>
     </>
   );
+  
 }
 
 const pickerSelectStyles = {
   inputIOS: {
-    height: 27,
+    height: 40,
     color: 'black',
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
     fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   inputAndroid: {
-    height: 27,
+    height: 40,
     color: 'black',
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
     fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   placeholder: {
     color: '#a0a0a0',
   },
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 13,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
     paddingTop: 10,
     paddingHorizontal: 15,
   },
@@ -221,42 +236,66 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    padding: 10,
   },
   searchInput: {
     flex: 1,
-    borderColor: 'blue',
+    borderColor: '#ddd',
     borderWidth: 1,
-    borderRadius: 3,
+    borderRadius: 8,
     paddingHorizontal: 15,
-    height: 40,
+    height: 45,
     backgroundColor: '#fff',
     marginRight: 10,
+    fontSize: 16,
   },
   searchButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 3,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   filterWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
     marginBottom: 10,
   },
   filterSection: {
     borderWidth: 1,
-    borderColor: "blue",
+    borderColor: '#ddd',
     flex: 1,
     marginHorizontal: 5,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
   },
   employeeList: {
     marginTop: 10,
+    paddingBottom: 20,
   },
 });
