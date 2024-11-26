@@ -12,6 +12,8 @@ import {
 import { app } from "../config/firebaseconfig"; // Đảm bảo bạn đã cấu hình đúng
 import dayjs from "dayjs"; // Sử dụng thư viện dayjs để dễ dàng xử lý thời gian
 import { store } from "../redux/store";
+import { database } from '../config/firebaseconfig';
+
 const db = getDatabase(app);
 
 // Lấy công thức lương từ Realtime Database
@@ -390,3 +392,33 @@ export async function layDanhSachBangLuongTheoThang(nam, thang) {
     throw error;
   }
 }
+
+
+
+
+// Function to read all employees from Realtime Database
+export async function readEmployeesFireStore() {
+  try {
+    const state = store.getState();
+    const idCty = state.congTy.idCty; // Lấy idCty từ Redux store
+
+    const employeeRef = ref(database, `${idCty}/employees`);
+    const snapshot = await get(employeeRef);
+
+    if (snapshot.exists()) {
+      const employees = [];
+      snapshot.forEach((childSnapshot) => {
+        employees.push({ id: childSnapshot.key, ...childSnapshot.val() });
+      });
+
+      return employees;
+    } else {
+      console.log("No data available");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error reading employees:", error);
+    throw error;
+  }
+}
+

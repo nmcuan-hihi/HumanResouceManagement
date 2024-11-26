@@ -16,7 +16,6 @@ import RNPickerSelect from "react-native-picker-select";
 
 import MonthSelector from "../../Compoment/SelectMonth_DSLuong";
 import { readChucVu, readPhongBan } from "../../services/database";
-import { readEmployeesFireStore } from "../../services/EmployeeFireBase";
 import {
   getCongThucLuong,
   getChamCongByMonth,
@@ -24,6 +23,7 @@ import {
   luuDanhSachLuongFirebase,
   layDanhSachBangLuongTheoThang,
   getChamCongByMonth123,
+  readEmployeesFireStore,
 } from "../../services/quanLyMucLuongFirebase";
 import LoadingModal from "../../Compoment/modalLodading";
 import dayjs from "dayjs";
