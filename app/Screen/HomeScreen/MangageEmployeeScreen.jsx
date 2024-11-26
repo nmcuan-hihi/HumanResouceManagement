@@ -94,7 +94,7 @@ const EmployeeScreen = ({ navigation, route }) => {
               color="#4CAF50"
               value={listEmployee.length}
               label="Nhân Viên"
-              onPress={() => navigateTo("ListEmployee")}
+              onPress={() => navigateTo("ListEmployee",{phongbanId: employee.phongbanId, chucvu_id: employee.chucvuId})}
             />
             <StatItem
               icon="id-badge"

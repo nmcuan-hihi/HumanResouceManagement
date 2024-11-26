@@ -36,6 +36,8 @@ export default function HomeScreenGD({ navigation, route }) {
   const [listEmployee, setListEmployee] = useState([]);
   const [listPhongBan, setListPhongBan] = useState([]);
 
+
+  
   const date = new Date();
 
   // Lấy danh sách nhân viên
@@ -73,7 +75,7 @@ export default function HomeScreenGD({ navigation, route }) {
         <View style={styles.statsContainer}>
           <TouchableOpacity
             style={styles.statItem}
-            onPress={() => navigation.navigate("ListEmployee")}
+            onPress={() => navigation.navigate("ListEmployee",{phongbanId: employee.phongbanId, chucvu_id: employee.chucvuId})}
           >
             <Icon name="person" size={24} color="#2196F3" />
             <Text style={styles.statValue}>Nhân viên</Text>
