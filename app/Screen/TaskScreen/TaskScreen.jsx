@@ -18,33 +18,39 @@ const TaskScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
 
 
-
   useEffect(() => {
     async function fetchTasks() {
       try {
-        const tasks = await layTatCaNhiemVuPhanCongByMaNV("MN001"); // Thay "MN001" bằng manhiemvu cụ thể
-        console.log("Nhiệm vụ phân công:", tasks);
+        // Instead of directly using await, use the callback version of the function
+        const unsubscribe = layTatCaNhiemVuPhanCongByMaNV("MN001", (tasks) => {
+          console.log("Nhiệm vụ phân công:", tasks);
+          // Now you can store the tasks in the state or process them
+          setFullTasks(tasks);
+        });
+  
+        // If you want to unsubscribe later
+        return unsubscribe;
       } catch (error) {
         console.error("Lỗi khi lấy nhiệm vụ phân công:", error);
       }
     }
-
+  
     fetchTasks();
   }, []);
+  
 
   useEffect(() => {
-    async function fetchAllAssignedTasks() {
-      try {
-        const allTasks = await layTatCaNhiemVuPhanCong();
-        console.log("Danh sách nhiệm vụ phân công:", allTasks);
-        setFullAlTasksNV(allTasks)
-      } catch (error) {
-        console.error("Lỗi khi lấy danh sách nhiệm vụ phân công:", error);
-      }
+    function fetchAllAssignedTasks() {
+      // Gọi hàm layTatCaNhiemVuPhanCong và truyền callback để xử lý kết quả
+      layTatCaNhiemVuPhanCong((tasks) => {
+        console.log("Danh sách nhiệm vụ phân công:", tasks);
+        setFullAlTasksNV(tasks); // Cập nhật state với dữ liệu đã lấy
+      });
     }
-
-    fetchAllAssignedTasks();
-  }, []);
+  
+    fetchAllAssignedTasks(); // Gọi hàm để lấy nhiệm vụ phân công
+  }, []); // Chạy 1 lần khi component được mount
+  
 
 
 
@@ -105,23 +111,22 @@ const TaskScreen = ({ route, navigation }) => {
 
 
 
-  const handleTaskPress = async (task,tyle) => {
-    try {
-      const taskDetails = await layNhiemVuById(task.manhiemvu);
+  const handleTaskPress = (task, tyle) => {
+    // Gọi hàm layNhiemVuById với callback
+    layNhiemVuById(task.manhiemvu, (taskDetails) => {
       if (taskDetails) {
-        navigation.navigate("TaskDetail", { task: taskDetails, employee ,tyle});
+        // Nếu tìm thấy nhiệm vụ, chuyển hướng đến màn hình TaskDetail
+        navigation.navigate("TaskDetail", { task: taskDetails, employee, tyle });
       } else {
+        // Nếu không tìm thấy nhiệm vụ, log lỗi
         console.error("Task not found");
       }
-    } catch (error) {
-      console.error("Error fetching task details:", error);
-    }
+    });
   };
-
+  
   const handleAddTask = () => {
     navigation.navigate("AddTask", { employee });
   };
-
 
   // Check if the employee is a department head
   const isDepartmentHead = employee.chucvuId !== "NV"; // Assuming "GD" is the ID for trưởng phòng

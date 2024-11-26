@@ -36,6 +36,7 @@ const AddTask = ({ navigation }) => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
+        console.log(employee,"--------------------------------------")
         const employeesData = await readEmployeesFireStore();
 
         // Kiểm tra thông tin người đăng nhập
@@ -49,7 +50,7 @@ const AddTask = ({ navigation }) => {
         // Lọc danh sách nhân viên cùng phòng ban (trừ Trưởng phòng và Giám đốc)
         const filteredEmployees = employeesData.filter(
           (emp) =>
-            emp.phongbanId === getNV.phongbanId && // Cùng phòng ban với Trưởng phòng
+            emp.phongbanId === employee.phongbanId && // Cùng phòng ban với Trưởng phòng
             emp.chucvuId !== "TP" && // Không phải Trưởng phòng
             emp.chucvuId !== "GD" // Không phải Giám đốc
         );

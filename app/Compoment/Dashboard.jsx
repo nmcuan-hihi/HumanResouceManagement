@@ -3,16 +3,22 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Import icon
 
 import { getPhongBanById } from "../services/InfoDataLogin";
-// import { getTasksForEmployee } from "../services/Task"; // Assuming you have a service to fetch tasks
+import {  layTatCaNhiemVu, listenForTask, layTatCaNhiemVuPhanCong, layTatCaNhiemVuPhanCongByMaNV } from "../services/Task"; // Assuming you have a service to fetch tasks
 import { useNavigation } from "@react-navigation/native";
 
-const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) => {
+const Dashboard = ({ listEmployee, employee, onPressChamCong, onPressNhemVU }) => {
   const [phongBan, setPhongBan] = useState(null);
-  const [tasks, setTasks] = useState([]);  // State to store tasks
+
+  const [tasks, setTasks] = useState([]);
+  const [fullTasks, setFullTasks] = useState([]);
+  const [tasksNV, setTasksNV] = useState([]);
+  const [fullTasksNV, setFullTasksNV] = useState([]);
+  const [fullAllTasksNV, setFullAlTasksNV] = useState([]);
   const phongbanId = employee?.phongbanId;
   const navigation = useNavigation();
   const isEmployee = employee?.chucvuId === 'NV';
 
+  console.log(employee, "=======================")
   useEffect(() => {
     const fetchPhongBan = async () => {
       if (phongbanId) {
@@ -25,18 +31,96 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) =>
     fetchPhongBan();
   }, [phongbanId]);
 
-  // useEffect(() => {
-  //   const fetchTasks = async () => {
-  //     if (employee?.employeeId) {
-  //       const tasksData = await getTasksForEmployee(employee?.employeeId); // Fetch tasks for the employee
-  //       if (Array.isArray(tasksData)) {
-  //         setTasks(tasksData); // Set tasks to state
-  //       }
-  //     }
-  //   };
-  //   fetchTasks();
-  // }, [employee]);
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (employee?.employeeId) {
+        // Call the layTatCaNhiemVu function and process the tasks
+        const tasksData = await layTatCaNhiemVu(); // Fetch tasks for the employee
+        if (Array.isArray(tasksData)) {
+          const employeeTasks = tasksData.filter(
+            (task) => task.employee === employee.employeeId
+          );
+          setFullTasks(employeeTasks); // Set the filtered tasks in state
+        }
+      }
+    };
+  
+    fetchTasks();
+  }, [employee]); 
+  
 
+  console.log(fullTasks, "Full")
+  useEffect(() => {
+    const unsubscribe = listenForTask(employee.employeeId, (newTasks) => {
+      setTasksNV(newTasks);
+
+      // Lọc danh sách thông báo từ fullTasks dựa trên manhiemvu trong newTasks
+      const filteredTasks = fullTasks.filter((task) =>
+        newTasks.some((newTask) => newTask.manhiemvu === task.manhiemvu)
+      );
+      setFullTasksNV(filteredTasks)
+      console.log(filteredTasks, '-adasd21321312 dsd       dsd    312312312sda----')
+
+      // Xử lý dữ liệu được lọc (ví dụ: cập nhật state khác nếu cần)
+    });
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [employee, fullTasks]);
+
+
+  const getTaskCount = () => {
+    if (isEmployee) {
+      // Nhân viên
+      const matchedTasks = tasksNV.filter((nvTask) =>
+        fullAllTasksNV.some(
+          (task) => task.manhiemvu === nvTask.manhiemvu && nvTask.employeeId === employee.employeeId
+        )
+      );
+      return matchedTasks.length > 0 ? matchedTasks.length : "Chưa có";
+    } else {
+      // Trưởng phòng
+      return fullTasks.length > 0 ? fullTasks.length : "Chưa có";
+    }
+  };
+  useEffect(() => {
+    function fetchAllAssignedTasks() {
+      // Gọi hàm layTatCaNhiemVuPhanCong và truyền callback để xử lý kết quả
+      layTatCaNhiemVuPhanCong((tasks) => {
+        console.log("Danh sách nhiệm vụ phân công:", tasks);
+        setFullAlTasksNV(tasks); // Cập nhật state với dữ liệu đã lấy
+      });
+    }
+  
+    fetchAllAssignedTasks(); // Gọi hàm để lấy nhiệm vụ phân công
+  }, []); // Chạy 1 lần khi component được mount
+  
+  console.log(fullAllTasksNV.length, "Full NV")
+
+
+  useEffect(() => {
+    async function fetchTasks() {
+      try {
+        // Instead of directly using await, use the callback version of the function
+        const unsubscribe = layTatCaNhiemVuPhanCongByMaNV("MN001", (tasks) => {
+          console.log("Nhiệm vụ phân công:", tasks);
+          // Now you can store the tasks in the state or process them
+          setFullTasks(tasks);
+        });
+  
+        // If you want to unsubscribe later
+        return unsubscribe;
+      } catch (error) {
+        console.error("Lỗi khi lấy nhiệm vụ phân công:", error);
+      }
+    }
+  
+    fetchTasks();
+  }, []);
+  
   return (
     <View style={styles.container}>
       {/* Phần chào hỏi */}
@@ -56,12 +140,11 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) =>
         <View style={styles.statsContainer}>
           {/* Nhiệm vụ hôm nay */}
           <View style={[styles.statBox, styles.statBoxYellow]}>
-            <Text style={styles.statNumber}>
-              {tasks.length > 0 ? tasks.length : "Chưa có"} {/* Display total number of tasks */}
-            </Text>
-            <Text style={styles.statLabel}>Nhiệm vụ hôm nay</Text>
-            <Icon name="assignment" size={24} color="#000" style={styles.absoluteIcon} />
-          </View>
+    <Text style={styles.statNumber}>{getTaskCount()}</Text>
+    <Text style={styles.statLabel}>Nhiệm vụ hôm nay</Text>
+    <Icon name="assignment" size={24} color="#000" style={styles.absoluteIcon} />
+  </View>
+
 
           {/* Nhóm của bạn */}
           <View style={[styles.statBox, styles.statBoxGreen]}>
@@ -100,8 +183,8 @@ const Dashboard = ({ listEmployee, employee, onPressChamCong,onPressNhemVU }) =>
       </TouchableOpacity>
 
       {isEmployee && (
-        <TouchableOpacity 
-          style={styles.button} 
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => {
             navigation.navigate("TaskScreen", { employee: employee });
           }}
