@@ -3,6 +3,7 @@ import { View, Text, Button, StyleSheet, Modal, KeyboardAvoidingView, Platform }
 import BackNav from '../../Compoment/BackNav';
 import { duyetNghiPhep } from '../../services/NghiPhepDB';
 import { TextInput } from 'react-native-paper';
+import { taoThongBaoDataBase, themThongBaoNhanVien } from '../../services/thongBaoFirebase';
 
 export default function ChiTietNghiPhep({ route, navigation }) {
   const { nghiPhepData } = route.params;
@@ -13,6 +14,25 @@ export default function ChiTietNghiPhep({ route, navigation }) {
   const handleXacNhan = async (id) => {
     try {
       await duyetNghiPhep(id, "1");
+
+
+      
+      const tieuDe = "Xác nhận Nghỉ";
+      const noiDung = "đơn nghỉ phép vào ngày "+nghiPhepData.ngayBatDau + " đã được duyệt"
+
+        try {
+          const dataTB = await taoThongBaoDataBase({
+            tieuDe,
+            noiDung,
+          });         
+            await themThongBaoNhanVien(nghiPhepData.employeeId, dataTB.maThongBao);
+
+        } catch (error) {
+         
+        }
+
+
+
       navigation.goBack(); // Quay lại màn hình trước sau khi cập nhật
     } catch (error) {
       console.error('Lỗi khi xác nhận nghỉ phép:', error);
@@ -61,6 +81,23 @@ export default function ChiTietNghiPhep({ route, navigation }) {
   const submitReject = async (id) => {
     try {
       await duyetNghiPhep(id, "-1", rejectReason);
+
+
+
+        
+      const tieuDe = "Tù chối nghỉ";
+      const noiDung = "đơn nghỉ phép vào ngày "+nghiPhepData.ngayBatDau + " đã bị từ chối\n lý do: " +rejectReason
+
+        try {
+          const dataTB = await taoThongBaoDataBase({
+            tieuDe,
+            noiDung,
+          });         
+            await themThongBaoNhanVien(nghiPhepData.employeeId, dataTB.maThongBao);
+
+        } catch (error) {
+         
+        }
       navigation.goBack(); // Quay lại màn hình trước sau khi cập nhật
     } catch (error) {
       console.error('Lỗi khi từ chối nghỉ phép:', error);
