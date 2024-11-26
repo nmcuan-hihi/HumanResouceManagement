@@ -34,9 +34,9 @@ const SuaThietBi = ({ navigation, route }) => {
   const [maNV, setMaNV] = useState();
   const [ngayCap, setNgayCap] = useState();
   const [nhanVien, setNhanVien] = useState();
-  const [isEditing, setIsEditing] = useState(false);
   const [dataSelect, setDataSelect] = useState([]);
 
+  const [soLuong, setSoLuong] = useState();
   const [checkImg, setCheckImg] = useState(false);
 
   const getThietBi = async () => {
@@ -75,8 +75,7 @@ const SuaThietBi = ({ navigation, route }) => {
       setLoai(thietBi.loai);
       setHang(thietBi.hang);
       setNgayNhap(thietBi.ngayNhap);
-      setMaNV(thietBi.employeeId);
-      setNgayCap(thietBi.ngayCap);
+      setSoLuong(thietBi.soLuong);
 
       ngayNhap ? setDate(new Date(ngayNhap)) : date;
     }
@@ -114,19 +113,17 @@ const SuaThietBi = ({ navigation, route }) => {
           ten,
           loai,
           hang,
+          soLuong,
           ngayNhap: ngayNhap || null,
-          employeeId: maNV || null,
-          ngayCap: ngayCap || null,
         };
       } else {
         data = {
           ten,
           loai,
           hang,
-          ngayNhap: ngayNhap || null,
+          soLuong,
 
-          employeeId: maNV || null,
-          ngayCap: ngayCap || null,
+          ngayNhap: ngayNhap || null,
         };
       }
 
@@ -168,7 +165,6 @@ const SuaThietBi = ({ navigation, route }) => {
       { cancelable: true }
     );
   };
-
 
   const launchImageLibrary = async () => {
     const permissionResult =
@@ -262,6 +258,19 @@ const SuaThietBi = ({ navigation, route }) => {
           onChangeText={setHang}
         />
 
+        <Text style={styles.label}>Số lượng:</Text>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          placeholder="Số lượng"
+          value={soLuong}
+          onChangeText={(text) => {
+            // Chỉ chấp nhận số nguyên
+            const numericValue = text.replace(/[^0-9]/g, "");
+            setSoLuong(numericValue);
+          }}
+        />
+
         <Text style={styles.label}>Ngày nhập:</Text>
         <View>
           <TextInput
@@ -276,59 +285,6 @@ const SuaThietBi = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>Nhân viên được cấp:</Text>
-        {isEditing ? (
-          <>
-            <View style={styles.label}>
-              <SelectList
-                placeholder={nhanVien?.name}
-                setSelected={(val) => {
-                  setMaNV(val);
-                }}
-                data={dataSelect}
-                save="key"
-              />
-            </View>
-            {maNV && (
-              <>
-                <Text style={styles.label}>Ngày cấp:</Text>
-                <View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Ngày cấp (YYYY-MM-DD)"
-                    value={ngayCap}
-                    editable={false}
-                    onChangeText={setNgayCap}
-                  />
-                  <TouchableOpacity
-                    style={styles.iconPicker}
-                    onPress={showDatepickerCap}
-                  >
-                    <Icon name="calendar-month" size={24} color="#FFC107" />
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-          </>
-        ) : (
-          <View>
-            <TextInput
-              style={styles.input}
-              placeholder="Chưa cấp cho nhân viên"
-              value={nhanVien?.name}
-              editable={false}
-            />
-            <TouchableOpacity
-              style={styles.iconPicker}
-              onPress={() => {
-                setIsEditing(!isEditing);
-              }}
-            >
-              <Icon name="edit-square" size={24} color="#FFC107" />
-            </TouchableOpacity>
-          </View>
-        )}
-
         {show && (
           <DateTimePicker
             testID="dateTimePicker"
@@ -336,16 +292,6 @@ const SuaThietBi = ({ navigation, route }) => {
             mode={"date"}
             is24Hour={true}
             onChange={onChange}
-          />
-        )}
-
-        {showNC && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode={"date"}
-            is24Hour={true}
-            onChange={onChangeCap}
           />
         )}
 

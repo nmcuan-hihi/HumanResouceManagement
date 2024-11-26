@@ -20,8 +20,12 @@ export default function ListThietBi({ navigation }) {
 
   const getDSThietBi = () => {
     getAllThietBi((data) => {
-      setListTB(data);
-      setFilteredTB(data); // Đặt danh sách ban đầu
+      if (data && Array.isArray(data)) {
+        setListTB(data);
+        setFilteredTB(data);
+      } else {
+        console.error("Dữ liệu không hợp lệ:", data);
+      }
     });
   };
 
@@ -55,15 +59,14 @@ export default function ListThietBi({ navigation }) {
         <Text style={styles.textItem}>{item.hang}</Text>
       </View>
       <View style={styles.itemBody}>
+        <Text style={styles.textItem}>Số lượng:</Text>
+        <Text style={styles.textItem}>{item.soLuong}</Text>
+      </View>
+      <View style={styles.itemBody}>
         <Text style={styles.textItem}>Ngày:</Text>
         <Text style={styles.textItem}>{item.ngayNhap}</Text>
       </View>
-      {item.employeeId && (
-        <View style={styles.itemBody}>
-          <Text style={styles.textItem}> </Text>
-          <Text style={[styles.textItem, { color: "red" }]}>Đã cấp</Text>
-        </View>
-      )}
+  
     </TouchableOpacity>
   );
 

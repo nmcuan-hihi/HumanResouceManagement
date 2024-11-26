@@ -25,6 +25,8 @@ const AddThietBi = ({ validModal, setValidModal }) => {
   const [deviceName, setDeviceName] = useState("");
   const [deviceType, setDeviceType] = useState("");
   const [deviceBrand, setDeviceBrand] = useState("");
+  const [soLuong, setSoLuong] = useState("");
+
   const [avatarSource, setAvatarSource] = useState(null); // Thêm state cho hình ảnh
   const [validDate, setValidDate] = useState(false);
   const [load, setLoad] = useState(false);
@@ -63,7 +65,6 @@ const AddThietBi = ({ validModal, setValidModal }) => {
       { cancelable: true }
     );
   };
-
 
   const launchImageLibrary = async () => {
     const permissionResult =
@@ -109,8 +110,8 @@ const AddThietBi = ({ validModal, setValidModal }) => {
       hang: deviceBrand,
       ngayNhap: Intl.DateTimeFormat("en-CA").format(date),
       imageUrl: avatarSource,
-      employeeId: null,
-      ngayCap: null,
+      soLuong: soLuong,
+      daCap: 0,
     };
 
     // Kiểm tra các trường hợp không hợp lệ
@@ -231,6 +232,20 @@ const AddThietBi = ({ validModal, setValidModal }) => {
             </View>
 
             <View style={styleModel.viewText}>
+              <TextInput
+                style={styleModel.textInput}
+                keyboardType="numeric"
+                placeholder="Số lượng"
+                value={soLuong}
+                onChangeText={(text) => {
+                  // Chỉ chấp nhận số nguyên
+                  const numericValue = text.replace(/[^0-9]/g, "");
+                  setSoLuong(numericValue);
+                }}
+              />
+            </View>
+
+            <View style={styleModel.viewText}>
               <TouchableOpacity
                 style={{ alignItems: "center", height: "100%" }}
                 onPress={showDatepicker}
@@ -291,7 +306,7 @@ const styleModel = StyleSheet.create({
   },
   modalView: {
     marginTop: 30,
-    height: "75%",
+    height: "90%",
     width: "90%",
     backgroundColor: "#FAFAFA",
     borderRadius: 20,
