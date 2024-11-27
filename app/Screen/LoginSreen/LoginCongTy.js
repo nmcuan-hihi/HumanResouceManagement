@@ -44,7 +44,7 @@ export default function AddCongTy({ navigation }) {
         Alert.alert("Lỗi", "Đã xảy ra lỗi khi thêm công ty. Vui lòng thử lại.");
       }
     } catch (error) {
-      console.error("Lỗi khi thêm công ty:", error);
+      console.log("Lỗi khi thêm công ty:", error);
       Alert.alert("Lỗi", "Không thể thêm công ty. Vui lòng kiểm tra kết nối mạng.");
     }
   };

@@ -43,11 +43,11 @@ export default function DuyetNghiPhep({ navigation,route }) {
   
         setRefreshing(false);
       }, (error) => {
-        console.error('Lỗi khi lắng nghe dữ liệu:', error);
+        console.log('Lỗi khi lắng nghe dữ liệu:', error);
         setRefreshing(false);
       });
     } catch (error) {
-      console.error('Lỗi khi tải dữ liệu nghỉ phép:', error);
+      console.log('Lỗi khi tải dữ liệu nghỉ phép:', error);
       setRefreshing(false);
     }
   };

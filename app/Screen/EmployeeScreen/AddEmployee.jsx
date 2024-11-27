@@ -182,7 +182,7 @@ export default function AddMember({ navigation }) {
       navigation.goBack();
     } catch (error) {
       Alert.alert("Lỗi!", "Có lỗi xảy ra khi thêm nhân viên.");
-      console.error(error);
+      console.log(error);
     } finally {
       closeModal();
     }
@@ -205,7 +205,7 @@ export default function AddMember({ navigation }) {
           }
         }
       } catch (error) {
-        console.error("Lỗi khi lấy phòng ban:", error);
+        console.log("Lỗi khi lấy phòng ban:", error);
       }
     };
 
@@ -225,7 +225,7 @@ export default function AddMember({ navigation }) {
           }
         }
       } catch (error) {
-        console.error("Lỗi khi lấy chức vụ:", error);
+        console.log("Lỗi khi lấy chức vụ:", error);
       }
     };
 
@@ -235,7 +235,7 @@ export default function AddMember({ navigation }) {
         setEmployeeId(newId);
         updateField("employeeId", newId); // Cập nhật mã nhân viên mới
       } catch (error) {
-        console.error("Error fetching new employee ID:", error);
+        console.log("Error fetching new employee ID:", error);
       }
     };
 

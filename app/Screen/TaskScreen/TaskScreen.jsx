@@ -31,7 +31,7 @@ const TaskScreen = ({ route, navigation }) => {
         // If you want to unsubscribe later
         return unsubscribe;
       } catch (error) {
-        console.error("Lỗi khi lấy nhiệm vụ phân công:", error);
+        console.log("Lỗi khi lấy nhiệm vụ phân công:", error);
       }
     }
   
@@ -74,7 +74,7 @@ const TaskScreen = ({ route, navigation }) => {
           setTasks([]);
         }
       } catch (error) {
-        console.error("Error fetching tasks:", error);
+        console.log("Error fetching tasks:", error);
       } finally {
         setLoading(false);
       }
@@ -119,7 +119,7 @@ const TaskScreen = ({ route, navigation }) => {
         navigation.navigate("TaskDetail", { task: taskDetails, employee, tyle });
       } else {
         // Nếu không tìm thấy nhiệm vụ, log lỗi
-        console.error("Task not found");
+        console.log("Task not found");
       }
     });
   };

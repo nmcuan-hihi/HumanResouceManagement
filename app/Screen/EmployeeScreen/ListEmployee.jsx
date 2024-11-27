@@ -44,7 +44,7 @@ export default function EmployeeList({ navigation , route}) {
         console.warn('Dữ liệu phòng ban không hợp lệ:', phongBans);
       }
     } catch (error) {
-      console.error('Lỗi khi fetching dữ liệu:', error);
+      console.log('Lỗi khi fetching dữ liệu:', error);
     } finally {
       setRefreshing(false);
     }

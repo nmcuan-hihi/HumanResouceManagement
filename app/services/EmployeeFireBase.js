@@ -53,7 +53,7 @@ export const editEmployeeFireStore = async (
 
     console.log(`Employee ${employeeId} updated successfully!`);
   } catch (error) {
-    console.error(`Error updating employee ${employeeId}:`, error);
+    console.log(`Error updating employee ${employeeId}:`, error);
     throw new Error("Failed to update employee!");
   }
 };
@@ -90,7 +90,7 @@ export const addEmployeeFireStore = async (employee, profileImage = null) => {
     await set(ref(database, `${idCty}/employees/${employee.employeeId}`), emp);
     console.log("Employee successfully added to Realtime Database!");
   } catch (error) {
-    console.error("Error adding employee:", error);
+    console.log("Error adding employee:", error);
     throw error;
   }
 };
@@ -119,7 +119,7 @@ export async function readEmployeesFireStore() {
       return null;
     }
   } catch (error) {
-    console.error("Error reading employees:", error);
+    console.log("Error reading employees:", error);
     throw error;
   }
 }
@@ -144,7 +144,7 @@ export async function getEmployeeById(employeeId) {
       return null;
     }
   } catch (error) {
-    console.error("Error getting employee by ID:", error);
+    console.log("Error getting employee by ID:", error);
     throw error;
   }
 }
@@ -173,7 +173,7 @@ export async function getNewEmployeeId() {
     }
     return newId;
   } catch (error) {
-    console.error("Error fetching latest employee ID:", error);
+    console.log("Error fetching latest employee ID:", error);
     throw error;
   }
 }

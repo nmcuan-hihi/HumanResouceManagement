@@ -43,14 +43,14 @@ export async function taoTaskDataBase(nhiemvu) {
     console.log("Thông báo đã được tạo thành công:", notificationData);
     return notificationData;
   } catch (error) {
-    console.error("Lỗi khi tạo thông báo:", error);
+    console.log("Lỗi khi tạo thông báo:", error);
     throw error;
   }
 }
   // export const getAssignedTask = async (employeeId, manhiemvu) => {
   //   try {
   //     if (!employeeId || !manhiemvu) {
-  //       console.error("Dữ liệu đầu vào không hợp lệ?");
+  //       console.log("Dữ liệu đầu vào không hợp lệ?");
   //       return null;
   //     }
 
@@ -74,7 +74,7 @@ export async function taoTaskDataBase(nhiemvu) {
   //     return tasks[taskKey];
 
   //   } catch (error) {
-  //     console.error("Lỗi khi lấy thông tin nhiệm vụ:", error);
+  //     console.log("Lỗi khi lấy thông tin nhiệm vụ:", error);
   //     throw error;
   //   }
   // };
@@ -83,7 +83,7 @@ export async function taoTaskDataBase(nhiemvu) {
     return new Promise((resolve, reject) => {
       try {
         if (!employeeId || !manhiemvu) {
-          console.error("Dữ liệu đầu vào không hợp lệ?");
+          console.log("Dữ liệu đầu vào không hợp lệ?");
           reject("Dữ liệu đầu vào không hợp lệ");
           return;
         }
@@ -109,12 +109,12 @@ export async function taoTaskDataBase(nhiemvu) {
             }
           },
           (error) => {
-            console.error("Lỗi khi lắng nghe nhiệm vụ phân công:", error);
+            console.log("Lỗi khi lắng nghe nhiệm vụ phân công:", error);
             reject(error);
           }
         );
       } catch (error) {
-        console.error("Lỗi khi lắng nghe nhiệm vụ phân công:", error);
+        console.log("Lỗi khi lắng nghe nhiệm vụ phân công:", error);
         reject(error);
       }
     });
@@ -125,7 +125,7 @@ export const updateAssignedTaskStatus = async (employeeId, manhiemvu, trangthai)
   try {
     // Validate đầu vào
     if (!employeeId || !manhiemvu || typeof trangthai !== "boolean") {
-      console.error("Dữ liệu đầu vào không hợp lệ");
+      console.log("Dữ liệu đầu vào không hợp lệ");
       return false;
     }
     const idCty = getIdCty();
@@ -134,7 +134,7 @@ export const updateAssignedTaskStatus = async (employeeId, manhiemvu, trangthai)
     // Lấy dữ liệu hiện tại
     const snapshot = await get(taskRef);
     if (!snapshot.exists()) {
-      console.error("Không tìm thấy dữ liệu nhiệm vụ phân công");
+      console.log("Không tìm thấy dữ liệu nhiệm vụ phân công");
       return false;
     }
     const tasks = snapshot.val();
@@ -143,7 +143,7 @@ export const updateAssignedTaskStatus = async (employeeId, manhiemvu, trangthai)
       key => tasks[key].employeeId === employeeId && tasks[key].manhiemvu === manhiemvu
     );
     if (!taskKey) {
-      console.error("Không tìm thấy nhiệm vụ phù hợp");
+      console.log("Không tìm thấy nhiệm vụ phù hợp");
       return false;
     }
     // Cập nhật trạng thái
@@ -154,7 +154,7 @@ export const updateAssignedTaskStatus = async (employeeId, manhiemvu, trangthai)
     console.log(`Đã cập nhật trạng thái nhiệm vụ ${manhiemvu} thành ${trangthai}`);
     return true;
   } catch (error) {
-    console.error("Lỗi khi cập nhật trạng thái nhiệm vụ:", error);
+    console.log("Lỗi khi cập nhật trạng thái nhiệm vụ:", error);
     throw error;
   }
 };
@@ -175,7 +175,7 @@ export function layTatCaNhiemVu() {
         }
       },
       (error) => {
-        console.error("Lỗi khi lắng nghe nhiệm vụ:", error);
+        console.log("Lỗi khi lắng nghe nhiệm vụ:", error);
         reject(error); // Reject the promise if there's an error
       }
     );
@@ -196,7 +196,7 @@ export function layNhiemVuById(manhiemvu, callback) {
       callback(null); // Không tìm thấy nhiệm vụ
     }
   }, (error) => {
-    console.error("Lỗi khi lắng nghe nhiệm vụ:", error);
+    console.log("Lỗi khi lắng nghe nhiệm vụ:", error);
   });
 }
 
@@ -247,7 +247,7 @@ export async function themTaskPhanCong(employeeId, manhiemvu) {
     console.log("Thông báo cho nhân viên đã được tạo thành công:", notificationNhanVienData);
     return notificationNhanVienData;
   } catch (error) {
-    console.error("Lỗi khi thêm thông báo cho nhân viên:", error);
+    console.log("Lỗi khi thêm thông báo cho nhân viên:", error);
     throw error;
   }
 }
@@ -267,7 +267,7 @@ export async function themTaskPhanCong(employeeId, manhiemvu) {
 
 //     return statistics;
 //   } catch (error) {
-//     console.error("Lỗi khi lấy thống kê nhiệm vụ:", error);
+//     console.log("Lỗi khi lấy thống kê nhiệm vụ:", error);
 //     throw error;
 //   }
   
@@ -291,7 +291,7 @@ export async function themTaskPhanCong(employeeId, manhiemvu) {
 //       return []; // Không có nhiệm vụ phân công nào
 //     }
 //   } catch (error) {
-//     console.error("Error fetching assigned tasks:", error);
+//     console.log("Error fetching assigned tasks:", error);
 //     throw error;
 //   }
 // }
@@ -320,7 +320,7 @@ export function layTatCaNhiemVuPhanCongByMaNV(manhiemvu, callback) {
       }
     },
     (error) => {
-      console.error("Error listening for assigned tasks:", error);
+      console.log("Error listening for assigned tasks:", error);
     }
   );
 
@@ -340,7 +340,7 @@ export function layTatCaNhiemVuPhanCong(callback) {
       callback([]);
     }
   }, (error) => {
-    console.error("Lỗi khi lắng nghe nhiệm vụ phân công:", error);
+    console.log("Lỗi khi lắng nghe nhiệm vụ phân công:", error);
   });
 }
 

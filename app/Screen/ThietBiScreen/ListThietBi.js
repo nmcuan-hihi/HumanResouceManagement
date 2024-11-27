@@ -24,7 +24,7 @@ export default function ListThietBi({ navigation }) {
         setListTB(data);
         setFilteredTB(data);
       } else {
-        console.error("Dữ liệu không hợp lệ:", data);
+        console.log("Dữ liệu không hợp lệ:", data);
       }
     });
   };

@@ -79,7 +79,7 @@ export default function ChamCongNV({ navigation, route }) {
           setIsInitialized(true);
         }
       } catch (error) {
-        console.error("Error fetching employees:", error);
+        console.log("Error fetching employees:", error);
       }
     }
 
@@ -91,7 +91,7 @@ export default function ChamCongNV({ navigation, route }) {
           setPhongBan(filteredPhongBan);
         }
       } catch (error) {
-        console.error("Error fetching phong ban:", error);
+        console.log("Error fetching phong ban:", error);
       }
     }
 
@@ -137,7 +137,7 @@ export default function ChamCongNV({ navigation, route }) {
           }
         }
       } catch (error) {
-        console.error("Error fetching existing timeIn:", error);
+        console.log("Error fetching existing timeIn:", error);
       }
     };
   
@@ -164,7 +164,7 @@ export default function ChamCongNV({ navigation, route }) {
       const filteredEmployees = await getFilteredEmployeesByPhongBanAndLeave(phongbanId, selecl);
       setEmployees(filteredEmployees);
     } catch (error) {
-      console.error("Error filtering employees by phòng ban:", error);
+      console.log("Error filtering employees by phòng ban:", error);
     }
   };
 
@@ -173,7 +173,7 @@ export default function ChamCongNV({ navigation, route }) {
       const filteredEmployees = await getEmployeesByLeaveType(phongbanId);
       setEmployees(filteredEmployees);
     } catch (error) {
-      console.error("Error filtering employees by phòng ban:", error);
+      console.log("Error filtering employees by phòng ban:", error);
     }
   };
 
@@ -268,7 +268,7 @@ const handleSaveAttendance = async () => {
       alert('Chấm công thành công!');
     }
   } catch (error) {
-    console.error("Error saving attendance:", error);
+    console.log("Error saving attendance:", error);
     alert('Đã xảy ra lỗi khi chấm công.');
   } finally {
     setLoading(false);

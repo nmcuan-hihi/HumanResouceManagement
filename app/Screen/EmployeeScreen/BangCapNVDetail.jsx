@@ -30,7 +30,7 @@ export default function DetailBangCapNhanVien({ navigation, route }) {
 
   const handleXacThuc = async () => {
     if (!bangCapDetail || !bangCapDetail.bangcap_id) {
-      console.error("Item không hợp lệ:", bangCapDetail);
+      console.log("Item không hợp lệ:", bangCapDetail);
       return;
     }
 

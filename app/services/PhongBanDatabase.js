@@ -29,7 +29,7 @@ export async function filterEmployeesByPhongBan(phongbanId) {
 
     return filteredEmployees;
   } catch (error) {
-    console.error("Error filtering employees by phòng ban:", error);
+    console.log("Error filtering employees by phòng ban:", error);
     return [];
   }
 }
@@ -49,7 +49,7 @@ export async function filterEmployeesByGender(gender) {
 
     return filteredEmployees;
   } catch (error) {
-    console.error("Error filtering employees by gender:", error);
+    console.log("Error filtering employees by gender:", error);
     return [];
   }
 }
@@ -69,7 +69,7 @@ export async function filterEmployeesByStatus(status) {
 
     return filteredEmployees;
   } catch (error) {
-    console.error("Error filtering employees by status:", error);
+    console.log("Error filtering employees by status:", error);
     return [];
   }
 }
@@ -97,7 +97,7 @@ export async function searchEmployeesByNameOrId(searchTerm) {
 
     return searchResults;
   } catch (error) {
-    console.error("Error searching employees by name or ID:", error);
+    console.log("Error searching employees by name or ID:", error);
     return {};
   }
 }
@@ -120,7 +120,7 @@ export async function readPhongBanFromRealtime() {
 
     return phongBanData;
   } catch (error) {
-    console.error("Error reading phong ban:", error);
+    console.log("Error reading phong ban:", error);
     return [];
   }
 }
@@ -140,7 +140,7 @@ export async function searchEmployeesById(employeeId) {
 
     return searchResults;
   } catch (error) {
-    console.error("Error searching employees by employee ID:", error);
+    console.log("Error searching employees by employee ID:", error);
     return [];
   }
 }
@@ -171,7 +171,7 @@ export async function filterEmployees({ phongbanId, gender, status }) {
 
     return filteredEmployees;
   } catch (error) {
-    console.error("Error filtering employees:", error);
+    console.log("Error filtering employees:", error);
     return [];
   }
 }

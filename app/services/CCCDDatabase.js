@@ -35,7 +35,7 @@ export async function writeInfoCCCD(employeeId, imgFront, imgBack) {
 
         console.log("CCCD information has been successfully saved.");
     } catch (error) {
-        console.error("Error saving CCCD images:", error);
+        console.log("Error saving CCCD images:", error);
     }
 }
 
@@ -56,7 +56,7 @@ export async function readInfoCCCD(employeeId) {
             return null;
         }
     } catch (error) {
-        console.error("Error reading CCCD information:", error);
+        console.log("Error reading CCCD information:", error);
         throw error;
     }
 }

@@ -34,7 +34,7 @@ export async function dangKyNghiPhep(nghiPhepData) {
 
     return { success: true, message: 'Đăng ký nghỉ phép thành công!' };
   } catch (error) {
-    console.error('Lỗi khi đăng ký nghỉ phép:', error);
+    console.log('Lỗi khi đăng ký nghỉ phép:', error);
     return { success: false, message: 'Đăng ký nghỉ phép thất bại.', error };
   }
 }
@@ -67,7 +67,7 @@ export async function layDanhSachNghiPhep() {
       return { message: 'Không có dữ liệu nghỉ phép.' };
     }
   } catch (error) {
-    console.error('Lỗi khi lấy dữ liệu nghỉ phép:', error);
+    console.log('Lỗi khi lấy dữ liệu nghỉ phép:', error);
     return { success: false, message: 'Lỗi khi lấy dữ liệu nghỉ phép.', error };
   }
 }
@@ -75,10 +75,10 @@ export async function layDanhSachNghiPhep() {
 // Hàm để duyệt hoặc hủy yêu cầu nghỉ phép
 export async function duyetNghiPhep(id, status, rejectReason = null) {
   try {
+
     // Lấy idCty từ store
     const state = store.getState();
     const idCty = state.congTy.idCty;
-    
     // Tạo reference đến yêu cầu nghỉ phép cụ thể trong database của công ty
     const nghiPhepRef = ref(database, `${idCty}/nghiPhep/${id}`);
 
@@ -95,7 +95,7 @@ export async function duyetNghiPhep(id, status, rejectReason = null) {
 
     return { success: true, message: 'Cập nhật trạng thái thành công!' };
   } catch (error) {
-    console.error('Lỗi khi cập nhật trạng thái nghỉ phép:', error);
+    console.log('Lỗi khi cập nhật trạng thái nghỉ phép:', error);
     return { success: false, message: 'Cập nhật trạng thái thất bại.', error };
   }
 }

@@ -18,7 +18,7 @@ export default function ThongTinChamCong({ navigation }) {
           setAttendanceData(data);
         }
       } catch (error) {
-        console.error("Error fetching attendance data:", error);
+        console.log("Error fetching attendance data:", error);
       } finally {
         setLoading(false);
       }
@@ -41,7 +41,7 @@ export default function ThongTinChamCong({ navigation }) {
         ]
       );
     } catch (error) {
-      console.error("Error saving attendance data:", error);
+      console.log("Error saving attendance data:", error);
       Alert.alert("Thông báo", "Cập nhật thất bại!");
     } finally {
       setLoading(false);
@@ -63,7 +63,7 @@ export default function ThongTinChamCong({ navigation }) {
             alert('Xóa thành công!');
             navigation.goBack();
           } catch (error) {
-            console.error("Error deleting attendance data:", error);
+            console.log("Error deleting attendance data:", error);
             alert('Xóa thất bại!');
           } finally {
             setLoading(false);

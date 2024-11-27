@@ -45,7 +45,7 @@ export default function MessengerGroupDetails({ navigation, route }) {
         return [];
       }
     } catch (error) {
-      console.error('Lỗi khi lấy hoặc tạo cuộc trò chuyện:', error);
+      console.log('Lỗi khi lấy hoặc tạo cuộc trò chuyện:', error);
       throw error;
     }
   };
@@ -80,7 +80,7 @@ export default function MessengerGroupDetails({ navigation, route }) {
   
         return () => unsubscribe();
       } catch (error) {
-        console.error('Lỗi khi lấy dữ liệu:', error);
+        console.log('Lỗi khi lấy dữ liệu:', error);
       }
     };
   
@@ -94,7 +94,7 @@ export default function MessengerGroupDetails({ navigation, route }) {
         await sendMessage(chatID, empFrom.employeeId, newMessage);
         setNewMessage('');
       } catch (error) {
-        console.error('Lỗi khi gửi tin nhắn:', error);
+        console.log('Lỗi khi gửi tin nhắn:', error);
       }
     }
   };

@@ -148,7 +148,7 @@ console.log(employeeId+"hjhjhj"+cccdNumber);
             navigation.goBack();
         } catch (error) {
             Alert.alert('Lỗi!', 'Có lỗi xảy ra khi lưu thông tin.');
-            console.error(error);
+            console.log(error);
         } finally {
             closeModal(); // Ensure the modal is closed after completion
         }

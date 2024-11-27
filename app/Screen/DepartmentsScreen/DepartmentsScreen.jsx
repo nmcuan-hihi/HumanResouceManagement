@@ -64,7 +64,7 @@ export default function PhongBanScreen({ navigation }) {
 
       setPhongBanData(newData);
     } catch (error) {
-      console.error("Lỗi khi đọc dữ liệu:", error);
+      console.log("Lỗi khi đọc dữ liệu:", error);
     }
   };
 
@@ -116,7 +116,7 @@ export default function PhongBanScreen({ navigation }) {
       setSearchText("");
       setVisibleModal(false);
     } catch (error) {
-      console.error("Lỗi khi thêm phòng ban:", error);
+      console.log("Lỗi khi thêm phòng ban:", error);
     }
   };
 

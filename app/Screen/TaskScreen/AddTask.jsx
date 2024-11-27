@@ -67,7 +67,7 @@ const AddTask = ({ navigation }) => {
           );
         }
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách nhân viên:", error);
+        console.log("Lỗi khi lấy danh sách nhân viên:", error);
         Alert.alert(
           "Lỗi",
           "Không thể lấy danh sách nhân viên: " + error.message

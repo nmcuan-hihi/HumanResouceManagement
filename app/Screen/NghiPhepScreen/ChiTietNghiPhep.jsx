@@ -35,7 +35,7 @@ export default function ChiTietNghiPhep({ route, navigation }) {
 
       navigation.goBack(); // Quay lại màn hình trước sau khi cập nhật
     } catch (error) {
-      console.error('Lỗi khi xác nhận nghỉ phép:', error);
+      console.log('Lỗi khi xác nhận nghỉ phép:', error);
     }
   };
 
@@ -100,7 +100,7 @@ export default function ChiTietNghiPhep({ route, navigation }) {
         }
       navigation.goBack(); // Quay lại màn hình trước sau khi cập nhật
     } catch (error) {
-      console.error('Lỗi khi từ chối nghỉ phép:', error);
+      console.log('Lỗi khi từ chối nghỉ phép:', error);
     }
   };
 

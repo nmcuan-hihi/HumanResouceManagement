@@ -27,7 +27,7 @@ export async function taoThongBaoDataBase(thongBao) {
     console.log("Thông báo đã được tạo thành công:", notificationData);
     return notificationData;
   } catch (error) {
-    console.error("Lỗi khi tạo thông báo:", error);
+    console.log("Lỗi khi tạo thông báo:", error);
     throw error;
   }
 }
@@ -57,7 +57,7 @@ export async function themThongBaoNhanVien(employeeId, maThongBao) {
     );
     return notificationNhanVienData;
   } catch (error) {
-    console.error("Lỗi khi thêm thông báo cho nhân viên:", error);
+    console.log("Lỗi khi thêm thông báo cho nhân viên:", error);
     throw error;
   }
 }
@@ -85,7 +85,7 @@ export async function layDanhSachThongBaoNhanVien(employeeId) {
     });
     return danhSachThongBao;
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách thông báo:", error);
+    console.log("Lỗi khi lấy danh sách thông báo:", error);
     throw error;
   }
 }
@@ -132,7 +132,7 @@ export async function layThongBaoById(maThongBao) {
     const thongBao = snapshot.val();
     return thongBao;
   } catch (error) {
-    console.error("Lỗi khi lấy thông báo theo key:", error);
+    console.log("Lỗi khi lấy thông báo theo key:", error);
     throw error;
   }
 }
@@ -149,7 +149,7 @@ export async function capNhatTrangThaiThongBao(employeeId, maThongBao) {
     console.log(`Cập nhật trạng thái cho thông báo nhân viên ${maThongBao} thành công.`);
     return true;
   } catch (error) {
-    console.error("Lỗi khi cập nhật trạng thái thông báo:", error);
+    console.log("Lỗi khi cập nhật trạng thái thông báo:", error);
     throw error;
   }
 }

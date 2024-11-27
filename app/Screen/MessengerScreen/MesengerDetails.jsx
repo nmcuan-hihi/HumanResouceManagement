@@ -45,7 +45,7 @@ export default function MesengerDetails({ navigation, route }) {
         return { chatID, messages: [] };
       }
     } catch (error) {
-      console.error('Lỗi khi lấy hoặc tạo cuộc trò chuyện:', error);
+      console.log('Lỗi khi lấy hoặc tạo cuộc trò chuyện:', error);
       throw error;
     }
   };
@@ -75,7 +75,7 @@ export default function MesengerDetails({ navigation, route }) {
 
         return () => unsubscribe();
       } catch (error) {
-        console.error('Lỗi khi lấy tin nhắn:', error);
+        console.log('Lỗi khi lấy tin nhắn:', error);
       }
     };
 
@@ -88,7 +88,7 @@ export default function MesengerDetails({ navigation, route }) {
         await sendMessage(chatID, empFrom.employeeId, newMessage);
         setNewMessage('');
       } catch (error) {
-        console.error('Lỗi khi gửi tin nhắn:', error);
+        console.log('Lỗi khi gửi tin nhắn:', error);
       }
     }
   };

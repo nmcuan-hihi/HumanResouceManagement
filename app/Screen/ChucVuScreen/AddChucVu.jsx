@@ -26,7 +26,7 @@ export default function AddChucVu({ navigation }) {
       Alert.alert("Thành công", "Thêm chức vụ thành công!");
       navigation.goBack();
     } catch (error) {
-      console.error(error);
+      console.log(error);
       Alert.alert("Lỗi", "Đã xảy ra lỗi trong quá trình thêm chức vụ.");
     }
   };

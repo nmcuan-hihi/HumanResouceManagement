@@ -29,7 +29,7 @@ export const addEmployeeFireStore = async (employee) => {
     await set(ref(database, `${idCty}/employees/${employee.employeeId}`), sanitizedEmployee);
     console.log("Employee successfully added to Realtime Database!");
   } catch (error) {
-    console.error("Error adding employee:", error);
+    console.log("Error adding employee:", error);
   }
 };
 
@@ -43,7 +43,7 @@ export function writeUserData(employee) {
       console.log(`Employee ${employeeId} written successfully!`);
     })
     .catch((error) => {
-      console.error(`Error writing employee ${employeeId}:`, error);
+      console.log(`Error writing employee ${employeeId}:`, error);
     });
 }
 
@@ -64,7 +64,7 @@ export async function addEmployee(employeeData, profileImage) {
     await set(ref(database, `${idCty}/employees/${employeeData.employeeId}`), employee);
     console.log(`Employee ${employeeData.employeeId} added successfully!`);
   } catch (error) {
-    console.error("Error adding employee:", error);
+    console.log("Error adding employee:", error);
   }
 }
 
@@ -85,7 +85,7 @@ export async function readEmployees() {
       return null;
     }
   } catch (error) {
-    console.error("Error reading employees:", error);
+    console.log("Error reading employees:", error);
   }
 }
 
@@ -98,7 +98,7 @@ export const updateEmployee = async (employee_id, employeeData) => {
     await update(employeeRef, employeeData);
     console.log(`Employee ${employee_id} updated successfully!`);
   } catch (error) {
-    console.error(`Error updating employee ${employee_id}:`, error);
+    console.log(`Error updating employee ${employee_id}:`, error);
     throw error;
   }
 };
@@ -112,7 +112,7 @@ export const deleteEmployee = async (employee_id) => {
     await remove(employeeRef);
     console.log(`Employee ${employee_id} deleted successfully!`);
   } catch (error) {
-    console.error(`Error deleting employee ${employee_id}:`, error);
+    console.log(`Error deleting employee ${employee_id}:`, error);
     throw error;
   }
 };
@@ -128,7 +128,7 @@ export const toggleEmployeeStatus = async (employee_id, currentStatus) => {
     await update(employeeRef, { trangthai: newStatus });
     console.log(`Employee ${employee_id} status updated to ${newStatus ? "active" : "inactive"} successfully!`);
   } catch (error) {
-    console.error(`Error updating employee ${employee_id} status:`, error);
+    console.log(`Error updating employee ${employee_id} status:`, error);
     throw error;
   }
 };
@@ -142,7 +142,7 @@ export const createChucVu = async (chucvu_id, chucVu) => {
     await set(chucVuRef, chucVu); // Set data at the specific location
     console.log(`Chức vụ ${chucvu_id} đã được thêm thành công`);
   } catch (error) {
-    console.error(`Lỗi khi thêm chức vụ ${chucvu_id}:`, error);
+    console.log(`Lỗi khi thêm chức vụ ${chucvu_id}:`, error);
   }
 };
 
@@ -171,7 +171,7 @@ export const readChucVu = async (filter = 0) => {
       return null; // No data found
     }
   } catch (error) {
-    console.error("Error reading chuc vu data:", error);
+    console.log("Error reading chuc vu data:", error);
     return null; // Handle error
   }
 };
@@ -185,7 +185,7 @@ export const updateChucVu = async (maChucVu, updatedData) => {
     await update(chucVuRef, updatedData); // Update data at the specific location
     console.log(`Chức vụ ${maChucVu} đã được cập nhật thành công`);
   } catch (error) {
-    console.error(`Lỗi khi cập nhật chức vụ ${maChucVu}:`, error);
+    console.log(`Lỗi khi cập nhật chức vụ ${maChucVu}:`, error);
   }
 };
 
@@ -198,7 +198,7 @@ export const deleteChucVu = async (chucvu_id) => {
     await remove(chucVuRef); // Remove data at the specific location
     console.log(`Chức vụ ${chucvu_id} đã được xóa thành công`);
   } catch (error) {
-    console.error(`Lỗi khi xóa chức vụ ${chucvu_id}:`, error);
+    console.log(`Lỗi khi xóa chức vụ ${chucvu_id}:`, error);
   }
 };
 
@@ -212,7 +212,7 @@ export function writePhongBan(phongBan) {
       console.log(`Phòng ban ${maPhongBan} written successfully!`);
     })
     .catch((error) => {
-      console.error(`Error writing phòng ban ${maPhongBan}:`, error);
+      console.log(`Error writing phòng ban ${maPhongBan}:`, error);
     });
 }
 
@@ -233,7 +233,7 @@ export async function readPhongBan() {
       return null;
     }
   } catch (error) {
-    console.error("Error reading phong ban:", error);
+    console.log("Error reading phong ban:", error);
   }
 }
 
@@ -246,7 +246,7 @@ export const editPhongBan = async (maPhongBan, updatedData) => {
     await update(phongBanRef, updatedData);
     console.log("Cập nhật phòng ban thành công");
   } catch (error) {
-    console.error("Error updating phòng ban:", error);
+    console.log("Error updating phòng ban:", error);
   }
 };
 
@@ -259,7 +259,7 @@ export const removePhongBan = async (maPhongBan) => {
     await remove(phongBanRef);
     console.log("Xóa phòng ban thành công");
   } catch (error) {
-    console.error("Error deleting phòng ban:", error);
+    console.log("Error deleting phòng ban:", error);
   }
 };
 
@@ -276,7 +276,7 @@ export function writeBangCap(bangCap) {
       console.log(`Bằng cấp ${bangCapId} cho công ty ${idCty} đã được ghi thành công!`);
     })
     .catch((error) => {
-      console.error(`Lỗi khi ghi bằng cấp ${bangCapId} cho công ty ${idCty}:`, error);
+      console.log(`Lỗi khi ghi bằng cấp ${bangCapId} cho công ty ${idCty}:`, error);
     });
 }
 
@@ -299,7 +299,7 @@ export async function readBangCap() {
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi đọc danh sách bằng cấp:", error);
+    console.log("Lỗi khi đọc danh sách bằng cấp:", error);
   }
 }
 
@@ -313,7 +313,7 @@ export async function updateBangCap(bangcapId, tenBang) {
     await update(ref(database, `${idCty}/bangcap/${bangcapId}`), { tenBang });
     console.log(`Bằng cấp ${bangcapId} cho công ty ${idCty} đã được cập nhật thành công!`);
   } catch (error) {
-    console.error(`Lỗi khi cập nhật bằng cấp ${bangcapId} cho công ty ${idCty}:`, error);
+    console.log(`Lỗi khi cập nhật bằng cấp ${bangcapId} cho công ty ${idCty}:`, error);
   }
 }
 
@@ -328,7 +328,7 @@ export const deleteBangCap = async (bangCap_id) => {
     await remove(bangCapRef);
     console.log(`Bằng cấp ${bangCap_id} cho công ty ${idCty} đã được xóa thành công`);
   } catch (error) {
-    console.error(`Lỗi khi xóa bằng cấp ${bangCap_id} cho công ty ${idCty}:`, error);
+    console.log(`Lỗi khi xóa bằng cấp ${bangCap_id} cho công ty ${idCty}:`, error);
   }
 };
 
@@ -356,7 +356,7 @@ export async function readEmployeesByPhongBan(phongBanId) {
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi đọc danh sách nhân viên theo phòng ban và công ty:", error);
+    console.log("Lỗi khi đọc danh sách nhân viên theo phòng ban và công ty:", error);
   }
 }
 
@@ -371,7 +371,7 @@ export async function addChamCong(chamCongData) {
     await set(newChamCongRef, chamCongData);
     console.log("Thông tin chấm công cho công ty đã được thêm thành công!");
   } catch (error) {
-    console.error("Lỗi khi thêm thông tin chấm công cho công ty:", error);
+    console.log("Lỗi khi thêm thông tin chấm công cho công ty:", error);
   }
 }
 
@@ -394,6 +394,6 @@ export async function readChamCong() {
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi đọc danh sách chấm công cho công ty:", error);
+    console.log("Lỗi khi đọc danh sách chấm công cho công ty:", error);
   }
 }

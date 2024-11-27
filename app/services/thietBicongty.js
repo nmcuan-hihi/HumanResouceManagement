@@ -48,7 +48,7 @@ export async function addThietBiFirebase(thietBi) {
     await set(ref(database, `${idCty}/thietbicty/${random}`), data);
     console.log(`them thiet bi thanh cong`);
   } catch (error) {
-    console.error("Error them thiet bi", error);
+    console.log("Error them thiet bi", error);
   }
 }
 
@@ -74,7 +74,7 @@ export function getAllThietBi(callback) {
       }
     },
     (error) => {
-      console.error("Lỗi khi lắng nghe thay đổi:", error);
+      console.log("Lỗi khi lắng nghe thay đổi:", error);
     }
   );
 }
@@ -93,7 +93,7 @@ export async function getThietBiById(id) {
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi lấy thiết bị theo ID:", error);
+    console.log("Lỗi khi lấy thiết bị theo ID:", error);
   }
 }
 
@@ -105,7 +105,7 @@ export async function deleteThietBi(id) {
     await set(ref(database, `${idCty}/thietbicty/${id}`), null); // Xóa thiết bị
     console.log(`Xóa thiết bị với ID ${id} thành công.`);
   } catch (error) {
-    console.error("Lỗi khi xóa thiết bị:", error);
+    console.log("Lỗi khi xóa thiết bị:", error);
   }
 }
 
@@ -134,7 +134,7 @@ export async function updateThietBi(id, updatedData) {
     await update(thietBiRef, updatedData);
     console.log(`Cập nhật thiết bị với ID ${id} thành công.`);
   } catch (error) {
-    console.error("Lỗi khi cập nhật thiết bị:", error);
+    console.log("Lỗi khi cập nhật thiết bị:", error);
   }
 }
 export function getAllThietBiByEmployeeId(employeeId) {
@@ -161,7 +161,7 @@ export function getAllThietBiByEmployeeId(employeeId) {
         }
       },
       (error) => {
-        console.error("Lỗi khi lắng nghe thay đổi:", error);
+        console.log("Lỗi khi lắng nghe thay đổi:", error);
         reject(error); // Trả về lỗi
       }
     );
@@ -179,7 +179,7 @@ export async function traThietBi(id, updatedData) {
     // Cập nhật thông tin thiết bị
     console.log(`Trả thiết bị với ID ${id} thành công.`);
   } catch (error) {
-    console.error("Lỗi khi Trả thiết bị:", error);
+    console.log("Lỗi khi Trả thiết bị:", error);
   }
 }
 
@@ -214,7 +214,7 @@ export async function addThietBiNhanVien(employeeId, thietbiId, data) {
       });
     }
   } catch (error) {
-    console.error("Lỗi khi thêm hoặc cập nhật thiết bị:", error);
+    console.log("Lỗi khi thêm hoặc cập nhật thiết bị:", error);
   }
 }
 
@@ -238,7 +238,7 @@ export async function getThietBiNhanVien(employeeId) {
       return []; // Không có dữ liệu
     }
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách thiết bị:", error);
+    console.log("Lỗi khi lấy danh sách thiết bị:", error);
     return [];
   }
 }
@@ -276,6 +276,6 @@ export async function updateThietBiNhanVien(
       console.warn("Thiết bị không tồn tại để cập nhật.");
     }
   } catch (error) {
-    console.error("Lỗi khi cập nhật thiết bị:", error);
+    console.log("Lỗi khi cập nhật thiết bị:", error);
   }
 }

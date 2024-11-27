@@ -43,7 +43,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
       const empl = await getEmployeeById(manv);
       setEmployeeData(empl);
     } catch (error) {
-      console.error("Error fetching employee data:", error);
+      console.log("Error fetching employee data:", error);
     }
   };
 
@@ -163,7 +163,7 @@ export default function EmployeeDetailScreen({ route, navigation }) {
 
   const handleXacThuc = (item) => {
     if (!item || !item.bangcap_id) {
-      console.error("Item không hợp lệ:", item);
+      console.log("Item không hợp lệ:", item);
       return;
     }
 

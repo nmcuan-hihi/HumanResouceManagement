@@ -48,7 +48,7 @@ export const getEmployeesWithLeave = async (today) => {
 
     return filteredEmployees;
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách nhân viên: ", error);
+    console.log("Lỗi khi lấy danh sách nhân viên: ", error);
     return [];
   }
 };
@@ -80,7 +80,7 @@ export async function locTheoPhongBan(phongbanId, chucvuId) {
 
     return filteredEmployees;
   } catch (error) {
-    console.error("Lỗi khi lọc nhân viên theo phòng ban và chức vụ:", error);
+    console.log("Lỗi khi lọc nhân viên theo phòng ban và chức vụ:", error);
     return [];
   }
 }
@@ -151,7 +151,7 @@ export async function getFilteredEmployeesByPhongBanAndLeave(
 
     return updatedEmployees;
   } catch (error) {
-    console.error("Lỗi khi lọc nhân viên theo phòng ban và nghỉ phép:", error);
+    console.log("Lỗi khi lọc nhân viên theo phòng ban và nghỉ phép:", error);
     return [];
   }
 }
@@ -164,7 +164,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
 
     // Kiểm tra dữ liệu
     if (!employeeId || !month || !status) {
-      console.error("Dữ liệu không hợp lệ:", attendanceData);
+      console.log("Dữ liệu không hợp lệ:", attendanceData);
       return;
     }
 
@@ -173,7 +173,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     // Lấy dữ liệu hiện tại từ Realtime Database
     const snapshot = await get(thongTinChamCongRef);
     if (!snapshot.exists()) {
-      console.error("Không tìm thấy dữ liệu thongtinchamcong");
+      console.log("Không tìm thấy dữ liệu thongtinchamcong");
       return;
     }
 
@@ -181,7 +181,7 @@ export const addChiTietChamCongToRealtime = async (attendanceData) => {
     const { giovaolam, giotanlam, handitre } = thongTinChamCong;
 
     if (!giovaolam || !giotanlam || !handitre) {
-      console.error("Dữ liệu thongtinchamcong không đầy đủ:", thongTinChamCong);
+      console.log("Dữ liệu thongtinchamcong không đầy đủ:", thongTinChamCong);
       return;
     }
 
@@ -336,7 +336,7 @@ export const getEmployeesByLeaveType = async (leaveType = "Có lương") => {
 
     return filteredEmployees;
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách nhân viên: ", error);
+    console.log("Lỗi khi lấy danh sách nhân viên: ", error);
     return [];
   }
 };
@@ -356,7 +356,7 @@ export async function readThongTinChamCong() {
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi đọc thongtinchamcong:", error);
+    console.log("Lỗi khi đọc thongtinchamcong:", error);
     return null;
   }
 }
@@ -370,6 +370,6 @@ export async function updateThongTinChamCong(updateData) {
 
     console.log("Cập nhật thongtinchamcong thành công:", updateData);
   } catch (error) {
-    console.error("Lỗi khi cập nhật thongtinchamcong:", error);
+    console.log("Lỗi khi cập nhật thongtinchamcong:", error);
   }
 }

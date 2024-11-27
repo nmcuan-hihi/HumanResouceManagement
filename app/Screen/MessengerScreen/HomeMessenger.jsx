@@ -44,7 +44,7 @@ export default function HomeMessenger({ navigation, route }) {
       // Listen to real-time changes in chat list
       listenToChatList(employee.employeeId);
     } catch (error) {
-      console.error('Error fetching employees:', error);
+      console.log('Error fetching employees:', error);
     } finally {
       setLoading(false);  // Hide loading indicator
     }

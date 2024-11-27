@@ -30,7 +30,7 @@ export const getIdCtyData = async (id) => {
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu ID công ty:", error);
+    console.log("Lỗi khi lấy dữ liệu ID công ty:", error);
     throw error;
   }
 };
@@ -47,7 +47,7 @@ export const checkCompanyExists = async (idCongTy) => {
       return false; // Công ty chưa tồn tại
     }
   } catch (error) {
-    console.error("Lỗi khi kiểm tra công ty:", error);
+    console.log("Lỗi khi kiểm tra công ty:", error);
     throw error;
   }
 };
@@ -77,7 +77,7 @@ export const addCompany = async (idCongTy, tenCongTy, tenGiamDoc, sdt) => {
     console.log("Thêm công ty, phòng ban, và chức vụ thành công!");
     return true; // Thêm thành công
   } catch (error) {
-    console.error("Lỗi khi thêm công ty:", error);
+    console.log("Lỗi khi thêm công ty:", error);
     return false; // Thêm thất bại
   }
 };

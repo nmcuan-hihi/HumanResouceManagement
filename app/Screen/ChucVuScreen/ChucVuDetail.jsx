@@ -42,7 +42,7 @@ export default function ChucVuDetail({ route, navigation }) {
         }
       } catch (error) {
         Alert.alert("Lỗi", "Không thể tải dữ liệu chức vụ.");
-        console.error("Lỗi khi lấy dữ liệu chức vụ:", error);
+        console.log("Lỗi khi lấy dữ liệu chức vụ:", error);
       } finally {
         setLoading(false);
       }
@@ -71,7 +71,7 @@ export default function ChucVuDetail({ route, navigation }) {
       setIsEditing(false);
     } catch (error) {
       Alert.alert("Lỗi", "Không thể lưu thông tin chức vụ.");
-      console.error("Lỗi khi lưu thông tin chức vụ:", error);
+      console.log("Lỗi khi lưu thông tin chức vụ:", error);
     }
   };
 
@@ -86,7 +86,7 @@ export default function ChucVuDetail({ route, navigation }) {
       navigation.goBack();
     } catch (error) {
       Alert.alert("Lỗi", "Không thể xóa chức vụ.");
-      console.error("Lỗi khi xóa chức vụ:", error);
+      console.log("Lỗi khi xóa chức vụ:", error);
       setConfirmDelete(false);
     }
   };

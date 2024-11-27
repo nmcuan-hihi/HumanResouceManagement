@@ -64,7 +64,7 @@ export default function QuanLyMucLuong({ navigation }) {
         setVisibleSuccess(false);
       }, 1000);
     } catch (error) {
-      console.error("Error saving updated value:", error);
+      console.log("Error saving updated value:", error);
       setVisibleLoad(false);
     }
   };

@@ -24,6 +24,6 @@ const idCty = state.congTy.idCty;
       return null; // No phongban data found
     }
   } catch (error) {
-    console.error("Lỗi khi đọc thông tin phòng ban:", error);
+    console.log("Lỗi khi đọc thông tin phòng ban:", error);
   }
 };

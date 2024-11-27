@@ -122,7 +122,7 @@ export default function DetailPB({ navigation, route }) {
       setIsEditing(false);
       await fetchPhongBan(); // Refresh data after editing
     } catch (error) {
-      console.error("Lỗi khi lưu thông tin phòng ban:111111", error);
+      console.log("Lỗi khi lưu thông tin phòng ban:111111", error);
     }
   };
 
@@ -141,7 +141,7 @@ export default function DetailPB({ navigation, route }) {
       }
       navigation.goBack(); // Quay lại màn hình trước đó sau khi xóa
     } catch (error) {
-      console.error("Lỗi khi xóa phòng ban:", error);
+      console.log("Lỗi khi xóa phòng ban:", error);
       setConfirmDelete(false); // Đảm bảo modal được đóng lại ngay cả khi có lỗi
     }
   };

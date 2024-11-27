@@ -40,7 +40,7 @@ export const getMessenger = async (id1, id2) => {
       return { chatID, messages: [] };
     }
   } catch (error) {
-    console.error('Lỗi khi lấy hoặc tạo cuộc trò chuyện:', error);
+    console.log('Lỗi khi lấy hoặc tạo cuộc trò chuyện:', error);
     throw error;
   }
 };
@@ -68,7 +68,7 @@ export const sendMessage = async (chatID, senderID, text) => {
   try {
     await update(ref(database), updates);
   } catch (error) {
-    console.error('Lỗi khi gửi tin nhắn:', error);
+    console.log('Lỗi khi gửi tin nhắn:', error);
     throw error;
   }
 };
@@ -94,7 +94,7 @@ export const getChatList = async (employeeID) => {
 
     return chatList;
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách cuộc trò chuyện:', error);
+    console.log('Lỗi khi lấy danh sách cuộc trò chuyện:', error);
     throw error;
   }
 };

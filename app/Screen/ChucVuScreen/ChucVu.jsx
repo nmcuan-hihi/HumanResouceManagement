@@ -60,7 +60,7 @@ export default function ListChucVu({ navigation }) {
         fetchData(); // Refresh the data after successful deletion
       })
       .catch(error => {
-        console.error("Error deleting item:", error);
+        console.log("Error deleting item:", error);
       });
   };
 

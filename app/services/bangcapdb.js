@@ -55,7 +55,7 @@ export async function addBangCapNV(bangCap, image) {
     );
     console.log(`Employee ${bangCap.employeeId} added successfully!`);
   } catch (error) {
-    console.error("Error adding employee qualification:", error);
+    console.log("Error adding employee qualification:", error);
   }
 }
 
@@ -80,7 +80,7 @@ export async function readBangCapNhanVien1(bangcap_id, employeeId) {
       return {};
     }
   } catch (error) {
-    console.error(
+    console.log(
       "Error reading qualification by bangcap_id and employeeId:",
       error
     );
@@ -108,7 +108,7 @@ export async function readBangCapNhanVien() {
       return null;
     }
   } catch (error) {
-    console.error("Error reading qualifications:", error);
+    console.log("Error reading qualifications:", error);
   }
 }
 
@@ -139,7 +139,7 @@ export async function toggleXacthuc(employeeId, bangcapId) {
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi cập nhật xacthuc:", error);
+    console.log("Lỗi khi cập nhật xacthuc:", error);
     return null;
   }
 }

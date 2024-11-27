@@ -417,7 +417,7 @@ export async function readEmployeesFireStore() {
       return null;
     }
   } catch (error) {
-    console.error("Error reading employees:", error);
+    console.log("Error reading employees:", error);
     throw error;
   }
 }

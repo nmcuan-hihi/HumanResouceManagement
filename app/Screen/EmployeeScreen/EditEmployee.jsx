@@ -90,7 +90,7 @@ export default function EditMember({ route, navigation }) {
 
         setCurrentNV(employee);
       } catch (error) {
-        console.error("Lỗi khi lấy thông tin nhân viên:", error);
+        console.log("Lỗi khi lấy thông tin nhân viên:", error);
       }
     };
 
@@ -278,7 +278,7 @@ export default function EditMember({ route, navigation }) {
     } catch (error) {
       closeModal();
 
-      console.error("Error updating employee 11111:", error);
+      console.log("Error updating employee 11111:", error);
       Alert.alert("Thông báo", "Cập nhật không thành công!");
     }
   };
@@ -315,7 +315,7 @@ export default function EditMember({ route, navigation }) {
           setPhongBanUpDate(phongBanUpdate);
         }
       } catch (error) {
-        console.error("Lỗi khi lấy phòng ban:", error);
+        console.log("Lỗi khi lấy phòng ban:", error);
       }
     };
 
@@ -330,7 +330,7 @@ export default function EditMember({ route, navigation }) {
           setChucVus(chucVuArr);
         }
       } catch (error) {
-        console.error("Lỗi khi lấy chức vụ:", error);
+        console.log("Lỗi khi lấy chức vụ:", error);
       }
     };
 

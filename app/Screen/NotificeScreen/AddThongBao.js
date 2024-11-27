@@ -51,7 +51,7 @@ export default function AddThongBao({ route, navigation }) {
         setPhongBans(phongBanArray);
       }
     } catch (error) {
-      console.error("Lỗi khi lấy phòng ban:", error);
+      console.log("Lỗi khi lấy phòng ban:", error);
     }
   };
 

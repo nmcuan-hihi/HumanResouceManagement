@@ -91,7 +91,7 @@ const DanhSachLuong = ({ navigation }) => {
         setPhongBans(phongBanArray);
       }
     } catch (error) {
-      console.error("Lỗi khi lấy phòng ban:", error);
+      console.log("Lỗi khi lấy phòng ban:", error);
     }
   };
 
@@ -112,7 +112,7 @@ const DanhSachLuong = ({ navigation }) => {
         ]);
         setCheckLoad(false);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
       } finally {
         setVisibleLoad(false);
       }

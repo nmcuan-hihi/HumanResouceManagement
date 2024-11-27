@@ -28,7 +28,7 @@ export const addSkill = async (skill) => {
     await set(ref(database, `${idCty}/skills/${skillId}`), skill); // Thêm kỹ năng vào Realtime Database
     console.log(`Skill ${skillId} added successfully!`);
   } catch (error) {
-    console.error(`Error adding skill ${skillId}:`, error);
+    console.log(`Error adding skill ${skillId}:`, error);
   }
 };
 
@@ -40,7 +40,7 @@ export const updateSkill = async (mask, updatedData) => {
     await update(skillRef, updatedData); // Cập nhật kỹ năng
     console.log(`Skill ${mask} updated successfully!`);
   } catch (error) {
-    console.error(`Error updating skill ${mask}:`, error);
+    console.log(`Error updating skill ${mask}:`, error);
     throw error;
   }
 };
@@ -53,7 +53,7 @@ export const deleteSkill = async (mask) => {
     await remove(skillRef); // Xóa kỹ năng
     console.log(`Skill ${mask} deleted successfully!`);
   } catch (error) {
-    console.error(`Error deleting skill ${mask}:`, error);
+    console.log(`Error deleting skill ${mask}:`, error);
     throw error;
   }
 };
@@ -76,7 +76,7 @@ export const readSkills = async () => {
       return [];
     }
   } catch (error) {
-    console.error("Error reading skills:", error);
+    console.log("Error reading skills:", error);
     return [];
   }
 };
@@ -96,7 +96,7 @@ export const readSkill1 = async (mask) => {
       return null;
     }
   } catch (error) {
-    console.error("Lỗi khi đọc kỹ năng:", error);
+    console.log("Lỗi khi đọc kỹ năng:", error);
     return null;
   }
 };
@@ -109,7 +109,7 @@ export const addSkillNV = async (Skill) => {
     await set(skillRef, Skill); // Thêm kỹ năng nhân viên
     console.log(`Employee ${Skill.employeeId} added successfully!`);
   } catch (error) {
-    console.error("Error adding employee skill:", error);
+    console.log("Error adding employee skill:", error);
   }
 };
 
@@ -132,7 +132,7 @@ export const readSkillNhanVien = async () => {
       return null;
     }
   } catch (error) {
-    console.error("Error reading employee skills:", error);
+    console.log("Error reading employee skills:", error);
     return null;
   }
 };
